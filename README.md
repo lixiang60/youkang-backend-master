@@ -1,95 +1,188 @@
-<p align="center">
-	<img alt="logo" src="https://oscimg.oschina.net/oscnet/up-d3d0a9303e11d522a06cd263f3079027715.png">
-</p>
-<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">YouKang v3.9.0</h1>
-<h4 align="center">基于SpringBoot+Vue前后端分离的Java快速开发框架</h4>
-<p align="center">
-	<a href="https://gitee.com/y_project/YouKang-Vue/stargazers"><img src="https://gitee.com/y_project/YouKang-Vue/badge/star.svg?theme=dark"></a>
-	<a href="https://gitee.com/y_project/YouKang-Vue"><img src="https://img.shields.io/badge/YouKang-v3.9.0-brightgreen.svg"></a>
-	<a href="https://gitee.com/y_project/YouKang-Vue/blob/master/LICENSE"><img src="https://img.shields.io/github/license/mashape/apistatus.svg"></a>
-</p>
+# CLAUDE.md
 
-## 平台简介
+此文件为 Claude Code (claude.ai/code) 在此代码库中工作时提供指导。
 
-有康是一套全部开源的快速开发平台，毫无保留给个人及企业免费使用。
+## 项目概述
 
-* 前端采用Vue、Element UI。
-* 后端采用Spring Boot、Spring Security、Redis & Jwt。
-* 权限认证使用Jwt，支持多终端认证系统。
-* 支持加载动态权限菜单，多方式轻松权限控制。
-* 高效率开发，使用代码生成器可以一键生成前后端代码。
-* 提供了技术栈（[Vue3](https://v3.cn.vuejs.org) [Element Plus](https://element-plus.org/zh-CN) [Vite](https://cn.vitejs.dev)）版本[YouKang-Vue3](https://gitcode.com/yangzongzhuan/YouKang-Vue3)，保持同步更新。
-* 提供了单应用版本[YouKang-Vue-fast](https://gitcode.com/yangzongzhuan/YouKang-Vue-fast)，Oracle版本[YouKang-Vue-Oracle](https://gitcode.com/yangzongzhuan/YouKang-Vue-Oracle)，保持同步更新。
-* 不分离版本，请移步[YouKang](https://gitee.com/y_project/YouKang)，微服务版本，请移步[YouKang-Cloud](https://gitee.com/y_project/YouKang-Cloud)
-* 阿里云折扣场：[点我进入](http://aly.youkang.vip)，腾讯云秒杀场：[点我进入](http://txy.youkang.vip)&nbsp;&nbsp;
+有康（YouKang）是一个基于 Spring Boot 3.5.4 和 Java 17 的快速开发框架。这是前后端分离架构的后端部分（前端使用 Vue + Element UI）。系统提供企业管理功能，包括用户管理、基于角色的访问控制（RBAC）、定时任务、代码生成和系统监控。
 
-## 内置功能
+**版本：** 3.9.0
+**主入口：** `youkang-admin/src/main/java/com/youkang/YouKangApplication.java`
+**默认端口：** 3564
 
-1.  用户管理：用户是系统操作者，该功能主要完成系统用户配置。
-2.  部门管理：配置系统组织机构（公司、部门、小组），树结构展现支持数据权限。
-3.  岗位管理：配置系统用户所属担任职务。
-4.  菜单管理：配置系统菜单，操作权限，按钮权限标识等。
-5.  角色管理：角色菜单权限分配、设置角色按机构进行数据范围权限划分。
-6.  字典管理：对系统中经常使用的一些较为固定的数据进行维护。
-7.  参数管理：对系统动态配置常用参数。
-8.  通知公告：系统通知公告信息发布维护。
-9.  操作日志：系统正常操作日志记录和查询；系统异常信息日志记录和查询。
-10. 登录日志：系统登录日志记录查询包含登录异常。
-11. 在线用户：当前系统中活跃用户状态监控。
-12. 定时任务：在线（添加、修改、删除)任务调度包含执行结果日志。
-13. 代码生成：前后端代码的生成（java、html、xml、sql）支持CRUD下载 。
-14. 系统接口：根据业务代码自动生成相关的api接口文档。
-15. 服务监控：监视当前系统CPU、内存、磁盘、堆栈等相关信息。
-16. 缓存监控：对系统的缓存信息查询，命令统计等。
-17. 在线构建器：拖动表单元素生成相应的HTML代码。
-18. 连接池监视：监视当前系统数据库连接池状态，可进行分析SQL找出系统性能瓶颈。
+## 构建和运行命令
 
-## 在线体验
+### 构建项目
+```bash
+mvn clean package
+```
 
-- admin/admin123  
-- 陆陆续续收到一些打赏，为了更好的体验已用于演示服务器升级。谢谢各位小伙伴。
+### 运行应用
+```bash
+# 从根目录运行
+mvn spring-boot:run -pl youkang-admin
 
-演示地址：http://vue.youkang.vip  
-文档地址：http://doc.youkang.vip
+# 或者运行编译后的 JAR
+java -jar youkang-admin/target/youkang-admin.jar
+```
 
-## 演示图
+### 跳过测试编译
+```bash
+mvn clean install -DskipTests
+```
 
-<table>
-    <tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/cd1f90be5f2684f4560c9519c0f2a232ee8.jpg"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/1cbcf0e6f257c7d3a063c0e3f2ff989e4b3.jpg"/></td>
-    </tr>
-    <tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-8074972883b5ba0622e13246738ebba237a.png"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-9f88719cdfca9af2e58b352a20e23d43b12.png"/></td>
-    </tr>
-    <tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-39bf2584ec3a529b0d5a3b70d15c9b37646.png"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-936ec82d1f4872e1bc980927654b6007307.png"/></td>
-    </tr>
-	<tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-b2d62ceb95d2dd9b3fbe157bb70d26001e9.png"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-d67451d308b7a79ad6819723396f7c3d77a.png"/></td>
-    </tr>	 
-    <tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/5e8c387724954459291aafd5eb52b456f53.jpg"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/644e78da53c2e92a95dfda4f76e6d117c4b.jpg"/></td>
-    </tr>
-	<tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-8370a0d02977eebf6dbf854c8450293c937.png"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-49003ed83f60f633e7153609a53a2b644f7.png"/></td>
-    </tr>
-	<tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-d4fe726319ece268d4746602c39cffc0621.png"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-c195234bbcd30be6927f037a6755e6ab69c.png"/></td>
-    </tr>
-    <tr>
-        <td><img src="https://oscimg.oschina.net/oscnet/b6115bc8c31de52951982e509930b20684a.jpg"/></td>
-        <td><img src="https://oscimg.oschina.net/oscnet/up-5e4daac0bb59612c5038448acbcef235e3a.png"/></td>
-    </tr>
-</table>
+### 清理构建产物
+```bash
+mvn clean
+```
 
+## 模块架构
 
-## 有康前后端分离交流群
+这是一个多模块 Maven 项目，具有以下结构：
 
-QQ群： [![加入QQ群](https://img.shields.io/badge/已满-937441-blue.svg)](https://jq.qq.com/?_wv=1027&k=5bVB1og) [![加入QQ群](https://img.shields.io/badge/已满-887144332-blue.svg)](https://jq.qq.com/?_wv=1027&k=5eiA4DH) [![加入QQ群](https://img.shields.io/badge/已满-180251782-blue.svg)](https://jq.qq.com/?_wv=1027&k=5AxMKlC) [![加入QQ群](https://img.shields.io/badge/已满-104180207-blue.svg)](https://jq.qq.com/?_wv=1027&k=51G72yr) [![加入QQ群](https://img.shields.io/badge/已满-186866453-blue.svg)](https://jq.qq.com/?_wv=1027&k=VvjN2nvu) [![加入QQ群](https://img.shields.io/badge/已满-201396349-blue.svg)](https://jq.qq.com/?_wv=1027&k=5vYAqA05) [![加入QQ群](https://img.shields.io/badge/已满-101456076-blue.svg)](https://jq.qq.com/?_wv=1027&k=kOIINEb5) [![加入QQ群](https://img.shields.io/badge/已满-101539465-blue.svg)](https://jq.qq.com/?_wv=1027&k=UKtX5jhs) [![加入QQ群](https://img.shields.io/badge/已满-264312783-blue.svg)](https://jq.qq.com/?_wv=1027&k=EI9an8lJ) [![加入QQ群](https://img.shields.io/badge/已满-167385320-blue.svg)](https://jq.qq.com/?_wv=1027&k=SWCtLnMz) [![加入QQ群](https://img.shields.io/badge/已满-104748341-blue.svg)](https://jq.qq.com/?_wv=1027&k=96Dkdq0k) [![加入QQ群](https://img.shields.io/badge/已满-160110482-blue.svg)](https://jq.qq.com/?_wv=1027&k=0fsNiYZt) [![加入QQ群](https://img.shields.io/badge/已满-170801498-blue.svg)](https://jq.qq.com/?_wv=1027&k=7xw4xUG1) [![加入QQ群](https://img.shields.io/badge/已满-108482800-blue.svg)](https://jq.qq.com/?_wv=1027&k=eCx8eyoJ) [![加入QQ群](https://img.shields.io/badge/已满-101046199-blue.svg)](https://jq.qq.com/?_wv=1027&k=SpyH2875) [![加入QQ群](https://img.shields.io/badge/已满-136919097-blue.svg)](https://jq.qq.com/?_wv=1027&k=tKEt51dz) [![加入QQ群](https://img.shields.io/badge/已满-143961921-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=0vBbSb0ztbBgVtn3kJS-Q4HUNYwip89G&authKey=8irq5PhutrZmWIvsUsklBxhj57l%2F1nOZqjzigkXZVoZE451GG4JHPOqW7AW6cf0T&noverify=0&group_code=143961921) [![加入QQ群](https://img.shields.io/badge/已满-174951577-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=ZFAPAbp09S2ltvwrJzp7wGlbopsc0rwi&authKey=HB2cxpxP2yspk%2Bo3WKTBfktRCccVkU26cgi5B16u0KcAYrVu7sBaE7XSEqmMdFQp&noverify=0&group_code=174951577) [![加入QQ群](https://img.shields.io/badge/已满-161281055-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=Fn2aF5IHpwsy8j6VlalNJK6qbwFLFHat&authKey=uyIT%2B97x2AXj3odyXpsSpVaPMC%2Bidw0LxG5MAtEqlrcBcWJUA%2FeS43rsF1Tg7IRJ&noverify=0&group_code=161281055) [![加入QQ群](https://img.shields.io/badge/已满-138988063-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=XIzkm_mV2xTsUtFxo63bmicYoDBA6Ifm&authKey=dDW%2F4qsmw3x9govoZY9w%2FoWAoC4wbHqGal%2BbqLzoS6VBarU8EBptIgPKN%2FviyC8j&noverify=0&group_code=138988063) [![加入QQ群](https://img.shields.io/badge/已满-151450850-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=DkugnCg68PevlycJSKSwjhFqfIgrWWwR&authKey=pR1Pa5lPIeGF%2FFtIk6d%2FGB5qFi0EdvyErtpQXULzo03zbhopBHLWcuqdpwY241R%2F&noverify=0&group_code=151450850) [![加入QQ群](https://img.shields.io/badge/已满-224622315-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=F58bgRa-Dp-rsQJThiJqIYv8t4-lWfXh&authKey=UmUs4CVG5OPA1whvsa4uSespOvyd8%2FAr9olEGaWAfdLmfKQk%2FVBp2YU3u2xXXt76&noverify=0&group_code=224622315) [![加入QQ群](https://img.shields.io/badge/已满-287842588-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=Nxb2EQ5qozWa218Wbs7zgBnjLSNk_tVT&authKey=obBKXj6SBKgrFTJZx0AqQnIYbNOvBB2kmgwWvGhzxR67RoRr84%2Bus5OadzMcdJl5&noverify=0&group_code=287842588) [![加入QQ群](https://img.shields.io/badge/已满-187944233-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=numtK1M_I4eVd2Gvg8qtbuL8JgX42qNh&authKey=giV9XWMaFZTY%2FqPlmWbkB9g3fi0Ev5CwEtT9Tgei0oUlFFCQLDp4ozWRiVIzubIm&noverify=0&group_code=187944233) [![加入QQ群](https://img.shields.io/badge/已满-228578329-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=G6r5KGCaa3pqdbUSXNIgYloyb8e0_L0D&authKey=4w8tF1eGW7%2FedWn%2FHAypQksdrML%2BDHolQSx7094Agm7Luakj9EbfPnSTxSi2T1LQ&noverify=0&group_code=228578329) [![加入QQ群](https://img.shields.io/badge/已满-191164766-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=GsOo-OLz53J8y_9TPoO6XXSGNRTgbFxA&authKey=R7Uy%2Feq%2BZsoKNqHvRKhiXpypW7DAogoWapOawUGHokJSBIBIre2%2FoiAZeZBSLuBc&noverify=0&group_code=191164766) [![加入QQ群](https://img.shields.io/badge/174569686-blue.svg)](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=PmYavuzsOthVqfdAPbo4uAeIbu7Ttjgc&authKey=p52l8%2FXa4PS1JcEmS3VccKSwOPJUZ1ZfQ69MEKzbrooNUljRtlKjvsXf04bxNp3G&noverify=0&group_code=174569686) 点击按钮入群。
+### youkang-admin
+Web 服务入口和主应用模块。包含：
+- 按领域组织的 REST 控制器（`system`、`monitor`、`tool`、`common`）
+- 包含 Spring Boot 配置的主应用类
+- 应用配置文件（`application.yml`、`application-druid.yml`）
+- 打包为可执行 JAR
+
+### youkang-framework
+核心框架模块，提供基础设施服务：
+- **安全：** Spring Security 配置、JWT 认证过滤器、令牌服务
+- **AOP 切面：** 日志记录（`LogAspect`）、数据权限过滤（`DataScopeAspect`）、数据源切换（`DataSourceAspect`）、限流（`RateLimiterAspect`）
+- **配置：** MyBatis、Druid、Redis、线程池、Kaptcha（验证码）
+- **Web 服务：** 认证、权限检查、用户注册
+- **异常处理：** 全局异常处理器
+- **动态数据源：** 通过 `DynamicDataSource` 实现主从数据库路由
+
+### youkang-system
+核心系统功能的业务逻辑和领域层：
+- 领域实体：`SysUser`、`SysRole`、`SysMenu`、`SysDept`、`SysPost`、`SysDictData`、`SysDictType`、`SysConfig`、`SysNotice`、`SysOperLog`、`SysLogininfor`
+- RBAC 的服务接口和实现
+- 数据库操作的 MyBatis 映射器
+- 处理用户管理、角色/权限管理、部门层次结构、数据字典、系统配置、审计日志
+
+### youkang-common
+共享工具和通用组件：
+- **注解：** `@Log`、`@DataScope`、`@DataSource`、`@Excel`、`@RateLimiter`、`@RepeatSubmit`、`@Sensitive`、`@Anonymous`
+- **核心领域：** `BaseEntity`、`AjaxResult`、`R`、`TableDataInfo`
+- **工具类：** 字符串、日期、HTTP、文件、安全、IP、Bean、Excel/POI、UUID 生成
+- **过滤器：** XSS 防护、Referer 验证、可重复请求包装器
+- **常量：** 用户、缓存、调度、HTTP 状态码
+- **异常：** 业务逻辑的自定义异常层次结构
+
+### youkang-quartz
+使用 Quartz Scheduler 的定时任务管理模块：
+- 支持 CRUD 操作的动态任务调度
+- 任务执行日志和监控
+- 支持 cron 表达式实现灵活调度
+
+### youkang-generator
+用于快速 CRUD 开发的代码生成器：
+- 生成 Java 实体、映射器、服务、控制器代码
+- 生成 MyBatis XML 映射器
+- 使用 Velocity 模板进行代码生成
+- 可以生成前端 Vue 代码（下载为 ZIP）
+- 检查数据库表以生成样板代码
+
+## 关键配置
+
+### 数据库配置
+位于 `youkang-admin/src/main/resources/application-druid.yml`：
+- 支持主从数据源配置
+- 使用 Druid 连接池
+- MySQL 8.x，时区 GMT+8
+- Druid 监控控制台：`/druid/*`（用户名：`youkang`，密码：`123456`）
+
+### 安全与认证
+- 基于 JWT 的认证（请求头：`Authorization`）
+- 令牌过期时间：30 分钟（可在 `application.yml` 中配置）
+- 密码重试限制：5 次尝试，锁定 10 分钟
+- 使用 Spring Security 进行授权
+
+### Redis 配置
+- 默认：`localhost:6379`，数据库 0
+- 用于缓存用户会话、令牌、权限、字典数据
+
+### MyBatis
+- 实体别名包：`com.youkang.**.domain`
+- 映射器位置：`classpath*:mapper/**/*Mapper.xml`
+- 配置：`mybatis/mybatis-config.xml`
+- 分页：使用 MySQL 方言的 PageHelper
+
+### API 文档
+- 使用 SpringDoc（OpenAPI 3.0）
+- Swagger UI：`http://localhost:3564/swagger-ui.html`
+- API 文档 JSON：`http://localhost:3564/v3/api-docs`
+
+## 开发模式
+
+### 控制器模式
+控制器继承 `BaseController` 并使用标准响应类型：
+- `AjaxResult.success()` / `AjaxResult.error()` 用于单个操作
+- `TableDataInfo` 用于分页列表响应
+- 使用 `@PreAuthorize("@ss.hasPermi('...')")` 进行权限检查
+- 使用 `@Log(title = "...", businessType = BusinessType.XXX)` 进行审计日志记录
+
+### 服务层模式
+- 服务实现接口（例如 `ISysUserService`）
+- 使用 `@DataScope` 注解进行数据权限过滤
+- 事务由 Spring `@Transactional` 管理
+
+### 动态数据源
+使用 `@DataSource(DataSourceType.SLAVE)` 将查询路由到从库（配置后）。
+
+### 代码生成
+通过系统菜单"系统工具 > 代码生成"访问：
+1. 导入数据库表
+2. 配置生成参数（模块名、包名等）
+3. 生成并下载代码
+4. 将生成的文件导入项目
+
+### 权限表达式
+框架提供 `PermissionService`（`ss` bean）用于权限检查：
+- `@ss.hasPermi('system:user:add')` - 检查权限
+- `@ss.lacksPermi('system:user:remove')` - 缺少权限
+- `@ss.hasRole('admin')` - 检查角色
+- `@ss.hasAnyRoles('admin,editor')` - 检查任意角色
+
+## 常用注解
+
+- `@Log`：记录操作日志（标题、业务类型、操作人类型）
+- `@DataScope`：根据用户的数据权限范围过滤数据
+- `@DataSource`：在主从数据源之间切换
+- `@RateLimiter`：API 端点的限流
+- `@RepeatSubmit`：防止重复表单提交
+- `@Anonymous`：绕过公共端点的身份验证
+- `@Excel`：标记用于 Excel 导入/导出的字段
+
+## 文件上传
+- 上传路径在 `application.yml` 中配置：`youkang.profile`
+- 默认：`D:/youkang/uploadPath`（Windows），`/home/youkang/uploadPath`（Linux）
+- 最大文件大小：10MB
+- 最大请求大小：20MB
+
+## 重要说明
+
+### 安全注意事项
+- 数据库凭据暴露在 `application-druid.yml` 中 - 生产环境使用环境变量
+- 生产部署应更改令牌密钥
+- XSS 过滤默认启用（`xss.enabled: true`）
+- Referer 验证可用但默认禁用
+
+### 数据权限过滤
+`@DataScope` 注解基于用户的部门和角色启用行级安全。这在 `DataScopeAspect` 中实现，并根据以下条件注入 SQL 条件：
+- 全部数据权限（1）
+- 自定义部门权限（2）
+- 部门数据权限（3）
+- 部门及以下数据权限（4）
+- 仅本人数据权限（5）
+
+### 日志记录
+- 操作日志存储在 `sys_oper_log` 表中
+- 登录日志存储在 `sys_logininfor` 表中
+- 通过 `AsyncManager` 和 `AsyncFactory` 进行异步日志记录
+
+## 无测试套件
+此项目不包括测试套件。通过应用程序 UI 和 API 端点进行手动测试。

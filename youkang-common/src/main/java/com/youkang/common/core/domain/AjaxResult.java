@@ -10,9 +10,7 @@ import com.youkang.common.utils.StringUtils;
  * 
  * @author youkang
  */
-public class AjaxResult extends HashMap<String, Object>
-{
-    private static final long serialVersionUID = 1L;
+public class AjaxResult extends HashMap<String, Object> {
 
     /** 状态码 */
     public static final String CODE_TAG = "code";
