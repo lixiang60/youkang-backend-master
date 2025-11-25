@@ -3,7 +3,8 @@
     "allow": [
       "Bash(NUL)",
       "Bash(dir:*)",
-      "Bash(where:*)"
+      "Bash(where:*)",
+      "Bash(mvn clean install:*)"
     ],
     "deny": [],
     "ask": []

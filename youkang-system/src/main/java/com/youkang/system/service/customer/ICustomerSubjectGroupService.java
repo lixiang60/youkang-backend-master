@@ -1,15 +1,13 @@
 package com.youkang.system.service.customer;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.youkang.system.domain.CustomerInfo;
-import com.youkang.system.domain.resp.customer.CustomerSelectorResp;
-
-import java.util.List;
+import com.youkang.system.domain.CustomerSubjectGroup;
+import com.youkang.system.domain.req.customer.CustomerSubjectGroupReq;
+import com.youkang.system.domain.resp.customer.CustomerSubjectGroupResp;
 
 /**
- * 客户信息Service接口
+ * 客户科目组关系Service接口
  *
  * 继承 IService 后自动拥有以下方法：
  * - save(T entity)：插入一条记录
@@ -31,17 +29,12 @@ import java.util.List;
  * - count(Wrapper<T> queryWrapper)：条件查询总记录数
  *
  * @author youkang
- * @date 2025-11-20
+ * @date 2025-11-25
  */
-public interface ICustomerInfoService extends IService<CustomerInfo>
-{
-    /**
-     * 分页查询客户信息列表
-     * @param customerInfo 查询条件（包含分页参数）
-     * @return 分页结果
-     */
-    IPage<CustomerInfo> queryPage(CustomerInfo customerInfo);
+public interface ICustomerSubjectGroupService extends IService<CustomerSubjectGroup> {
 
-
-    Page<CustomerSelectorResp> customerSelector(String queryString);
+    void add(CustomerSubjectGroup customerSubjectGroup);
+    void update(CustomerSubjectGroup customerSubjectGroup);
+    void delete(Integer id);
+    Page<CustomerSubjectGroupResp> query(CustomerSubjectGroupReq req);
 }

@@ -23,8 +23,7 @@ import com.youkang.system.service.ISysConfigService;
  * @author youkang
  */
 @Service
-public class SysConfigServiceImpl implements ISysConfigService
-{
+public class SysConfigServiceImpl implements ISysConfigService {
     @Autowired
     private SysConfigMapper configMapper;
 

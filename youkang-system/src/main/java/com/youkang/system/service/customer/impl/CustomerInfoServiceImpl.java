@@ -5,14 +5,18 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.youkang.common.utils.StringUtils;
+import com.youkang.system.domain.resp.customer.CustomerSelectorResp;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import com.youkang.system.mapper.CustomerInfoMapper;
 import com.youkang.system.domain.CustomerInfo;
 import com.youkang.system.service.customer.ICustomerInfoService;
 
+import java.util.List;
+
 /**
  * 客户信息Service业务层处理
- *
+ * <p>
  * ServiceImpl 已经实现了 IService 中的所有方法，包括：
  * - 单条/批量 新增、删除、修改、查询
  * - 分页查询
@@ -23,10 +27,11 @@ import com.youkang.system.service.customer.ICustomerInfoService;
  * @date 2025-11-20
  */
 @Service
-public class CustomerInfoServiceImpl
-        extends ServiceImpl<CustomerInfoMapper, CustomerInfo>
-        implements ICustomerInfoService
-{
+public class CustomerInfoServiceImpl extends ServiceImpl<CustomerInfoMapper, CustomerInfo> implements ICustomerInfoService {
+
+    @Resource
+    private CustomerInfoMapper mapper;
+
     /**
      * 分页查询客户信息列表
      *
@@ -34,34 +39,40 @@ public class CustomerInfoServiceImpl
      * @return 分页结果
      */
     @Override
-    public IPage<CustomerInfo> queryPage(CustomerInfo customerInfo)
-    {
+    public IPage<CustomerInfo> queryPage(CustomerInfo customerInfo) {
         // 创建分页对象
         Page<CustomerInfo> page = new Page<>(customerInfo.getPageNum(), customerInfo.getPageSize());
 
         // 构建查询条件（使用 Lambda 表达式，类型安全）
         LambdaQueryWrapper<CustomerInfo> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.isNotEmpty(customerInfo.getCustomerName()),
-                     CustomerInfo::getCustomerName, customerInfo.getCustomerName())
-               .eq(StringUtils.isNotEmpty(customerInfo.getRegion()),
-                   CustomerInfo::getRegion, customerInfo.getRegion())
-               .like(StringUtils.isNotEmpty(customerInfo.getPhone()),
-                     CustomerInfo::getPhone, customerInfo.getPhone())
-               .like(StringUtils.isNotEmpty(customerInfo.getEmail()),
-                     CustomerInfo::getEmail, customerInfo.getEmail())
-               .eq(StringUtils.isNotEmpty(customerInfo.getCustomerLevel()),
-                   CustomerInfo::getCustomerLevel, customerInfo.getCustomerLevel())
-               .eq(StringUtils.isNotEmpty(customerInfo.getStatus()),
-                   CustomerInfo::getStatus, customerInfo.getStatus())
-               .like(StringUtils.isNotEmpty(customerInfo.getSalesPerson()),
-                     CustomerInfo::getSalesPerson, customerInfo.getSalesPerson())
-               .eq(StringUtils.isNotEmpty(customerInfo.getPaymentMethod()),
-                   CustomerInfo::getPaymentMethod, customerInfo.getPaymentMethod())
-               .like(StringUtils.isNotEmpty(customerInfo.getCompany()),
-                     CustomerInfo::getCompany, customerInfo.getCompany())
-               .orderByDesc(CustomerInfo::getCreateTime);
+                        CustomerInfo::getCustomerName, customerInfo.getCustomerName())
+                .eq(StringUtils.isNotEmpty(customerInfo.getRegion()),
+                        CustomerInfo::getRegion, customerInfo.getRegion())
+                .like(StringUtils.isNotEmpty(customerInfo.getPhone()),
+                        CustomerInfo::getPhone, customerInfo.getPhone())
+                .like(StringUtils.isNotEmpty(customerInfo.getEmail()),
+                        CustomerInfo::getEmail, customerInfo.getEmail())
+                .eq(StringUtils.isNotEmpty(customerInfo.getCustomerLevel()),
+                        CustomerInfo::getCustomerLevel, customerInfo.getCustomerLevel())
+                .eq(StringUtils.isNotEmpty(customerInfo.getStatus()),
+                        CustomerInfo::getStatus, customerInfo.getStatus())
+                .like(StringUtils.isNotEmpty(customerInfo.getSalesPerson()),
+                        CustomerInfo::getSalesPerson, customerInfo.getSalesPerson())
+                .eq(StringUtils.isNotEmpty(customerInfo.getPaymentMethod()),
+                        CustomerInfo::getPaymentMethod, customerInfo.getPaymentMethod())
+                .like(StringUtils.isNotEmpty(customerInfo.getCompany()),
+                        CustomerInfo::getCompany, customerInfo.getCompany())
+                .orderByDesc(CustomerInfo::getCreateTime);
 
         // 分页查询
         return this.page(page, wrapper);
     }
+
+    @Override
+    public Page<CustomerSelectorResp> customerSelector(String queryString) {
+        return mapper.customerSelector(Page.of(1, 20), queryString);
+    }
+
+
 }

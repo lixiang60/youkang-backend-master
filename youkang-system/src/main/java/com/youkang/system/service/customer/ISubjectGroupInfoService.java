@@ -1,8 +1,10 @@
 package com.youkang.system.service.customer;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.youkang.system.domain.SubjectGroupInfo;
+import com.youkang.system.domain.resp.customer.SubjectGroupSelectorResp;
 
 /**
  * 课题组信息Service接口
@@ -38,4 +40,6 @@ public interface ISubjectGroupInfoService extends IService<SubjectGroupInfo>
      * @return 分页结果
      */
     IPage<SubjectGroupInfo> queryPage(SubjectGroupInfo subjectGroupInfo);
+
+    Page<SubjectGroupSelectorResp> getSubjectGroupSelector(String queryString);
 }

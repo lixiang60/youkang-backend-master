@@ -21,8 +21,6 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @TableName("yk_customer_info")
 public class CustomerInfo extends PageReq {
-    private static final long serialVersionUID = 1L;
-
     /** 客户ID */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
@@ -31,6 +29,10 @@ public class CustomerInfo extends PageReq {
     @Excel(name = "客户姓名")
     @TableField("customer_name")
     private String customerName;
+        /** 课题组id */
+    @Excel(name = "课题组id")
+    @TableField("subject_group_id")
+    private String subjectGroupId;
 
     /** 地区 */
     @Excel(name = "地区")

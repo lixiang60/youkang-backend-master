@@ -2,16 +2,13 @@ package com.youkang.system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.youkang.system.domain.CustomerInfo;
-import com.youkang.system.domain.resp.customer.CustomerSelectorResp;
+import com.youkang.system.domain.CustomerSubjectGroup;
+import com.youkang.system.domain.req.customer.CustomerSubjectGroupReq;
+import com.youkang.system.domain.resp.customer.CustomerSubjectGroupResp;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-
-import java.util.List;
 
 /**
- * 客户信息Mapper接口
+ * 客户科目组关系Mapper接口
  *
  * 继承 BaseMapper 后自动拥有以下方法（无需 XML）：
  * - insert(T entity)：插入一条记录
@@ -24,10 +21,10 @@ import java.util.List;
  * - selectPage(IPage<T> page, Wrapper<T> queryWrapper)：分页查询
  *
  * @author youkang
- * @date 2025-11-20
+ * @date 2025-11-25
  */
 @Mapper
-public interface CustomerInfoMapper extends BaseMapper<CustomerInfo> {
+public interface CustomerSubjectGroupMapper extends BaseMapper<CustomerSubjectGroup> {
 
-    Page<CustomerSelectorResp> customerSelector(Page<CustomerSelectorResp> page,@Param("queryString") String queryString);
+    Page<CustomerSubjectGroupResp> query(CustomerSubjectGroupReq req);
 }

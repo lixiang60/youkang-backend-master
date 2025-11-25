@@ -5,10 +5,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.youkang.common.utils.StringUtils;
+import com.youkang.system.domain.resp.customer.SubjectGroupSelectorResp;
 import org.springframework.stereotype.Service;
 import com.youkang.system.mapper.SubjectGroupInfoMapper;
 import com.youkang.system.domain.SubjectGroupInfo;
 import com.youkang.system.service.customer.ISubjectGroupInfoService;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 课题组信息Service业务层处理
@@ -55,5 +59,30 @@ public class SubjectGroupInfoServiceImpl extends ServiceImpl<SubjectGroupInfoMap
 
         // 分页查询
         return this.page(page, wrapper);
+    }
+
+    @Override
+    public Page<SubjectGroupSelectorResp> getSubjectGroupSelector(String queryString) {
+        // 查询 SubjectGroupInfo
+        Page<SubjectGroupInfo> subjectGroupPage = this.lambdaQuery()
+                .and(StringUtils.isNotBlank(queryString), wrapper ->
+                    wrapper.like(SubjectGroupInfo::getId, queryString)
+                           .or()
+                           .like(SubjectGroupInfo::getName, queryString)
+                )
+                .page(Page.of(1, 20));
+
+        // 转换为 SubjectGroupSelectorResp
+        Page<SubjectGroupSelectorResp> respPage = new Page<>(subjectGroupPage.getCurrent(), subjectGroupPage.getSize(), subjectGroupPage.getTotal());
+        List<SubjectGroupSelectorResp> respList = subjectGroupPage.getRecords().stream()
+                .map(info -> {
+                    SubjectGroupSelectorResp resp = new SubjectGroupSelectorResp();
+                    resp.setId(info.getId());
+                    resp.setName(info.getName());
+                    resp.setContactAddress(info.getContactAddress());
+                    return resp;
+                }).collect(Collectors.toList());
+        respPage.setRecords(respList);
+        return respPage;
     }
 }

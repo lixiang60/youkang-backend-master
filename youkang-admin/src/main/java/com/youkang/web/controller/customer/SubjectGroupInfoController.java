@@ -43,7 +43,7 @@ public class SubjectGroupInfoController
      */
     @PreAuthorize("@ss.hasPermi('customer:subjectGroup:list')")
     @GetMapping("/list")
-    public R<PageResp> list(SubjectGroupInfo subjectGroupInfo) {
+    public R<PageResp> list(@RequestBody SubjectGroupInfo subjectGroupInfo) {
         // 业务逻辑在 Service 层处理
         IPage<SubjectGroupInfo> page = subjectGroupInfoService.queryPage(subjectGroupInfo);
         return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
@@ -55,8 +55,7 @@ public class SubjectGroupInfoController
     @PreAuthorize("@ss.hasPermi('customer:subjectGroup:export')")
     @Log(title = "课题组信息", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, SubjectGroupInfo subjectGroupInfo)
-    {
+    public void export(HttpServletResponse response, SubjectGroupInfo subjectGroupInfo) {
         // 构建查询条件
         LambdaQueryWrapper<SubjectGroupInfo> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.isNotEmpty(subjectGroupInfo.getName()),

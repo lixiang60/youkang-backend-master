@@ -25,134 +25,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"      column="update_time"     />
         <result property="company"         column="company"         />
     </resultMap>
-
-    <sql id="selectYkCustomerInfoVo">
-        select id, customer_name, region, address, phone, email, wechat_id, customer_level, status,
-               sales_person, customer_unit, payment_method, invoice_type, remarks,
-               create_by, create_time, update_by, update_time, company
-        from yk_customer_info
-    </sql>
-
-    <select id="selectYkCustomerInfoList" parameterType="CustomerInfo" resultMap="YkCustomerInfoResult">
-        <include refid="selectYkCustomerInfoVo"/>
+    <select id="customerSelector" resultType="com.youkang.system.domain.resp.customer.CustomerSelectorResp">
+        select yci.id,yci.customer_name,yci.subject_group_id,ysgi.name,
+               yci.address,yci.email,yci.phone,yci.customer_unit
+        from yk_customer_info yci
+        left join yk_subject_group_info ysgi on yci.subject_group_id = ysgi.id
         <where>
-            <if test="customerName != null and customerName != ''">
-                and customer_name like concat('%', #{customerName}, '%')
-            </if>
-            <if test="region != null and region != ''">
-                and region = #{region}
-            </if>
-            <if test="phone != null and phone != ''">
-                and phone like concat('%', #{phone}, '%')
-            </if>
-            <if test="email != null and email != ''">
-                and email like concat('%', #{email}, '%')
-            </if>
-            <if test="wechatId != null and wechatId != ''">
-                and wechat_id like concat('%', #{wechatId}, '%')
-            </if>
-            <if test="customerLevel != null and customerLevel != ''">
-                and customer_level = #{customerLevel}
-            </if>
-            <if test="status != null and status != ''">
-                and status = #{status}
-            </if>
-            <if test="salesPerson != null and salesPerson != ''">
-                and sales_person like concat('%', #{salesPerson}, '%')
-            </if>
-            <if test="customerUnit != null and customerUnit != ''">
-                and customer_unit like concat('%', #{customerUnit}, '%')
-            </if>
-            <if test="paymentMethod != null and paymentMethod != ''">
-                and payment_method = #{paymentMethod}
-            </if>
-            <if test="invoiceType != null and invoiceType != ''">
-                and invoice_type = #{invoiceType}
-            </if>
-            <if test="company != null and company != ''">
-                and company = #{company}
+            <if test="queryString != null and queryString != ''">
+                yci.id like concat('%',#{queryString},'%')
+                or yci.customer_name like concat('%',#{queryString},'%')
             </if>
         </where>
-        order by create_time desc
     </select>
-
-    <select id="selectYkCustomerInfoById" parameterType="Integer" resultMap="YkCustomerInfoResult">
-        <include refid="selectYkCustomerInfoVo"/>
-        where id = #{id}
-    </select>
-
-    <insert id="insertYkCustomerInfo" parameterType="CustomerInfo" useGeneratedKeys="true" keyProperty="id">
-        insert into yk_customer_info
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="customerName != null and customerName != ''">customer_name,</if>
-            <if test="region != null">region,</if>
-            <if test="address != null">address,</if>
-            <if test="phone != null">phone,</if>
-            <if test="email != null">email,</if>
-            <if test="wechatId != null">wechat_id,</if>
-            <if test="customerLevel != null">customer_level,</if>
-            <if test="status != null">status,</if>
-            <if test="salesPerson != null">sales_person,</if>
-            <if test="customerUnit != null">customer_unit,</if>
-            <if test="paymentMethod != null">payment_method,</if>
-            <if test="invoiceType != null">invoice_type,</if>
-            <if test="remarks != null">remarks,</if>
-            <if test="createBy != null">create_by,</if>
-            <if test="createTime != null">create_time,</if>
-            <if test="company != null">company,</if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="customerName != null and customerName != ''">#{customerName},</if>
-            <if test="region != null">#{region},</if>
-            <if test="address != null">#{address},</if>
-            <if test="phone != null">#{phone},</if>
-            <if test="email != null">#{email},</if>
-            <if test="wechatId != null">#{wechatId},</if>
-            <if test="customerLevel != null">#{customerLevel},</if>
-            <if test="status != null">#{status},</if>
-            <if test="salesPerson != null">#{salesPerson},</if>
-            <if test="customerUnit != null">#{customerUnit},</if>
-            <if test="paymentMethod != null">#{paymentMethod},</if>
-            <if test="invoiceType != null">#{invoiceType},</if>
-            <if test="remarks != null">#{remarks},</if>
-            <if test="createBy != null">#{createBy},</if>
-            <if test="createTime != null">#{createTime},</if>
-            <if test="company != null">#{company},</if>
-        </trim>
-    </insert>
-
-    <update id="updateYkCustomerInfo" parameterType="CustomerInfo">
-        update yk_customer_info
-        <trim prefix="SET" suffixOverrides=",">
-            <if test="customerName != null and customerName != ''">customer_name = #{customerName},</if>
-            <if test="region != null">region = #{region},</if>
-            <if test="address != null">address = #{address},</if>
-            <if test="phone != null">phone = #{phone},</if>
-            <if test="email != null">email = #{email},</if>
-            <if test="wechatId != null">wechat_id = #{wechatId},</if>
-            <if test="customerLevel != null">customer_level = #{customerLevel},</if>
-            <if test="status != null">status = #{status},</if>
-            <if test="salesPerson != null">sales_person = #{salesPerson},</if>
-            <if test="customerUnit != null">customer_unit = #{customerUnit},</if>
-            <if test="paymentMethod != null">payment_method = #{paymentMethod},</if>
-            <if test="invoiceType != null">invoice_type = #{invoiceType},</if>
-            <if test="remarks != null">remarks = #{remarks},</if>
-            <if test="updateBy != null">update_by = #{updateBy},</if>
-            <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="company != null">company = #{company},</if>
-        </trim>
-        where id = #{id}
-    </update>
-
-    <delete id="deleteYkCustomerInfoById" parameterType="Integer">
-        delete from yk_customer_info where id = #{id}
-    </delete>
-
-    <delete id="deleteYkCustomerInfoByIds" parameterType="Integer">
-        delete from yk_customer_info where id in
-        <foreach item="id" collection="array" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-    </delete>
 
 </mapper>
