@@ -6,6 +6,7 @@ import com.youkang.system.domain.CustomerSubjectGroup;
 import com.youkang.system.domain.req.customer.CustomerSubjectGroupReq;
 import com.youkang.system.domain.resp.customer.CustomerSubjectGroupResp;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 客户科目组关系Mapper接口
@@ -26,5 +27,5 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface CustomerSubjectGroupMapper extends BaseMapper<CustomerSubjectGroup> {
 
-    Page<CustomerSubjectGroupResp> query(CustomerSubjectGroupReq req);
+    Page<CustomerSubjectGroupResp> query(Page<CustomerSubjectGroupResp> page, @Param("req") CustomerSubjectGroupReq req);
 }

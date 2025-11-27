@@ -2,6 +2,9 @@ package com.youkang.web.controller.customer;
 
 import com.youkang.common.core.domain.R;
 import com.youkang.system.domain.CustomerSubjectGroup;
+import com.youkang.system.domain.req.CustomerUpdateReq;
+import com.youkang.system.domain.req.DeleteReq;
+import com.youkang.system.domain.req.customer.CustomerSubjectGroupReq;
 import com.youkang.system.service.customer.ICustomerSubjectGroupService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -26,19 +29,20 @@ public class CustomerSubjectController {
 
     @PostMapping("/query")
     @PreAuthorize("@ss.hasPermi('customer:customerSubject:query')")
-    public R<?> query(@RequestBody CustomerSubjectGroup req){
-        return R.ok();
+    public R<?> query(@RequestBody CustomerSubjectGroupReq req){
+        return R.ok(service.query(req));
     }
 
     @PostMapping("/update")
     @PreAuthorize("@ss.hasPermi('customer:customerSubject:update')")
-    public R<?> update(@RequestBody CustomerSubjectGroup req){
+    public R<?> update(@RequestBody CustomerUpdateReq req){
+        service.update(req);
         return R.ok();
     }
 
     @PostMapping("/delete")
     @PreAuthorize("@ss.hasPermi('customer:customerSubject:delete')")
-    public R<?> delete(@Valid @RequestBody CustomerSubjectGroup req){
+    public R<?> delete(@Valid @RequestBody DeleteReq req){
         return R.ok();
     }
 

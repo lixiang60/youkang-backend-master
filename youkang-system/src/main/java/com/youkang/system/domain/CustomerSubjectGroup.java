@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @TableName("yk_customer_subject")
 @Getter
 @Setter
@@ -24,4 +26,10 @@ public class CustomerSubjectGroup {
 
     @TableField("remark")
     private String remark;
+
+    @TableField("create_time")
+    private LocalDateTime createTime;
+
+    @TableField("create_user")
+    private String createUser;
 }

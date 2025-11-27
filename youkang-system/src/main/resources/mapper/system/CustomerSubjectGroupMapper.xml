@@ -10,6 +10,48 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="subjectGroupId"  column="subject_group_id"/>
     </resultMap>
     <select id="query" resultType="com.youkang.system.domain.resp.customer.CustomerSubjectGroupResp">
-
+        select
+            cs.id,
+            cs.customer_id as customerId,
+            yci.customer_name as customerName,
+            yci.region,
+            yci.address as customerAddress,
+            yci.phone as customerPhone,
+            yci.email as customerEmail,
+            yci.status,
+            yci.sales_person as salesPerson,
+            yci.payment_method as paymentMethod,
+            yci.company,
+            yci.create_by as createUser,
+            yci.create_time as createTime,
+            cs.subject_group_id as subjectGroupId,
+            ysgi.name as subjectGroupName
+        from yk_customer_subject cs
+        join yk_customer_info yci on yci.id = cs.customer_id
+        join yk_subject_group_info ysgi on cs.subject_group_id = ysgi.id
+        <where>
+            <if test="req.customerName != null and req.customerName != ''">
+                and yci.customer_name like concat('%', #{req.customerName}, '%')
+            </if>
+            <if test="req.customerId != null">
+                and cs.customer_id = like concat('%', #{req.customerId},'%')
+            </if>
+            <if test="req.subjectGroupId != null">
+                and cs.subject_group_id = like concat('%',#{req.subjectGroupId},'%')
+            </if>
+            <if test="req.subjectGroupName != null and req.subjectGroupName != ''">
+                and ysgi.name like concat('%', #{req.subjectGroupName}, '%')
+            </if>
+            <if test="req.customerPhone != null and req.customerPhone != ''">
+                and yci.customer_phone like concat('%',#{req.customerPhone},'%')
+            </if>
+            <if test="req.company != null and req.company != ''">
+                and yci.company = #{req.company}
+            </if>
+            <if test="req.customerAddress !=null and req.customerAddress !=''">
+                and yci.address like concat('%',#{req.customerAddress},'%')
+            </if>
+        </where>
+        order by cs.create_time desc
     </select>
 </mapper>

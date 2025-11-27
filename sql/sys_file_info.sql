@@ -1,0 +1,32 @@
+-- 文件信息表
+DROP TABLE IF EXISTS `sys_file_info`;
+CREATE TABLE `sys_file_info` (
+  `file_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '文件ID',
+  `file_name` varchar(200) NOT NULL COMMENT '文件名称',
+  `original_name` varchar(200) NOT NULL COMMENT '原始文件名',
+  `file_path` varchar(500) NOT NULL COMMENT '文件存储路径',
+  `file_url` varchar(500) DEFAULT NULL COMMENT '文件访问URL',
+  `file_size` bigint(20) NOT NULL COMMENT '文件大小（字节）',
+  `file_type` varchar(50) NOT NULL COMMENT '文件类型（扩展名）',
+  `mime_type` varchar(100) DEFAULT NULL COMMENT 'MIME类型',
+  `file_category` varchar(50) DEFAULT NULL COMMENT '文件分类（image/document/video/audio/other）',
+  `business_type` varchar(50) DEFAULT NULL COMMENT '业务类型（user_avatar/order_attachment/product_image等）',
+  `business_id` varchar(100) DEFAULT NULL COMMENT '关联业务ID',
+  `md5` varchar(64) DEFAULT NULL COMMENT '文件MD5值',
+  `thumbnail_path` varchar(500) DEFAULT NULL COMMENT '缩略图路径（针对图片）',
+  `thumbnail_url` varchar(500) DEFAULT NULL COMMENT '缩略图URL',
+  `download_count` int(11) DEFAULT 0 COMMENT '下载次数',
+  `storage_type` char(1) DEFAULT '0' COMMENT '存储类型（0=本地 1=阿里云OSS 2=七牛云）',
+  `status` char(1) DEFAULT '0' COMMENT '状态（0正常 1停用）',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  `create_by` varchar(64) DEFAULT NULL COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT NULL COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`file_id`),
+  KEY `idx_file_category` (`file_category`),
+  KEY `idx_business_type` (`business_type`),
+  KEY `idx_business_id` (`business_id`),
+  KEY `idx_create_by` (`create_by`),
+  KEY `idx_md5` (`md5`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='文件信息表';

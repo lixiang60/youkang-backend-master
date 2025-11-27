@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.youkang.system.mapper.SysFileInfoMapper">
+
+    <resultMap type="SysFileInfo" id="SysFileInfoResult">
+        <result property="fileId"           column="file_id"        />
+        <result property="fileName"         column="file_name"      />
+        <result property="originalName"     column="original_name"  />
+        <result property="filePath"         column="file_path"      />
+        <result property="fileUrl"          column="file_url"       />
+        <result property="fileSize"         column="file_size"      />
+        <result property="fileType"         column="file_type"      />
+        <result property="mimeType"         column="mime_type"      />
+        <result property="fileCategory"     column="file_category"  />
+        <result property="businessType"     column="business_type"  />
+        <result property="businessId"       column="business_id"    />
+        <result property="md5"              column="md5"            />
+        <result property="thumbnailPath"    column="thumbnail_path" />
+        <result property="thumbnailUrl"     column="thumbnail_url"  />
+        <result property="downloadCount"    column="download_count" />
+        <result property="storageType"      column="storage_type"   />
+        <result property="status"           column="status"         />
+        <result property="remark"           column="remark"         />
+        <result property="createBy"         column="create_by"      />
+        <result property="createTime"       column="create_time"    />
+        <result property="updateBy"         column="update_by"      />
+        <result property="updateTime"       column="update_time"    />
+    </resultMap>
+
+    <sql id="selectSysFileInfoVo">
+        select file_id, file_name, original_name, file_path, file_url, file_size, file_type,
+               mime_type, file_category, business_type, business_id, md5, thumbnail_path, thumbnail_url,
+               download_count, storage_type, status, remark, create_by, create_time, update_by, update_time
+        from sys_file_info
+    </sql>
+
+    <select id="selectSysFileInfoList" parameterType="SysFileInfo" resultMap="SysFileInfoResult">
+        <include refid="selectSysFileInfoVo"/>
+        <where>
+            <if test="fileName != null and fileName != ''">
+                and file_name like concat('%', #{fileName}, '%')
+            </if>
+            <if test="originalName != null and originalName != ''">
+                and original_name like concat('%', #{originalName}, '%')
+            </if>
+            <if test="fileType != null and fileType != ''">
+                and file_type = #{fileType}
+            </if>
+            <if test="fileCategory != null and fileCategory != ''">
+                and file_category = #{fileCategory}
+            </if>
+            <if test="businessType != null and businessType != ''">
+                and business_type = #{businessType}
+            </if>
+            <if test="businessId != null and businessId != ''">
+                and business_id = #{businessId}
+            </if>
+            <if test="createBy != null and createBy != ''">
+                and create_by = #{createBy}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectSysFileInfoByFileId" parameterType="Long" resultMap="SysFileInfoResult">
+        <include refid="selectSysFileInfoVo"/>
+        where file_id = #{fileId}
+    </select>
+
+    <select id="selectSysFileInfoByMd5" parameterType="String" resultMap="SysFileInfoResult">
+        <include refid="selectSysFileInfoVo"/>
+        where md5 = #{md5} and status = '0'
+        limit 1
+    </select>
+
+    <select id="selectFilesByBusiness" resultMap="SysFileInfoResult">
+        <include refid="selectSysFileInfoVo"/>
+        where business_type = #{businessType}
+          and business_id = #{businessId}
+          and status = '0'
+        order by create_time desc
+    </select>
+
+    <insert id="insertSysFileInfo" parameterType="SysFileInfo" useGeneratedKeys="true" keyProperty="fileId">
+        insert into sys_file_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fileName != null and fileName != ''">file_name,</if>
+            <if test="originalName != null and originalName != ''">original_name,</if>
+            <if test="filePath != null and filePath != ''">file_path,</if>
+            <if test="fileUrl != null and fileUrl != ''">file_url,</if>
+            <if test="fileSize != null">file_size,</if>
+            <if test="fileType != null and fileType != ''">file_type,</if>
+            <if test="mimeType != null and mimeType != ''">mime_type,</if>
+            <if test="fileCategory != null and fileCategory != ''">file_category,</if>
+            <if test="businessType != null and businessType != ''">business_type,</if>
+            <if test="businessId != null and businessId != ''">business_id,</if>
+            <if test="md5 != null and md5 != ''">md5,</if>
+            <if test="thumbnailPath != null">thumbnail_path,</if>
+            <if test="thumbnailUrl != null">thumbnail_url,</if>
+            <if test="downloadCount != null">download_count,</if>
+            <if test="storageType != null">storage_type,</if>
+            <if test="status != null">status,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="fileName != null and fileName != ''">#{fileName},</if>
+            <if test="originalName != null and originalName != ''">#{originalName},</if>
+            <if test="filePath != null and filePath != ''">#{filePath},</if>
+            <if test="fileUrl != null and fileUrl != ''">#{fileUrl},</if>
+            <if test="fileSize != null">#{fileSize},</if>
+            <if test="fileType != null and fileType != ''">#{fileType},</if>
+            <if test="mimeType != null and mimeType != ''">#{mimeType},</if>
+            <if test="fileCategory != null and fileCategory != ''">#{fileCategory},</if>
+            <if test="businessType != null and businessType != ''">#{businessType},</if>
+            <if test="businessId != null and businessId != ''">#{businessId},</if>
+            <if test="md5 != null and md5 != ''">#{md5},</if>
+            <if test="thumbnailPath != null">#{thumbnailPath},</if>
+            <if test="thumbnailUrl != null">#{thumbnailUrl},</if>
+            <if test="downloadCount != null">#{downloadCount},</if>
+            <if test="storageType != null">#{storageType},</if>
+            <if test="status != null">#{status},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateSysFileInfo" parameterType="SysFileInfo">
+        update sys_file_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fileName != null and fileName != ''">file_name = #{fileName},</if>
+            <if test="businessType != null and businessType != ''">business_type = #{businessType},</if>
+            <if test="businessId != null and businessId != ''">business_id = #{businessId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where file_id = #{fileId}
+    </update>
+
+    <update id="increaseDownloadCount" parameterType="Long">
+        update sys_file_info
+        set download_count = download_count + 1
+        where file_id = #{fileId}
+    </update>
+
+    <delete id="deleteSysFileInfoByFileId" parameterType="Long">
+        delete from sys_file_info where file_id = #{fileId}
+    </delete>
+
+    <delete id="deleteSysFileInfoByFileIds" parameterType="Long">
+        delete from sys_file_info where file_id in
+        <foreach item="fileId" collection="array" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </delete>
+
+</mapper>

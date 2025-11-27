@@ -4,7 +4,8 @@
       "Bash(NUL)",
       "Bash(dir:*)",
       "Bash(where:*)",
-      "Bash(mvn clean install:*)"
+      "Bash(mvn clean install:*)",
+      "Bash(mvn clean compile:*)"
     ],
     "deny": [],
     "ask": []

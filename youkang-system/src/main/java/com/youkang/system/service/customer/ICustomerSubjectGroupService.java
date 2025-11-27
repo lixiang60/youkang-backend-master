@@ -3,8 +3,12 @@ package com.youkang.system.service.customer;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.youkang.system.domain.CustomerSubjectGroup;
+import com.youkang.system.domain.req.CustomerUpdateReq;
+import com.youkang.system.domain.req.DeleteReq;
+import com.youkang.system.domain.req.UpdateReq;
 import com.youkang.system.domain.req.customer.CustomerSubjectGroupReq;
 import com.youkang.system.domain.resp.customer.CustomerSubjectGroupResp;
+import org.apache.ibatis.annotations.Delete;
 
 /**
  * 客户科目组关系Service接口
@@ -34,7 +38,7 @@ import com.youkang.system.domain.resp.customer.CustomerSubjectGroupResp;
 public interface ICustomerSubjectGroupService extends IService<CustomerSubjectGroup> {
 
     void add(CustomerSubjectGroup customerSubjectGroup);
-    void update(CustomerSubjectGroup customerSubjectGroup);
-    void delete(Integer id);
+    void update(CustomerUpdateReq req);
+    void delete(DeleteReq req);
     Page<CustomerSubjectGroupResp> query(CustomerSubjectGroupReq req);
 }
