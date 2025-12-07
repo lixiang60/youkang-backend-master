@@ -1,6 +1,5 @@
 package com.youkang.system.service.customer.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -8,22 +7,16 @@ import com.youkang.system.domain.CustomerInfo;
 import com.youkang.system.domain.SubjectGroupInfo;
 import com.youkang.system.domain.req.CustomerUpdateReq;
 import com.youkang.system.domain.req.DeleteReq;
-import com.youkang.system.domain.req.UpdateReq;
 import com.youkang.system.domain.req.customer.CustomerSubjectGroupReq;
 import com.youkang.system.domain.resp.customer.CustomerSubjectGroupResp;
 import com.youkang.system.mapper.CustomerInfoMapper;
 import com.youkang.system.mapper.SubjectGroupInfoMapper;
 import jakarta.annotation.Resource;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 import com.youkang.system.mapper.CustomerSubjectGroupMapper;
 import com.youkang.system.domain.CustomerSubjectGroup;
 import com.youkang.system.service.customer.ICustomerSubjectGroupService;
-
 import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
 /**
  * 客户科目组关系Service业务层处理
  * <p>
