@@ -39,7 +39,7 @@ public class MyBatisConfig
 
     public static String setTypeAliasesPackage(String typeAliasesPackage)
     {
-        ResourcePatternResolver resolver = (ResourcePatternResolver) new PathMatchingResourcePatternResolver();
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resolver);
         List<String> allResult = new ArrayList<String>();
         try
@@ -50,7 +50,7 @@ public class MyBatisConfig
                 aliasesPackage = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
                         + ClassUtils.convertClassNameToResourcePath(aliasesPackage.trim()) + "/" + DEFAULT_RESOURCE_PATTERN;
                 Resource[] resources = resolver.getResources(aliasesPackage);
-                if (resources != null && resources.length > 0)
+                if (resources.length > 0)
                 {
                     MetadataReader metadataReader = null;
                     for (Resource resource : resources)
@@ -69,13 +69,13 @@ public class MyBatisConfig
                         }
                     }
                 }
-                if (result.size() > 0)
+                if (!result.isEmpty())
                 {
                     HashSet<String> hashResult = new HashSet<String>(result);
                     allResult.addAll(hashResult);
                 }
             }
-            if (allResult.size() > 0)
+            if (!allResult.isEmpty())
             {
                 typeAliasesPackage = String.join(",", (String[]) allResult.toArray(new String[0]));
             }
@@ -110,7 +110,7 @@ public class MyBatisConfig
                 }
             }
         }
-        return resources.toArray(new Resource[resources.size()]);
+        return resources.toArray(new Resource[0]);
     }
 
     @Bean
@@ -119,6 +119,7 @@ public class MyBatisConfig
         String typeAliasesPackage = env.getProperty("mybatis.typeAliasesPackage");
         String mapperLocations = env.getProperty("mybatis.mapperLocations");
         String configLocation = env.getProperty("mybatis.configLocation");
+        assert typeAliasesPackage != null;
         typeAliasesPackage = setTypeAliasesPackage(typeAliasesPackage);
         VFS.addImplClass(SpringBootVFS.class);
 
@@ -126,6 +127,7 @@ public class MyBatisConfig
         sessionFactory.setDataSource(dataSource);
         sessionFactory.setTypeAliasesPackage(typeAliasesPackage);
         sessionFactory.setMapperLocations(resolveMapperLocations(StringUtils.split(mapperLocations, ",")));
+        assert configLocation != null;
         sessionFactory.setConfigLocation(new DefaultResourceLoader().getResource(configLocation));
         return sessionFactory.getObject();
     }

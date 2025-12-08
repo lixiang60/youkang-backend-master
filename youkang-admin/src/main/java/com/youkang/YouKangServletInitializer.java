@@ -8,8 +8,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  * 
  * @author youkang
  */
-public class YouKangServletInitializer extends SpringBootServletInitializer
-{
+public class YouKangServletInitializer extends SpringBootServletInitializer {
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application)
     {

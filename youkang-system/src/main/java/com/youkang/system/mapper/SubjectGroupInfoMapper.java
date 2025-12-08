@@ -2,6 +2,7 @@ package com.youkang.system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.youkang.system.domain.SubjectGroupInfo;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 课题组信息Mapper接口
@@ -20,8 +21,5 @@ import com.youkang.system.domain.SubjectGroupInfo;
  * @author youkang
  * @date 2025-01-20
  */
-public interface SubjectGroupInfoMapper extends BaseMapper<SubjectGroupInfo>
-{
-    // 继承 BaseMapper 后，基础的 CRUD 方法已经自动拥有
-    // 如果需要自定义复杂SQL，可以在这里添加方法，并在 XML 中编写 SQL
+public interface SubjectGroupInfoMapper extends BaseMapper<SubjectGroupInfo> {
 }

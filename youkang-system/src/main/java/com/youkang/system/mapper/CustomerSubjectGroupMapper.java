@@ -24,7 +24,6 @@ import org.apache.ibatis.annotations.Param;
  * @author youkang
  * @date 2025-11-25
  */
-@Mapper
 public interface CustomerSubjectGroupMapper extends BaseMapper<CustomerSubjectGroup> {
 
     Page<CustomerSubjectGroupResp> query(Page<CustomerSubjectGroupResp> page, @Param("req") CustomerSubjectGroupReq req);

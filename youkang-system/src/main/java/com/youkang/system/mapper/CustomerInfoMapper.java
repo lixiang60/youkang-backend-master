@@ -4,29 +4,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.youkang.system.domain.CustomerInfo;
 import com.youkang.system.domain.resp.customer.CustomerSelectorResp;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
-import java.util.List;
-
-/**
- * 客户信息Mapper接口
- *
- * 继承 BaseMapper 后自动拥有以下方法（无需 XML）：
- * - insert(T entity)：插入一条记录
- * - deleteById(Serializable id)：根据ID删除
- * - deleteBatchIds(Collection<? extends Serializable> idList)：批量删除
- * - updateById(T entity)：根据ID更新
- * - selectById(Serializable id)：根据ID查询
- * - selectBatchIds(Collection<? extends Serializable> idList)：批量查询
- * - selectList(Wrapper<T> queryWrapper)：条件查询列表
- * - selectPage(IPage<T> page, Wrapper<T> queryWrapper)：分页查询
- *
- * @author youkang
- * @date 2025-11-20
- */
-@Mapper
 public interface CustomerInfoMapper extends BaseMapper<CustomerInfo> {
 
     Page<CustomerSelectorResp> customerSelector(Page<CustomerSelectorResp> page,@Param("queryString") String queryString);
