@@ -50,13 +50,13 @@ mvn clean
 
 | 变量名           | 描述             | 默认值                     | 示例                                     |
 | :--------------- | :--------------- | :------------------------- | :--------------------------------------- |
-| `REDIS_HOST`     | Redis 服务器地址 | `124.222.41.12`            | `localhost`                              |
+| `REDIS_HOST`     | Redis 服务器地址 | `********`                 | `localhost`                              |
 | `REDIS_PORT`     | Redis 服务器端口 | `6379`                     | `6379`                                   |
-| `REDIS_PASSWORD` | Redis 密码       | `redis_bEDNjE`             | `your_secure_password`                   |
+| `REDIS_PASSWORD` | Redis 密码       | `********`                 | `your_secure_password`                   |
 | `REDIS_DB`       | Redis 数据库索引 | `0`                        | `1`                                      |
 | `DB_URL`         | MySQL 连接地址   | (见 application-druid.yml) | `jdbc:mysql://localhost:3306/youkang...` |
 | `DB_USERNAME`    | MySQL 用户名     | `root`                     | `admin`                                  |
-| `DB_PASSWORD`    | MySQL 密码       | `mysql_knNCfM`             | `123456`                                 |
+| `DB_PASSWORD`    | MySQL 密码       | `********`                 | `123456`                                 |
 | `UPLOAD_PATH`    | 文件上传路径     | `D:/youkang/uploadPath`    | `/home/youkang/files`                    |
 
 ### 使用方式
