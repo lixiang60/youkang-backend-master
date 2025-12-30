@@ -226,8 +226,7 @@ public class ExcelUtil<T>
         this.excludeFields = fields;
     }
 
-    public void init(List<T> list, String sheetName, String title, Type type)
-    {
+    public void init(List<T> list, String sheetName, String title, Type type) {
         if (list == null)
         {
             list = new ArrayList<T>();
@@ -606,8 +605,7 @@ public class ExcelUtil<T>
      * @param sheetName 工作表的名称
      * @return 结果
      */
-    public void importTemplateExcel(HttpServletResponse response, String sheetName)
-    {
+    public void importTemplateExcel(HttpServletResponse response, String sheetName) {
         importTemplateExcel(response, sheetName, StringUtils.EMPTY);
     }
 
@@ -618,8 +616,7 @@ public class ExcelUtil<T>
      * @param title 标题
      * @return 结果
      */
-    public void importTemplateExcel(HttpServletResponse response, String sheetName, String title)
-    {
+    public void importTemplateExcel(HttpServletResponse response, String sheetName, String title) {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         this.init(null, sheetName, title, Type.IMPORT);

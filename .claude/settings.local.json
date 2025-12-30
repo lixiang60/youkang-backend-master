@@ -6,7 +6,8 @@
       "Bash(where:*)",
       "Bash(mvn clean install:*)",
       "Bash(mvn clean compile:*)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

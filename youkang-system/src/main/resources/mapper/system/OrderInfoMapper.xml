@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.youkang.system.mapper.OrderInfoMapper">
+
+    <select id="queryPage" resultType="com.youkang.system.domain.resp.order.OrderResp">
+        SELECT
+            o.order_id AS orderId,
+            o.order_tid AS orderTid,
+            o.customer_id AS customerId,
+            c.customer_name AS customerName,
+            c.address AS customerAddress,
+            c.subject_group_id AS groupId,
+            g.name AS groupName,
+            o.generation,
+            o.order_type AS orderType,
+            o.is_async AS isAsync,
+            o.belong_company AS belongCompany,
+            o.produce_company AS produceCompany,
+            o.gen_no AS genNo,
+            o.remark,
+            o.create_by AS createBy,
+            o.create_time AS createTime
+        FROM yk_order_info o
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        LEFT JOIN yk_subject_group_info g ON c.subject_group_id = g.id
+        <where>
+            <if test="query.orderId != null and query.orderId != ''">
+                AND o.order_id LIKE CONCAT('%', #{query.orderId}, '%')
+            </if>
+            <if test="query.orderTid != null">
+                AND o.order_tid = #{query.orderTid}
+            </if>
+            <if test="query.customerId != null">
+                AND o.customer_id = #{query.customerId}
+            </if>
+            <if test="query.orderType != null and query.orderType != ''">
+                AND o.order_type = #{query.orderType}
+            </if>
+            <if test="query.isAsync != null">
+                AND o.is_async = #{query.isAsync}
+            </if>
+            <if test="query.generation != null">
+                AND o.generation = #{query.generation}
+            </if>
+            <if test="query.belongCompany != null and query.belongCompany != ''">
+                AND o.belong_company LIKE CONCAT('%', #{query.belongCompany}, '%')
+            </if>
+            <if test="query.produceCompany != null and query.produceCompany != ''">
+                AND o.produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
+            </if>
+            <if test="query.genNo != null and query.genNo != ''">
+                AND o.gen_no LIKE CONCAT('%', #{query.genNo}, '%')
+            </if>
+            <if test="query.createBy != null and query.createBy != ''">
+                AND o.create_by LIKE CONCAT('%', #{query.createBy}, '%')
+            </if>
+        </where>
+        ORDER BY o.create_time DESC
+    </select>
+
+    <select id="queryList" resultType="com.youkang.system.domain.resp.order.OrderResp">
+        SELECT
+            o.order_id AS orderId,
+            o.order_tid AS orderTid,
+            o.customer_id AS customerId,
+            c.customer_name AS customerName,
+            c.address AS customerAddress,
+            c.subject_group_id AS groupId,
+            g.name AS groupName,
+            o.generation,
+            o.order_type AS orderType,
+            o.is_async AS isAsync,
+            o.belong_company AS belongCompany,
+            o.produce_company AS produceCompany,
+            o.gen_no AS genNo,
+            o.remark,
+            o.create_by AS createBy,
+            o.create_time AS createTime
+        FROM yk_order_info o
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        LEFT JOIN yk_subject_group_info g ON c.subject_group_id = g.id
+        <where>
+            <if test="query.orderId != null and query.orderId != ''">
+                AND o.order_id LIKE CONCAT('%', #{query.orderId}, '%')
+            </if>
+            <if test="query.orderTid != null">
+                AND o.order_tid = #{query.orderTid}
+            </if>
+            <if test="query.customerId != null">
+                AND o.customer_id = #{query.customerId}
+            </if>
+            <if test="query.orderType != null and query.orderType != ''">
+                AND o.order_type = #{query.orderType}
+            </if>
+            <if test="query.isAsync != null">
+                AND o.is_async = #{query.isAsync}
+            </if>
+            <if test="query.generation != null">
+                AND o.generation = #{query.generation}
+            </if>
+            <if test="query.belongCompany != null and query.belongCompany != ''">
+                AND o.belong_company LIKE CONCAT('%', #{query.belongCompany}, '%')
+            </if>
+            <if test="query.produceCompany != null and query.produceCompany != ''">
+                AND o.produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
+            </if>
+            <if test="query.genNo != null and query.genNo != ''">
+                AND o.gen_no LIKE CONCAT('%', #{query.genNo}, '%')
+            </if>
+            <if test="query.createBy != null and query.createBy != ''">
+                AND o.create_by LIKE CONCAT('%', #{query.createBy}, '%')
+            </if>
+        </where>
+        ORDER BY o.create_time DESC
+    </select>
+
+    <select id="queryById" resultType="com.youkang.system.domain.resp.order.OrderResp">
+        SELECT
+            o.order_id AS orderId,
+            o.order_tid AS orderTid,
+            o.customer_id AS customerId,
+            c.customer_name AS customerName,
+            c.address AS customerAddress,
+            c.subject_group_id AS groupId,
+            g.name AS groupName,
+            o.generation,
+            o.order_type AS orderType,
+            o.is_async AS isAsync,
+            o.belong_company AS belongCompany,
+            o.produce_company AS produceCompany,
+            o.gen_no AS genNo,
+            o.remark,
+            o.create_by AS createBy,
+            o.create_time AS createTime
+        FROM yk_order_info o
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        LEFT JOIN yk_subject_group_info g ON c.subject_group_id = g.id
+        WHERE o.order_id = #{orderId}
+    </select>
+</mapper>
