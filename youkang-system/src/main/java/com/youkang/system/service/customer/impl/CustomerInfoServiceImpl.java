@@ -4,24 +4,24 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.youkang.common.enums.PayMentMethodEnum;
 import com.youkang.common.utils.StringUtils;
-import com.youkang.system.domain.resp.customer.CustomerSelectorResp;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Service;
-import com.youkang.system.mapper.CustomerInfoMapper;
 import com.youkang.system.domain.CustomerInfo;
+import com.youkang.system.domain.SubjectGroupInfo;
+import com.youkang.system.domain.req.customer.CustomerQueryReq;
+import com.youkang.system.domain.resp.customer.CustomerResp;
+import com.youkang.system.domain.resp.customer.CustomerSelectorResp;
+import com.youkang.system.mapper.CustomerInfoMapper;
+import com.youkang.system.mapper.SubjectGroupInfoMapper;
 import com.youkang.system.service.customer.ICustomerInfoService;
+import jakarta.annotation.Resource;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * 客户信息Service业务层处理
- * <p>
- * ServiceImpl 已经实现了 IService 中的所有方法，包括：
- * - 单条/批量 新增、删除、修改、查询
- * - 分页查询
- * - 条件查询
- * 等常用方法，可直接使用
  *
  * @author youkang
  * @date 2025-11-20
@@ -32,41 +32,58 @@ public class CustomerInfoServiceImpl extends ServiceImpl<CustomerInfoMapper, Cus
     @Resource
     private CustomerInfoMapper mapper;
 
-    /**
-     * 分页查询客户信息列表
-     *
-     * @param customerInfo 查询条件（包含分页参数）
-     * @return 分页结果
-     */
-    @Override
-    public IPage<CustomerInfo> queryPage(CustomerInfo customerInfo) {
-        // 创建分页对象
-        Page<CustomerInfo> page = new Page<>(customerInfo.getPageNum(), customerInfo.getPageSize());
+    @Resource
+    private SubjectGroupInfoMapper subjectGroupInfoMapper;
 
-        // 构建查询条件（使用 Lambda 表达式，类型安全）
+    @Override
+    public IPage<CustomerResp> queryPage(CustomerQueryReq queryReq) {
+        // 创建分页对象
+        Page<CustomerInfo> page = new Page<>(queryReq.getPageNum(), queryReq.getPageSize());
+
+        // 构建查询条件
         LambdaQueryWrapper<CustomerInfo> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(StringUtils.isNotEmpty(customerInfo.getCustomerName()),
-                        CustomerInfo::getCustomerName, customerInfo.getCustomerName())
-                .eq(StringUtils.isNotEmpty(customerInfo.getRegion()),
-                        CustomerInfo::getRegion, customerInfo.getRegion())
-                .like(StringUtils.isNotEmpty(customerInfo.getPhone()),
-                        CustomerInfo::getPhone, customerInfo.getPhone())
-                .like(StringUtils.isNotEmpty(customerInfo.getEmail()),
-                        CustomerInfo::getEmail, customerInfo.getEmail())
-                .eq(StringUtils.isNotEmpty(customerInfo.getCustomerLevel()),
-                        CustomerInfo::getCustomerLevel, customerInfo.getCustomerLevel())
-                .eq(StringUtils.isNotEmpty(customerInfo.getStatus()),
-                        CustomerInfo::getStatus, customerInfo.getStatus())
-                .like(StringUtils.isNotEmpty(customerInfo.getSalesPerson()),
-                        CustomerInfo::getSalesPerson, customerInfo.getSalesPerson())
-                .eq(StringUtils.isNotEmpty(customerInfo.getPaymentMethod()),
-                        CustomerInfo::getPaymentMethod, customerInfo.getPaymentMethod())
-                .like(StringUtils.isNotEmpty(customerInfo.getCompany()),
-                        CustomerInfo::getCompany, customerInfo.getCompany())
-                .orderByDesc(CustomerInfo::getCreateTime);
+        wrapper.like(StringUtils.isNotEmpty(queryReq.getCustomerName()),
+                        CustomerInfo::getCustomerName, queryReq.getCustomerName())
+                .eq(StringUtils.isNotEmpty(queryReq.getRegion()),
+                        CustomerInfo::getRegion, queryReq.getRegion())
+                .like(StringUtils.isNotEmpty(queryReq.getPhone()),
+                        CustomerInfo::getPhone, queryReq.getPhone())
+                .like(StringUtils.isNotEmpty(queryReq.getEmail()),
+                        CustomerInfo::getEmail, queryReq.getEmail())
+                .eq(StringUtils.isNotEmpty(queryReq.getCustomerLevel()),
+                        CustomerInfo::getCustomerLevel, queryReq.getCustomerLevel())
+                .eq(StringUtils.isNotEmpty(queryReq.getStatus()),
+                        CustomerInfo::getStatus, queryReq.getStatus())
+                .like(StringUtils.isNotEmpty(queryReq.getSalesPerson()),
+                        CustomerInfo::getSalesPerson, queryReq.getSalesPerson())
+                .eq(StringUtils.isNotEmpty(queryReq.getPaymentMethod()),
+                        CustomerInfo::getPaymentMethod, queryReq.getPaymentMethod())
+                .like(StringUtils.isNotEmpty(queryReq.getCompany()),
+                        CustomerInfo::getCompany, queryReq.getCompany())
+                .eq(queryReq.getSubjectGroupId() != null,
+                        CustomerInfo::getSubjectGroupId, queryReq.getSubjectGroupId())
+                .orderByDesc(CustomerInfo::getId);
 
         // 分页查询
-        return this.page(page, wrapper);
+        IPage<CustomerInfo> entityPage = this.page(page, wrapper);
+
+        // 转换为响应对象
+        Page<CustomerResp> respPage = new Page<>(entityPage.getCurrent(), entityPage.getSize(), entityPage.getTotal());
+        List<CustomerResp> respList = entityPage.getRecords().stream()
+                .map(this::convertToResp)
+                .toList();
+        respPage.setRecords(respList);
+
+        return respPage;
+    }
+
+    @Override
+    public CustomerResp getDetail(Integer id) {
+        CustomerInfo entity = this.getById(id);
+        if (entity == null) {
+            return null;
+        }
+        return convertToResp(entity);
     }
 
     @Override
@@ -74,5 +91,30 @@ public class CustomerInfoServiceImpl extends ServiceImpl<CustomerInfoMapper, Cus
         return mapper.customerSelector(Page.of(1, 20), queryString);
     }
 
+    /**
+     * 实体转响应对象
+     */
+    private CustomerResp convertToResp(CustomerInfo entity) {
+        CustomerResp resp = new CustomerResp();
+        BeanUtils.copyProperties(entity, resp);
 
+        // 转换结算方式名称
+        if (StringUtils.isNotEmpty(entity.getPaymentMethod())) {
+            String methodName = PayMentMethodEnum.getDescByCode(entity.getPaymentMethod());
+            resp.setPaymentMethodName(methodName);
+        }
+
+        // 转换课题组名称
+        if (entity.getSubjectGroupId() != null) {
+            SubjectGroupInfo subjectGroup = subjectGroupInfoMapper.selectById(entity.getSubjectGroupId());
+            if (subjectGroup != null) {
+                resp.setSubjectGroupName(subjectGroup.getName());
+            }
+        }
+
+        // TODO: 转换客户等级名称（根据枚举）
+        // TODO: 转换状态名称（根据枚举）
+
+        return resp;
+    }
 }

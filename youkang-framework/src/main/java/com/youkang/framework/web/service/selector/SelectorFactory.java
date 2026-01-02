@@ -28,7 +28,7 @@ public class SelectorFactory {
      */
     private final Map<String, ICommonSelector> selectorMap = new ConcurrentHashMap<>();
 
-    /**
+     /**
      * 初始化选择器映射表
      */
     @PostConstruct
@@ -60,6 +60,6 @@ public class SelectorFactory {
      * @return 选择器类型列表
      */
     public List<String> getSupportedTypes() {
-        return selectorMap.keySet().stream().sorted().toList();
+            return selectorMap.keySet().stream().sorted().toList();
     }
 }

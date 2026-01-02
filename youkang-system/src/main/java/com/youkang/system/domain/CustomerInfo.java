@@ -32,7 +32,7 @@ public class CustomerInfo extends PageReq {
         /** 课题组id */
     @Excel(name = "课题组id")
     @TableField("subject_group_id")
-    private String subjectGroupId;
+    private Integer subjectGroupId;
 
     /** 地区 */
     @Excel(name = "地区")

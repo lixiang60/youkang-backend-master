@@ -4,73 +4,85 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.youkang.common.enums.PayMentMethodEnum;
+import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.StringUtils;
-import com.youkang.system.domain.resp.customer.SubjectGroupSelectorResp;
-import org.springframework.stereotype.Service;
-import com.youkang.system.mapper.SubjectGroupInfoMapper;
 import com.youkang.system.domain.SubjectGroupInfo;
+import com.youkang.system.domain.req.subjectgroup.BatchUpdateRep;
+import com.youkang.system.domain.req.subjectgroup.SubjectGroupQueryReq;
+import com.youkang.system.domain.resp.customer.SubjectGroupSelectorResp;
+import com.youkang.system.domain.resp.subjectgroup.SubjectGroupResp;
+import com.youkang.system.mapper.SubjectGroupInfoMapper;
 import com.youkang.system.service.customer.ISubjectGroupInfoService;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 课题组信息Service业务层处理
- *
- * ServiceImpl 已经实现了 IService 中的所有方法，包括：
- * - 单条/批量 新增、删除、修改、查询
- * - 分页查询
- * - 条件查询
- * 等常用方法，可直接使用
  *
  * @author youkang
  * @date 2025-01-20
  */
 @Service
-public class SubjectGroupInfoServiceImpl extends ServiceImpl<SubjectGroupInfoMapper, SubjectGroupInfo> implements ISubjectGroupInfoService
-{
-    /**
-     * 分页查询课题组信息列表
-     *
-     * @param subjectGroupInfo 查询条件（包含分页参数）
-     * @return 分页结果
-     */
-    @Override
-    public IPage<SubjectGroupInfo> queryPage(SubjectGroupInfo subjectGroupInfo)
-    {
-        // 创建分页对象
-        Page<SubjectGroupInfo> page = new Page<>(subjectGroupInfo.getPageNum(), subjectGroupInfo.getPageSize());
+public class SubjectGroupInfoServiceImpl extends ServiceImpl<SubjectGroupInfoMapper, SubjectGroupInfo> implements ISubjectGroupInfoService {
 
-        // 构建查询条件（使用 Lambda 表达式，类型安全）
+    @Override
+    public IPage<SubjectGroupResp> queryPage(SubjectGroupQueryReq queryReq) {
+        // 创建分页对象
+        Page<SubjectGroupInfo> page = new Page<>(queryReq.getPageNum(), queryReq.getPageSize());
+
+        // 构建查询条件
         LambdaQueryWrapper<SubjectGroupInfo> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(StringUtils.isNotEmpty(subjectGroupInfo.getName()),
-                     SubjectGroupInfo::getName, subjectGroupInfo.getName())
-               .eq(StringUtils.isNotEmpty(subjectGroupInfo.getRegion()),
-                   SubjectGroupInfo::getRegion, subjectGroupInfo.getRegion())
-               .like(StringUtils.isNotEmpty(subjectGroupInfo.getSalesPerson()),
-                     SubjectGroupInfo::getSalesPerson, subjectGroupInfo.getSalesPerson())
-               .eq(StringUtils.isNotEmpty(subjectGroupInfo.getPaymentMethod()),
-                   SubjectGroupInfo::getPaymentMethod, subjectGroupInfo.getPaymentMethod())
-               .like(StringUtils.isNotEmpty(subjectGroupInfo.getContactPerson()),
-                     SubjectGroupInfo::getContactPerson, subjectGroupInfo.getContactPerson())
-               .like(StringUtils.isNotEmpty(subjectGroupInfo.getContactPhone()),
-                     SubjectGroupInfo::getContactPhone, subjectGroupInfo.getContactPhone())
-               .orderByDesc(SubjectGroupInfo::getId);
+        wrapper.like(StringUtils.isNotEmpty(queryReq.getName()),
+                        SubjectGroupInfo::getName, queryReq.getName())
+                .eq(StringUtils.isNotEmpty(queryReq.getRegion()),
+                        SubjectGroupInfo::getRegion, queryReq.getRegion())
+                .like(StringUtils.isNotEmpty(queryReq.getSalesPerson()),
+                        SubjectGroupInfo::getSalesPerson, queryReq.getSalesPerson())
+                .eq(StringUtils.isNotEmpty(queryReq.getPaymentMethod()),
+                        SubjectGroupInfo::getPaymentMethod, queryReq.getPaymentMethod())
+                .like(StringUtils.isNotEmpty(queryReq.getContactPerson()),
+                        SubjectGroupInfo::getContactPerson, queryReq.getContactPerson())
+                .like(StringUtils.isNotEmpty(queryReq.getContactPhone()),
+                        SubjectGroupInfo::getContactPhone, queryReq.getContactPhone())
+                .orderByDesc(SubjectGroupInfo::getId);
 
         // 分页查询
-        return this.page(page, wrapper);
+        IPage<SubjectGroupInfo> entityPage = this.page(page, wrapper);
+
+        // 转换为响应对象
+        Page<SubjectGroupResp> respPage = new Page<>(entityPage.getCurrent(), entityPage.getSize(), entityPage.getTotal());
+        List<SubjectGroupResp> respList = entityPage.getRecords().stream()
+                .map(this::convertToResp)
+                .toList();
+        respPage.setRecords(respList);
+
+        return respPage;
+    }
+
+    @Override
+    public SubjectGroupResp getDetail(Integer id) {
+        SubjectGroupInfo entity = this.getById(id);
+        if (entity == null) {
+            return null;
+        }
+        return convertToResp(entity);
     }
 
     @Override
     public Page<SubjectGroupSelectorResp> getSubjectGroupSelector(String queryString) {
         // 查询 SubjectGroupInfo
-        Page<SubjectGroupInfo> subjectGroupPage = this.lambdaQuery()
-                .and(StringUtils.isNotBlank(queryString), wrapper ->
-                    wrapper.like(SubjectGroupInfo::getId, queryString)
-                           .or()
-                           .like(SubjectGroupInfo::getName, queryString)
-                )
-                .page(Page.of(1, 20));
+        LambdaQueryWrapper<SubjectGroupInfo> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotBlank(queryString)) {
+            wrapper.and(w -> w.like(SubjectGroupInfo::getId, queryString)
+                    .or()
+                    .like(SubjectGroupInfo::getName, queryString));
+        }
+
+        Page<SubjectGroupInfo> subjectGroupPage = this.page(Page.of(1, 20), wrapper);
 
         // 转换为 SubjectGroupSelectorResp
         Page<SubjectGroupSelectorResp> respPage = new Page<>(subjectGroupPage.getCurrent(), subjectGroupPage.getSize(), subjectGroupPage.getTotal());
@@ -81,8 +93,46 @@ public class SubjectGroupInfoServiceImpl extends ServiceImpl<SubjectGroupInfoMap
                     resp.setName(info.getName());
                     resp.setContactAddress(info.getContactAddress());
                     return resp;
-                }).collect(Collectors.toList());
+                }).toList();
         respPage.setRecords(respList);
         return respPage;
+    }
+
+    @Override
+    public boolean saveSubjectGroup(SubjectGroupInfo entity) {
+        String username = SecurityUtils.getUsername();
+        entity.setCreateBy(username);
+        entity.setCreateTime(LocalDateTime.now());
+        return this.save( entity);
+    }
+
+    @Override
+    public void editBatch(BatchUpdateRep updateReq) {
+        this.lambdaUpdate()
+                .in(SubjectGroupInfo::getId, updateReq.getIds())
+                .set(StringUtils.isNotBlank(updateReq.getPaymentMethod()),SubjectGroupInfo::getPaymentMethod, updateReq.getPaymentMethod())
+                .set(StringUtils.isNotBlank(updateReq.getRegion()),SubjectGroupInfo::getRegion, updateReq.getRegion())
+                .set(StringUtils.isNotBlank(updateReq.getSalesPerson()),SubjectGroupInfo::getSalesPerson, updateReq.getSalesPerson())
+                .set(StringUtils.isNotBlank(updateReq.getInvoiceTitle()),SubjectGroupInfo::getInvoiceTitle, updateReq.getInvoiceTitle())
+                .update();
+    }
+
+    /**
+     * 实体转响应对象
+     */
+    private SubjectGroupResp convertToResp(SubjectGroupInfo entity) {
+        SubjectGroupResp resp = new SubjectGroupResp();
+        BeanUtils.copyProperties(entity, resp);
+
+        // 转换结算方式名称
+        if (StringUtils.isNotEmpty(entity.getPaymentMethod())) {
+            String methodName = PayMentMethodEnum.getDescByCode(entity.getPaymentMethod());
+            resp.setPaymentMethodName(methodName);
+        }
+
+        // TODO: 转换公司名称（根据 companyId 查询）
+        // resp.setCompanyName(...);
+
+        return resp;
     }
 }

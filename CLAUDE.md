@@ -12,35 +12,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 构建和运行命令
 
-### 构建项目
 ```bash
+# 构建项目
 mvn clean package
-```
 
-### 运行应用
-```bash
-# 从根目录运行
+# 运行应用
 mvn spring-boot:run -pl youkang-admin
 
 # 或者运行编译后的 JAR
 java -jar youkang-admin/target/youkang-admin.jar
-```
 
-### 跳过测试编译
-```bash
+# 跳过测试编译
 mvn clean install -DskipTests
-```
 
-### 清理构建产物
-```bash
-mvn clean
-```
-
-### 单模块快速编译
-```bash
-# 仅编译指定模块（开发时使用，更快）
+# 单模块快速编译（开发时使用）
 mvn compile -pl youkang-admin -am
 ```
+
+## 环境变量配置
+
+| 变量名 | 描述 | 默认值 |
+|--------|------|--------|
+| `REDIS_HOST` | Redis 服务器地址 | `124.222.41.12` |
+| `REDIS_PORT` | Redis 服务器端口 | `6379` |
+| `REDIS_PASSWORD` | Redis 密码 | (见 application.yml) |
+| `REDIS_DB` | Redis 数据库索引 | `0` |
+| `DB_URL` | MySQL 连接地址 | (见 application-druid.yml) |
+| `DB_USERNAME` | MySQL 用户名 | `root` |
+| `DB_PASSWORD` | MySQL 密码 | (见 application-druid.yml) |
+| `UPLOAD_PATH` | 文件上传路径 | `D:/youkang/uploadPath` |
+
+使用示例：`REDIS_PASSWORD=xxx mvn spring-boot:run -pl youkang-admin`
 
 ## 数据库初始化
 
@@ -56,7 +58,7 @@ SQL 脚本位于 `/sql` 目录：
 | 模块 | 职责 |
 |------|------|
 | **youkang-admin** | Web 入口，REST 控制器（按 `system`/`monitor`/`tool`/`common` 领域组织），应用配置 |
-| **youkang-framework** | 安全（JWT、Spring Security）、AOP 切面（日志/数据权限/数据源/限流）、全局异常处理 |
+| **youkang-framework** | 安全（JWT、Spring Security）、AOP 切面（日志/数据权限/数据源/限流）、全局异常处理、动态数据源 |
 | **youkang-system** | 业务逻辑层，领域实体（SysUser/SysRole/SysMenu/SysDept 等），MyBatis 映射器 |
 | **youkang-common** | 共享注解、工具类、BaseEntity、AjaxResult、TableDataInfo、自定义异常 |
 | **youkang-quartz** | Quartz 定时任务调度和执行日志 |
@@ -71,7 +73,7 @@ SQL 脚本位于 `/sql` 目录：
 | 配置项 | 说明 |
 |--------|------|
 | JWT 认证 | 请求头 `Authorization`，有效期 30 分钟 |
-| Redis | `localhost:6379`，缓存会话/令牌/权限 |
+| Redis | 缓存会话/令牌/权限 |
 | MyBatis 映射器 | `classpath*:mapper/**/*Mapper.xml` |
 | Swagger UI | `http://localhost:3564/swagger-ui.html` |
 | Druid 监控 | `/druid/*`（用户名：`youkang`，密码：`123456`）|

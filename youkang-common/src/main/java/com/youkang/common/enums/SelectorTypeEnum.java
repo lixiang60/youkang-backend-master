@@ -10,30 +10,16 @@ import lombok.Getter;
 @Getter
 public enum SelectorTypeEnum {
 
-    /**
-     * 用户选择器
-     */
     USER("user", "用户选择器"),
-
-    /**
-     * 部门选择器
-     */
     DEPT("dept", "部门选择器"),
-
-    /**
-     * 角色选择器
-     */
     ROLE("role", "角色选择器"),
-
-    /**
-     * 岗位选择器
-     */
     POST("post", "岗位选择器"),
+    DICT("dict", "字典选择器"),
+    PAYMENT("paymentMethod", "结算方式选择器"),
 
-    /**
-     * 字典选择器
-     */
-    DICT("dict", "字典选择器");
+
+    ;
+
 
     private final String code;
     private final String desc;

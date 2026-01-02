@@ -10,6 +10,8 @@ import com.youkang.common.core.domain.PageReq;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDateTime;
+
 /**
  * 课题组信息对象 yk_subject_group_info
  *
@@ -17,9 +19,8 @@ import lombok.EqualsAndHashCode;
  * @date 2025-01-20
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @TableName("yk_subject_group_info")
-public class SubjectGroupInfo extends PageReq {
+public class SubjectGroupInfo {
 
     /** 课题组ID */
     @TableId(value = "id", type = IdType.AUTO)
@@ -69,4 +70,15 @@ public class SubjectGroupInfo extends PageReq {
     @Excel(name = "联系地址")
     @TableField("contact_address")
     private String contactAddress;
+
+    /** 创建者 */
+    @TableField("create_by")
+    private String createBy;
+
+
+    /** 创建时间 */
+    @TableField("create_time")
+    private LocalDateTime createTime;
+
+
 }
