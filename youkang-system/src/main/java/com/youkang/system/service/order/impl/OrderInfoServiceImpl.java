@@ -9,7 +9,11 @@ import com.youkang.common.utils.StringUtils;
 import com.youkang.system.domain.OrderInfo;
 import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.OrderAddReq;
+import com.youkang.system.domain.req.order.OrderQueryReq;
+import com.youkang.system.domain.req.order.OrderUpdateReq;
 import com.youkang.system.domain.req.order.SampleAddReq;
+import com.youkang.system.domain.req.order.SampleBatchAddReq;
+import com.youkang.system.domain.req.order.SampleItemReq;
 import com.youkang.system.domain.resp.order.OrderResp;
 import com.youkang.system.mapper.OrderInfoMapper;
 import com.youkang.system.mapper.SampleInfoMapper;
@@ -21,9 +25,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * 订单信息Service业务层处理
@@ -87,11 +91,14 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfoMapper.insert(orderInfo);
         //如果样品信息不为空，则添加样品信息
         if (req.getSampleInfoList() != null && !req.getSampleInfoList().isEmpty()){
-            req.getSampleInfoList().forEach(sample -> {
-                sample.setOrderId(req.getOrderId());
-                sample.setCreateUser(username);
-            });
-            sampleInfoMapper.insert(req.getSampleInfoList());
+            List<SampleInfo> sampleInfoList = req.getSampleInfoList().stream().map(item -> {
+                SampleInfo sampleInfo = new SampleInfo();
+                BeanUtils.copyProperties(item, sampleInfo);
+                sampleInfo.setOrderId(req.getOrderId());
+                sampleInfo.setCreateUser(username);
+                return sampleInfo;
+            }).collect(Collectors.toList());
+            sampleInfoMapper.insert(sampleInfoList);
         }
 
     }
@@ -104,8 +111,17 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     }
 
     @Override
-    public void batchAddSample(List<SampleInfo> req) {
-        sampleInfoMapper.insert(req);
+    public void batchAddSample(SampleBatchAddReq req) {
+        if (req.getSampleList() != null && !req.getSampleList().isEmpty()) {
+            String username = SecurityUtils.getUsername();
+            List<SampleInfo> sampleInfoList = req.getSampleList().stream().map(item -> {
+                SampleInfo sampleInfo = new SampleInfo();
+                BeanUtils.copyProperties(item, sampleInfo);
+                sampleInfo.setCreateUser(username);
+                return sampleInfo;
+            }).collect(Collectors.toList());
+            sampleInfoMapper.insert(sampleInfoList);
+        }
     }
 
     /**
@@ -123,24 +139,24 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     /**
      * 分页查询订单信息列表
      *
-     * @param orderInfo 订单信息查询条件
+     * @param req 订单查询请求
      * @return 订单信息分页结果
      */
     @Override
-    public IPage<OrderResp> queryPage(OrderInfo orderInfo) {
-        Page<OrderResp> page = new Page<>(orderInfo.getPageNum(), orderInfo.getPageSize());
-        return orderInfoMapper.queryPage(page, orderInfo);
+    public IPage<OrderResp> queryPage(OrderQueryReq req) {
+        Page<OrderResp> page = new Page<>(req.getPageNum(), req.getPageSize());
+        return orderInfoMapper.queryPage(page, req);
     }
 
     /**
      * 查询订单信息列表（关联客户和课题组）
      *
-     * @param orderInfo 订单信息查询条件
+     * @param req 订单查询请求
      * @return 订单响应列表
      */
     @Override
-    public List<OrderResp> queryList(OrderInfo orderInfo) {
-        return orderInfoMapper.queryList(orderInfo);
+    public List<OrderResp> queryList(OrderQueryReq req) {
+        return orderInfoMapper.queryList(req);
     }
 
     /**
@@ -206,5 +222,18 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             successMsg.insert(0, "恭喜您，数据已全部导入成功！共 " + successNum + " 条，数据如下：");
         }
         return successMsg.toString();
+    }
+
+    /**
+     * 修改订单信息
+     *
+     * @param req 订单更新请求
+     * @return 是否成功
+     */
+    @Override
+    public boolean updateOrder(OrderUpdateReq req) {
+        OrderInfo orderInfo = new OrderInfo();
+        BeanUtils.copyProperties(req, orderInfo);
+        return this.updateById(orderInfo);
     }
 }

@@ -1,9 +1,11 @@
 package com.youkang.web.controller.customer;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.youkang.common.utils.SecurityUtils;
 import com.youkang.system.domain.req.customer.CustomerAddReq;
 import com.youkang.system.domain.req.customer.CustomerEditReq;
 import com.youkang.system.domain.req.customer.CustomerQueryReq;
@@ -114,6 +116,8 @@ public class CustomerInfoController {
     public R<Void> add(@Parameter(description = "客户信息") @Validated @RequestBody CustomerAddReq addReq) {
         CustomerInfo entity = new CustomerInfo();
         BeanUtils.copyProperties(addReq, entity);
+        entity.setCreateBy(SecurityUtils.getUsername());
+        entity.setCreateTime(LocalDateTime.now());
         boolean result = customerInfoService.save(entity);
         return result ? R.ok() : R.fail("新增客户信息失败");
     }
@@ -128,6 +132,8 @@ public class CustomerInfoController {
     public R<Void> edit(@Parameter(description = "客户信息") @Validated @RequestBody CustomerEditReq editReq) {
         CustomerInfo entity = new CustomerInfo();
         BeanUtils.copyProperties(editReq, entity);
+        entity.setUpdateBy(SecurityUtils.getUsername());
+        entity.setUpdateTime(LocalDateTime.now());
         boolean result = customerInfoService.updateById(entity);
         return result ? R.ok() : R.fail("修改客户信息失败");
     }

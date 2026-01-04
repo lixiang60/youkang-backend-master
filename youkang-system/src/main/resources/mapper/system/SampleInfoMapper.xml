@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.youkang.system.mapper.SampleInfoMapper">
+
+    <select id="queryPage" resultType="com.youkang.system.domain.resp.order.SampleResp">
+        SELECT
+            order_id AS orderId,
+            order_history AS orderHistory,
+            sample_id AS sampleId,
+            sample_type AS sampleType,
+            sample_position AS samplePosition,
+            primer,
+            primer_type AS primerType,
+            primer_position AS primerPosition,
+            primer_concentration AS primerConcentration,
+            seq,
+            project,
+            carrier_name AS carrierName,
+            antibiotic_type AS antibioticType,
+            plasmid_length AS plasmidLength,
+            fragment_size AS fragmentSize,
+            test_result AS testResult,
+            origin_concentration AS originConcentration,
+            template_plate_no AS templatePlateNo,
+            template_hole_no AS templateHoleNo,
+            performance,
+            return_state AS returnState,
+            flow_name AS flowName,
+            plate_no AS plateNo,
+            hole_no AS holeNo,
+            belong_company AS belongCompany,
+            produce_company AS produceCompany,
+            hole_number AS holeNumber,
+            layout,
+            create_user AS createUser,
+            create_time AS createTime,
+            remark
+        FROM yk_sample_info
+        <where>
+            <if test="query.orderId != null and query.orderId != ''">
+                AND order_id LIKE CONCAT('%', #{query.orderId}, '%')
+            </if>
+            <if test="query.orderHistory != null and query.orderHistory != ''">
+                AND order_history LIKE CONCAT('%', #{query.orderHistory}, '%')
+            </if>
+            <if test="query.sampleId != null and query.sampleId != ''">
+                AND sample_id LIKE CONCAT('%', #{query.sampleId}, '%')
+            </if>
+            <if test="query.sampleType != null and query.sampleType != ''">
+                AND sample_type = #{query.sampleType}
+            </if>
+            <if test="query.primer != null and query.primer != ''">
+                AND primer LIKE CONCAT('%', #{query.primer}, '%')
+            </if>
+            <if test="query.primerType != null and query.primerType != ''">
+                AND primer_type = #{query.primerType}
+            </if>
+            <if test="query.project != null and query.project != ''">
+                AND project = #{query.project}
+            </if>
+            <if test="query.carrierName != null and query.carrierName != ''">
+                AND carrier_name LIKE CONCAT('%', #{query.carrierName}, '%')
+            </if>
+            <if test="query.antibioticType != null and query.antibioticType != ''">
+                AND antibiotic_type = #{query.antibioticType}
+            </if>
+            <if test="query.testResult != null and query.testResult != ''">
+                AND test_result = #{query.testResult}
+            </if>
+            <if test="query.performance != null and query.performance != ''">
+                AND performance = #{query.performance}
+            </if>
+            <if test="query.returnState != null">
+                AND return_state = #{query.returnState}
+            </if>
+            <if test="query.flowName != null and query.flowName != ''">
+                AND flow_name LIKE CONCAT('%', #{query.flowName}, '%')
+            </if>
+            <if test="query.plateNo != null and query.plateNo != ''">
+                AND plate_no LIKE CONCAT('%', #{query.plateNo}, '%')
+            </if>
+            <if test="query.belongCompany != null and query.belongCompany != ''">
+                AND belong_company LIKE CONCAT('%', #{query.belongCompany}, '%')
+            </if>
+            <if test="query.produceCompany != null and query.produceCompany != ''">
+                AND produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
+            </if>
+            <if test="query.createUser != null and query.createUser != ''">
+                AND create_user LIKE CONCAT('%', #{query.createUser}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="queryList" resultType="com.youkang.system.domain.resp.order.SampleResp">
+        SELECT
+            order_id AS orderId,
+            order_history AS orderHistory,
+            sample_id AS sampleId,
+            sample_type AS sampleType,
+            sample_position AS samplePosition,
+            primer,
+            primer_type AS primerType,
+            primer_position AS primerPosition,
+            primer_concentration AS primerConcentration,
+            seq,
+            project,
+            carrier_name AS carrierName,
+            antibiotic_type AS antibioticType,
+            plasmid_length AS plasmidLength,
+            fragment_size AS fragmentSize,
+            test_result AS testResult,
+            origin_concentration AS originConcentration,
+            template_plate_no AS templatePlateNo,
+            template_hole_no AS templateHoleNo,
+            performance,
+            return_state AS returnState,
+            flow_name AS flowName,
+            plate_no AS plateNo,
+            hole_no AS holeNo,
+            belong_company AS belongCompany,
+            produce_company AS produceCompany,
+            hole_number AS holeNumber,
+            layout,
+            create_user AS createUser,
+            create_time AS createTime,
+            remark
+        FROM yk_sample_info
+        <where>
+            <if test="query.orderId != null and query.orderId != ''">
+                AND order_id LIKE CONCAT('%', #{query.orderId}, '%')
+            </if>
+            <if test="query.orderHistory != null and query.orderHistory != ''">
+                AND order_history LIKE CONCAT('%', #{query.orderHistory}, '%')
+            </if>
+            <if test="query.sampleId != null and query.sampleId != ''">
+                AND sample_id LIKE CONCAT('%', #{query.sampleId}, '%')
+            </if>
+            <if test="query.sampleType != null and query.sampleType != ''">
+                AND sample_type = #{query.sampleType}
+            </if>
+            <if test="query.primer != null and query.primer != ''">
+                AND primer LIKE CONCAT('%', #{query.primer}, '%')
+            </if>
+            <if test="query.primerType != null and query.primerType != ''">
+                AND primer_type = #{query.primerType}
+            </if>
+            <if test="query.project != null and query.project != ''">
+                AND project = #{query.project}
+            </if>
+            <if test="query.carrierName != null and query.carrierName != ''">
+                AND carrier_name LIKE CONCAT('%', #{query.carrierName}, '%')
+            </if>
+            <if test="query.antibioticType != null and query.antibioticType != ''">
+                AND antibiotic_type = #{query.antibioticType}
+            </if>
+            <if test="query.testResult != null and query.testResult != ''">
+                AND test_result = #{query.testResult}
+            </if>
+            <if test="query.performance != null and query.performance != ''">
+                AND performance = #{query.performance}
+            </if>
+            <if test="query.returnState != null">
+                AND return_state = #{query.returnState}
+            </if>
+            <if test="query.flowName != null and query.flowName != ''">
+                AND flow_name LIKE CONCAT('%', #{query.flowName}, '%')
+            </if>
+            <if test="query.plateNo != null and query.plateNo != ''">
+                AND plate_no LIKE CONCAT('%', #{query.plateNo}, '%')
+            </if>
+            <if test="query.belongCompany != null and query.belongCompany != ''">
+                AND belong_company LIKE CONCAT('%', #{query.belongCompany}, '%')
+            </if>
+            <if test="query.produceCompany != null and query.produceCompany != ''">
+                AND produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
+            </if>
+            <if test="query.createUser != null and query.createUser != ''">
+                AND create_user LIKE CONCAT('%', #{query.createUser}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="queryById" resultType="com.youkang.system.domain.resp.order.SampleResp">
+        SELECT
+            order_id AS orderId,
+            order_history AS orderHistory,
+            sample_id AS sampleId,
+            sample_type AS sampleType,
+            sample_position AS samplePosition,
+            primer,
+            primer_type AS primerType,
+            primer_position AS primerPosition,
+            primer_concentration AS primerConcentration,
+            seq,
+            project,
+            carrier_name AS carrierName,
+            antibiotic_type AS antibioticType,
+            plasmid_length AS plasmidLength,
+            fragment_size AS fragmentSize,
+            test_result AS testResult,
+            origin_concentration AS originConcentration,
+            template_plate_no AS templatePlateNo,
+            template_hole_no AS templateHoleNo,
+            performance,
+            return_state AS returnState,
+            flow_name AS flowName,
+            plate_no AS plateNo,
+            hole_no AS holeNo,
+            belong_company AS belongCompany,
+            produce_company AS produceCompany,
+            hole_number AS holeNumber,
+            layout,
+            create_user AS createUser,
+            create_time AS createTime,
+            remark
+        FROM yk_sample_info
+        WHERE sample_id = #{sampleId}
+    </select>
+</mapper>

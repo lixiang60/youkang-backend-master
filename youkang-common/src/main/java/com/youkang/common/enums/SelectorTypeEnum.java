@@ -16,7 +16,9 @@ public enum SelectorTypeEnum {
     POST("post", "岗位选择器"),
     DICT("dict", "字典选择器"),
     PAYMENT("paymentMethod", "结算方式选择器"),
-
+    INVOICE_TYPE("invoiceType", "发票种类选择器"),
+    SAMPLE_TYPE("sampleType", "样本类型选择器"),
+    ANTIBIOTIC_TYPE("antibioticType", "抗生素类型选择器"),
 
     ;
 

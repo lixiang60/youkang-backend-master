@@ -3,9 +3,11 @@ package com.youkang.system.service.order;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.youkang.system.domain.OrderInfo;
-import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.OrderAddReq;
+import com.youkang.system.domain.req.order.OrderQueryReq;
+import com.youkang.system.domain.req.order.OrderUpdateReq;
 import com.youkang.system.domain.req.order.SampleAddReq;
+import com.youkang.system.domain.req.order.SampleBatchAddReq;
 import com.youkang.system.domain.resp.order.OrderResp;
 
 import java.util.List;
@@ -20,18 +22,18 @@ public interface IOrderInfoService extends IService<OrderInfo> {
     /**
      * 分页查询订单信息列表
      *
-     * @param orderInfo 订单信息查询条件
+     * @param req 订单查询请求
      * @return 订单信息分页结果
      */
-    IPage<OrderResp> queryPage(OrderInfo orderInfo);
+    IPage<OrderResp> queryPage(OrderQueryReq req);
 
     /**
      * 查询订单信息列表（关联客户和课题组）
      *
-     * @param orderInfo 订单信息查询条件
+     * @param req 订单查询请求
      * @return 订单响应列表
      */
-    List<OrderResp> queryList(OrderInfo orderInfo);
+    List<OrderResp> queryList(OrderQueryReq req);
 
     /**
      * 根据订单ID查询订单详情（关联客户和课题组）
@@ -69,9 +71,15 @@ public interface IOrderInfoService extends IService<OrderInfo> {
     /**
      * 通过订单批量新增样品
      *
-     * @param req 订单信息
+     * @param req 批量添加样品请求
      */
-    void batchAddSample(List<SampleInfo> req);
+    void batchAddSample(SampleBatchAddReq req);
 
-
+    /**
+     * 修改订单信息
+     *
+     * @param req 订单更新请求
+     * @return 是否成功
+     */
+    boolean updateOrder(OrderUpdateReq req);
 }

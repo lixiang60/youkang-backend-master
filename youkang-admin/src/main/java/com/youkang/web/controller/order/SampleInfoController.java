@@ -5,8 +5,13 @@ import com.youkang.common.annotation.Log;
 import com.youkang.common.core.domain.PageResp;
 import com.youkang.common.core.domain.R;
 import com.youkang.common.enums.BusinessType;
+import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.poi.ExcelUtil;
 import com.youkang.system.domain.SampleInfo;
+import com.youkang.system.domain.req.order.SampleItemReq;
+import com.youkang.system.domain.req.order.SampleQueryReq;
+import com.youkang.system.domain.req.order.SampleUpdateReq;
+import com.youkang.system.domain.resp.order.SampleResp;
 import com.youkang.system.service.order.ISampleInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,8 +44,8 @@ public class SampleInfoController {
     @Operation(summary = "查询样品信息列表", description = "分页查询样品信息列表")
     @PreAuthorize("@ss.hasPermi('order:sample:list')")
     @GetMapping("/list")
-    public R<PageResp> list(@Parameter(description = "样品查询条件") SampleInfo sampleInfo) {
-        IPage<SampleInfo> page = sampleInfoService.queryPage(sampleInfo);
+    public R<PageResp> list(@Parameter(description = "样品查询条件") SampleQueryReq req) {
+        IPage<SampleResp> page = sampleInfoService.queryPage(req);
         return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
     }
 
@@ -51,9 +56,9 @@ public class SampleInfoController {
     @PreAuthorize("@ss.hasPermi('order:sample:export')")
     @Log(title = "样品信息", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, @Parameter(description = "样品查询条件") SampleInfo sampleInfo) {
-        List<SampleInfo> list = sampleInfoService.queryList(sampleInfo);
-        ExcelUtil<SampleInfo> util = new ExcelUtil<>(SampleInfo.class);
+    public void export(HttpServletResponse response, @Parameter(description = "样品查询条件") SampleQueryReq req) {
+        List<SampleResp> list = sampleInfoService.queryList(req);
+        ExcelUtil<SampleResp> util = new ExcelUtil<>(SampleResp.class);
         util.exportExcel(response, list, "样品信息数据");
     }
 
@@ -70,7 +75,7 @@ public class SampleInfoController {
     ) throws Exception {
         ExcelUtil<SampleInfo> util = new ExcelUtil<>(SampleInfo.class);
         List<SampleInfo> sampleList = util.importExcel(file.getInputStream());
-        String operName = "admin"; // 可以通过 SecurityUtils.getUsername() 获取当前用户
+        String operName = SecurityUtils.getUsername();
         String message = sampleInfoService.importSample(sampleList, updateSupport, operName);
         return R.ok(message);
     }
@@ -91,8 +96,8 @@ public class SampleInfoController {
     @Operation(summary = "获取样品详情", description = "根据样品ID获取样品详细信息")
     @PreAuthorize("@ss.hasPermi('order:sample:query')")
     @GetMapping(value = "/{sampleId}")
-    public R<SampleInfo> getInfo(@Parameter(description = "样品ID") @PathVariable("sampleId") String sampleId) {
-        return R.ok(sampleInfoService.getById(sampleId));
+    public R<SampleResp> getInfo(@Parameter(description = "样品ID") @PathVariable("sampleId") String sampleId) {
+        return R.ok(sampleInfoService.queryById(sampleId));
     }
 
     /**
@@ -102,8 +107,8 @@ public class SampleInfoController {
     @PreAuthorize("@ss.hasPermi('order:sample:add')")
     @Log(title = "样品信息", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> add(@Parameter(description = "样品信息") @RequestBody SampleInfo sampleInfo) {
-        boolean result = sampleInfoService.save(sampleInfo);
+    public R<Void> add(@Parameter(description = "样品信息") @RequestBody SampleItemReq req) {
+        boolean result = sampleInfoService.addSample(req);
         return result ? R.ok() : R.fail("新增样品信息失败");
     }
 
@@ -114,8 +119,8 @@ public class SampleInfoController {
     @PreAuthorize("@ss.hasPermi('order:sample:edit')")
     @Log(title = "样品信息", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> edit(@Parameter(description = "样品信息") @RequestBody SampleInfo sampleInfo) {
-        boolean result = sampleInfoService.updateById(sampleInfo);
+    public R<Void> edit(@Parameter(description = "样品更新请求") @RequestBody SampleUpdateReq req) {
+        boolean result = sampleInfoService.updateSample(req);
         return result ? R.ok() : R.fail("修改样品信息失败");
     }
 

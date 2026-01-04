@@ -33,6 +33,4 @@ public class CustomerSelectorResp {
     @Schema(description = "客户单位", example = "北京有康科技有限公司")
     private String customerUnit;
 
-    @Schema(description = "结果字符串")
-    private String resultString;
 }

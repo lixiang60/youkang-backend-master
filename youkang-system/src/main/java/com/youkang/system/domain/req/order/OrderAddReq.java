@@ -1,6 +1,5 @@
 package com.youkang.system.domain.req.order;
 
-import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.resp.customer.CustomerSelectorResp;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -32,7 +31,7 @@ public class OrderAddReq {
     private Integer templateType;
 
     @Schema(description = "样品列表")
-    private List<SampleInfo> sampleInfoList;
+    private List<SampleItemReq> sampleInfoList;
 
     @Schema(description = "关联基因号")
     private String genNo;

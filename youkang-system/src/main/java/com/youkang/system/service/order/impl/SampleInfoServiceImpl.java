@@ -1,16 +1,23 @@
 package com.youkang.system.service.order.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.youkang.common.exception.ServiceException;
+import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.StringUtils;
 import com.youkang.system.domain.SampleInfo;
+import com.youkang.system.domain.req.order.SampleItemReq;
+import com.youkang.system.domain.req.order.SampleQueryReq;
+import com.youkang.system.domain.req.order.SampleUpdateReq;
+import com.youkang.system.domain.resp.order.SampleResp;
 import com.youkang.system.mapper.SampleInfoMapper;
 import com.youkang.system.service.order.ISampleInfoService;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -21,72 +28,73 @@ import java.util.List;
 @Service
 public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleInfo> implements ISampleInfoService {
 
+    @Autowired
+    private SampleInfoMapper sampleInfoMapper;
+
     /**
      * 分页查询样品信息列表
      *
-     * @param sampleInfo 样品信息查询条件
+     * @param req 样品查询请求
      * @return 样品信息分页结果
      */
     @Override
-    public IPage<SampleInfo> queryPage(SampleInfo sampleInfo) {
-        Page<SampleInfo> page = new Page<>(sampleInfo.getPageNum(), sampleInfo.getPageSize());
-        LambdaQueryWrapper<SampleInfo> wrapper = buildQueryWrapper(sampleInfo);
-        return this.page(page, wrapper);
+    public IPage<SampleResp> queryPage(SampleQueryReq req) {
+        Page<SampleResp> page = new Page<>(req.getPageNum(), req.getPageSize());
+        return sampleInfoMapper.queryPage(page, req);
     }
 
     /**
      * 查询样品信息列表
      *
-     * @param sampleInfo 样品信息查询条件
+     * @param req 样品查询请求
      * @return 样品信息列表
      */
     @Override
-    public List<SampleInfo> queryList(SampleInfo sampleInfo) {
-        LambdaQueryWrapper<SampleInfo> wrapper = buildQueryWrapper(sampleInfo);
-        return this.list(wrapper);
+    public List<SampleResp> queryList(SampleQueryReq req) {
+        return sampleInfoMapper.queryList(req);
     }
 
     /**
-     * 构建查询条件
+     * 根据样品ID查询样品详情
      *
-     * @param sampleInfo 样品信息查询条件
-     * @return 查询包装器
+     * @param sampleId 样品ID
+     * @return 样品响应
      */
-    private LambdaQueryWrapper<SampleInfo> buildQueryWrapper(SampleInfo sampleInfo) {
-        LambdaQueryWrapper<SampleInfo> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(StringUtils.isNotEmpty(sampleInfo.getOrderId()),
-                        SampleInfo::getOrderId, sampleInfo.getOrderId())
-                .like(StringUtils.isNotEmpty(sampleInfo.getOrderHistory()),
-                        SampleInfo::getOrderHistory, sampleInfo.getOrderHistory())
-                .like(StringUtils.isNotEmpty(sampleInfo.getSampleId()),
-                        SampleInfo::getSampleId, sampleInfo.getSampleId())
-                .eq(StringUtils.isNotEmpty(sampleInfo.getSampleType()),
-                        SampleInfo::getSampleType, sampleInfo.getSampleType())
-                .like(StringUtils.isNotEmpty(sampleInfo.getSamplePosition()),
-                        SampleInfo::getSamplePosition, sampleInfo.getSamplePosition())
-                .like(StringUtils.isNotEmpty(sampleInfo.getPrimer()),
-                        SampleInfo::getPrimer, sampleInfo.getPrimer())
-                .eq(StringUtils.isNotEmpty(sampleInfo.getPrimerType()),
-                        SampleInfo::getPrimerType, sampleInfo.getPrimerType())
-                .eq(StringUtils.isNotEmpty(sampleInfo.getProject()),
-                        SampleInfo::getProject, sampleInfo.getProject())
-                .like(StringUtils.isNotEmpty(sampleInfo.getCarrierName()),
-                        SampleInfo::getCarrierName, sampleInfo.getCarrierName())
-                .eq(StringUtils.isNotEmpty(sampleInfo.getAntibioticType()),
-                        SampleInfo::getAntibioticType, sampleInfo.getAntibioticType())
-                .eq(StringUtils.isNotEmpty(sampleInfo.getTestResult()),
-                        SampleInfo::getTestResult, sampleInfo.getTestResult())
-                .eq(StringUtils.isNotEmpty(sampleInfo.getPerformance()),
-                        SampleInfo::getPerformance, sampleInfo.getPerformance())
-                .eq(sampleInfo.getReturnState() != null,
-                        SampleInfo::getReturnState, sampleInfo.getReturnState())
-                .like(StringUtils.isNotEmpty(sampleInfo.getFlowName()),
-                        SampleInfo::getFlowName, sampleInfo.getFlowName())
-                .like(StringUtils.isNotEmpty(sampleInfo.getPlateNo()),
-                        SampleInfo::getPlateNo, sampleInfo.getPlateNo())
-                .like(StringUtils.isNotEmpty(sampleInfo.getBelongCompany()),
-                        SampleInfo::getBelongCompany, sampleInfo.getBelongCompany());
-        return wrapper;
+    @Override
+    public SampleResp queryById(String sampleId) {
+        return sampleInfoMapper.queryById(sampleId);
+    }
+
+    /**
+     * 新增样品
+     *
+     * @param req 样品信息请求
+     * @return 是否成功
+     */
+    @Override
+    public boolean addSample(SampleItemReq req) {
+        SampleInfo sampleInfo = new SampleInfo();
+        BeanUtils.copyProperties(req, sampleInfo);
+        String username = SecurityUtils.getUsername();
+        sampleInfo.setCreateUser(username);
+        sampleInfo.setCreateTime(LocalDateTime.now());
+        return this.save(sampleInfo);
+    }
+
+    /**
+     * 修改样品
+     *
+     * @param req 样品更新请求
+     * @return 是否成功
+     */
+    @Override
+    public boolean updateSample(SampleUpdateReq req) {
+        SampleInfo sampleInfo = new SampleInfo();
+        BeanUtils.copyProperties(req, sampleInfo);
+        String username = SecurityUtils.getUsername();
+        sampleInfo.setUpdateUser(username);
+        sampleInfo.setUpdateTime(LocalDateTime.now());
+        return this.updateById(sampleInfo);
     }
 
     /**

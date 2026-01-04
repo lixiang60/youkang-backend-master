@@ -9,15 +9,16 @@ import com.youkang.common.core.domain.PageReq;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDateTime;
+
 /**
  * 样品信息对象 yk_sample_info
  *
  * @author youkang
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @TableName("yk_sample_info")
-public class SampleInfo extends PageReq {
+public class SampleInfo {
 
     /** 订单号 */
     @Excel(name = "订单号")
@@ -167,10 +168,23 @@ public class SampleInfo extends PageReq {
     /** 创建时间 */
     @Excel(name = "创建时间")
     @TableField("create_time")
-    private String createTime;
+    private LocalDateTime createTime;
+
+    /** 更新人 */
+    @Excel(name = "更新人")
+    @TableField("update_user")
+    private String updateUser;
+
+    /** 创建时间 */
+    @Excel(name = "更新时间")
+    @TableField("update_time")
+    private LocalDateTime updateTime;
+
 
     /** 备注 */
     @Excel(name = "备注")
     @TableField("remark")
     private String remark;
+
+
 }

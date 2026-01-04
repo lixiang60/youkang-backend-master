@@ -9,6 +9,7 @@ import com.youkang.common.core.domain.PageReq;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -18,9 +19,8 @@ import java.util.Date;
  * @date 2025-11-20
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @TableName("yk_customer_info")
-public class CustomerInfo extends PageReq {
+public class CustomerInfo {
     /** 客户ID */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
@@ -105,7 +105,7 @@ public class CustomerInfo extends PageReq {
 
     /** 创建时间 */
     @TableField("create_time")
-    private Date createTime;
+    private LocalDateTime createTime;
 
     /** 更新者 */
     @TableField("update_by")
@@ -113,5 +113,5 @@ public class CustomerInfo extends PageReq {
 
     /** 更新时间 */
     @TableField("update_time")
-    private Date updateTime;
+    private LocalDateTime updateTime;
 }

@@ -5,7 +5,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.youkang.system.mapper.CustomerInfoMapper">
 
     <select id="customerSelector" resultType="com.youkang.system.domain.resp.customer.CustomerSelectorResp">
-        select yci.id,yci.customer_name,yci.subject_group_id,ysgi.name,
+        select yci.id as customerId,yci.customer_name,yci.subject_group_id,ysgi.name as subjectGroupName,
                yci.address,yci.email,yci.phone,yci.customer_unit
         from yk_customer_info yci
         left join yk_subject_group_info ysgi on yci.subject_group_id = ysgi.id
