@@ -1,6 +1,7 @@
 package com.youkang.system.domain.req.order;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,10 +13,12 @@ import java.util.List;
 public class SampleAddReq {
 
     @Schema(description = "订单ID")
+    @NotBlank(message = "订单ID不能为空")
     private String orderId;
 
     @Schema(description = "样品编号")
-    private String sampleIds;
+    @NotBlank(message = "样品编号不能为空")
+    private String sampleId;
 
     @Schema(description = "测序引物")
     private String primer;

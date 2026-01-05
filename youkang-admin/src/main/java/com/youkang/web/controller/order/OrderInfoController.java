@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +69,7 @@ public class OrderInfoController {
      */
     @Operation(summary = "通过订单新增样品", description = "通过订单新增样品")
     @PostMapping("/addSample")
-    public R<Void> addSample(@RequestBody SampleAddReq req){
+    public R<Void> addSample(@Valid @RequestBody SampleAddReq req){
         orderInfoService.addSample(req);
         return R.ok();
     }
@@ -78,7 +79,7 @@ public class OrderInfoController {
      */
     @Operation(summary = "通过订单批量新增样品", description = "通过订单批量新增样品")
     @PostMapping("/batchAddSample")
-    public R<Void> batchAddSample(@RequestBody SampleBatchAddReq req){
+    public R<Void> batchAddSample( @RequestBody SampleBatchAddReq req){
         orderInfoService.batchAddSample(req);
         return R.ok();
     }

@@ -1,5 +1,6 @@
 package com.youkang.system.service.order.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -108,6 +109,15 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     public void addSample(SampleAddReq req) {
         SampleInfo sampleInfo = new SampleInfo();
         BeanUtils.copyProperties(req, sampleInfo);
+        LambdaQueryWrapper<SampleInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SampleInfo::getOrderId, req.getOrderId());
+        List<SampleInfo> sampleInfos = sampleInfoMapper.selectList(queryWrapper);
+        List<String> sampleIdList = sampleInfos.stream().map(SampleInfo::getSampleId).toList();
+        if (sampleIdList.contains(req.getSampleId())) {
+            throw new ServiceException("样品编号已存在");
+        }
+        sampleInfo.setCreateUser(SecurityUtils.getUsername());
+        sampleInfo.setCreateTime(LocalDateTime.now());
         sampleInfoMapper.insert(sampleInfo);
     }
 
@@ -119,6 +129,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                 SampleInfo sampleInfo = new SampleInfo();
                 BeanUtils.copyProperties(item, sampleInfo);
                 sampleInfo.setCreateUser(username);
+                sampleInfo.setCreateTime(LocalDateTime.now());
                 return sampleInfo;
             }).collect(Collectors.toList());
             sampleInfoMapper.insert(sampleInfoList);

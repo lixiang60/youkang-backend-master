@@ -17,6 +17,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.util.List;
+
 @Tag(name = "客户课题组关联管理", description = "客户与课题组关联关系的增删改查操作")
 @RestController
 @RequestMapping("/customerSubject")
@@ -51,6 +53,7 @@ public class CustomerSubjectController {
     @PostMapping("/delete")
     @PreAuthorize("@ss.hasPermi('customer:customerSubject:delete')")
     public R<?> delete(@Parameter(description = "删除信息") @Valid @RequestBody DeleteReq req){
+        service.delete(req);
         return R.ok();
     }
 

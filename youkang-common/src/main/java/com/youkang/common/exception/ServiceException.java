@@ -1,12 +1,14 @@
 package com.youkang.common.exception;
 
+import java.io.Serial;
+
 /**
  * 业务异常
  * 
  * @author youkang
  */
-public final class ServiceException extends RuntimeException
-{
+public final class ServiceException extends RuntimeException {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
