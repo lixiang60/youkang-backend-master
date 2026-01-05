@@ -1,5 +1,6 @@
 package com.youkang.system.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class CustomerSubjectGroup {
-    @TableId("id")
+    @TableId(value = "id",type = IdType.AUTO)
     private Integer id;
 
     @TableField("customer_id")
@@ -32,4 +33,10 @@ public class CustomerSubjectGroup {
 
     @TableField("create_user")
     private String createUser;
+
+    @TableField("update_time")
+    private LocalDateTime updateTime;
+
+    @TableField("update_user")
+    private String updateUser;
 }

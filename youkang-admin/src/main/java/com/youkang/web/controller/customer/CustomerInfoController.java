@@ -6,12 +6,15 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.youkang.common.utils.SecurityUtils;
+import com.youkang.system.domain.CustomerSubjectGroup;
+import com.youkang.system.domain.SubjectGroupInfo;
 import com.youkang.system.domain.req.customer.CustomerAddReq;
 import com.youkang.system.domain.req.customer.CustomerEditReq;
 import com.youkang.system.domain.req.customer.CustomerQueryReq;
 import com.youkang.system.domain.resp.customer.CustomerResp;
 import com.youkang.system.domain.resp.customer.CustomerSelectorResp;
 import com.youkang.system.domain.resp.customer.SubjectGroupSelectorResp;
+import com.youkang.system.service.customer.ICustomerSubjectGroupService;
 import com.youkang.system.service.customer.ISubjectGroupInfoService;
 import jakarta.servlet.http.HttpServletResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -50,6 +53,8 @@ public class CustomerInfoController {
     @Autowired
     private ISubjectGroupInfoService subjectGroupInfoService;
 
+    @Autowired
+    private ICustomerSubjectGroupService customerSubjectGroupService;
     /**
      * 查询客户信息列表
      */
@@ -116,9 +121,21 @@ public class CustomerInfoController {
     public R<Void> add(@Parameter(description = "客户信息") @Validated @RequestBody CustomerAddReq addReq) {
         CustomerInfo entity = new CustomerInfo();
         BeanUtils.copyProperties(addReq, entity);
-        entity.setCreateBy(SecurityUtils.getUsername());
+        String username = SecurityUtils.getUsername();
+        entity.setCreateBy(username);
         entity.setCreateTime(LocalDateTime.now());
         boolean result = customerInfoService.save(entity);
+        if (result){
+            if (entity.getSubjectGroupId()!= null){
+                SubjectGroupInfo subjectGroupInfo = subjectGroupInfoService.getById(entity.getSubjectGroupId());
+                CustomerSubjectGroup customerSubjectGroup = new CustomerSubjectGroup();
+                customerSubjectGroup.setCustomerId(entity.getId());
+                customerSubjectGroup.setSubjectGroupId(subjectGroupInfo.getId());
+                customerSubjectGroup.setCreateUser(username);
+                customerSubjectGroup.setCreateTime(LocalDateTime.now());
+                customerSubjectGroupService.add(customerSubjectGroup);
+            }
+        }
         return result ? R.ok() : R.fail("新增客户信息失败");
     }
 

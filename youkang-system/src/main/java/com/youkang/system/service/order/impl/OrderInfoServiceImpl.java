@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -64,6 +65,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         }
         return super.save(orderInfo);
     }
+    @Transactional
     @Override
     public void addOrder(OrderAddReq req){
         String username = SecurityUtils.getUsername();
@@ -74,10 +76,9 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         if (StringUtils.isEmpty(req.getOrderId())) {
             req.setOrderId(generateOrderId());
         }
-        //生成MapStruct
-
         OrderInfo orderInfo = new OrderInfo();
         orderInfo.setOrderId(req.getOrderId());
+        orderInfo.setGeneration(req.getGeneration());
         orderInfo.setCustomerId(req.getCustomerInfo().getCustomerId());
         orderInfo.setGroupId(req.getCustomerInfo().getSubjectGroupId());
         orderInfo.setOrderType("公司录入");

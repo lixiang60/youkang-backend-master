@@ -19,9 +19,8 @@ import java.util.Date;
  * @author youkang
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @TableName("yk_order_info")
-public class OrderInfo extends PageReq {
+public class OrderInfo {
 
     /** 订单id */
     @Excel(name = "订单id")

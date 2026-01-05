@@ -45,8 +45,8 @@ public class OrderInfoController {
      */
     @Operation(summary = "查询订单信息列表", description = "分页查询订单信息列表")
     @PreAuthorize("@ss.hasPermi('order:info:list')")
-    @GetMapping("/list")
-    public R<PageResp> list(@Parameter(description = "订单查询条件") OrderQueryReq req) {
+    @PostMapping("/list")
+    public R<PageResp> list(@Parameter(description = "订单查询条件") @RequestBody OrderQueryReq req) {
         IPage<OrderResp> page = orderInfoService.queryPage(req);
         return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
     }
@@ -57,7 +57,7 @@ public class OrderInfoController {
     @Operation(summary = "新增订单", description = "新增订单信息")
     @PreAuthorize("@ss.hasPermi('order:info:add')")
     @Log(title = "订单信息", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/addOrder")
     public R<Void> add(@Parameter(description = "订单信息") @RequestBody OrderAddReq req) {
         orderInfoService.addOrder(req);
         return R.ok();

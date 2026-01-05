@@ -38,4 +38,7 @@ public class OrderAddReq {
 
     @Schema(description = "备注")
     private String remark;
+
+    @Schema(description = "测序代数")
+    private Integer generation;
 }

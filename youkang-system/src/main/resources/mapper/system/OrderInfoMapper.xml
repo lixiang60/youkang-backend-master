@@ -5,7 +5,6 @@
     <select id="queryPage" resultType="com.youkang.system.domain.resp.order.OrderResp">
         SELECT
             o.order_id AS orderId,
-            o.order_tid AS orderTid,
             o.customer_id AS customerId,
             c.customer_name AS customerName,
             c.address AS customerAddress,
@@ -26,9 +25,6 @@
         <where>
             <if test="query.orderId != null and query.orderId != ''">
                 AND o.order_id LIKE CONCAT('%', #{query.orderId}, '%')
-            </if>
-            <if test="query.orderTid != null">
-                AND o.order_tid = #{query.orderTid}
             </if>
             <if test="query.customerId != null">
                 AND o.customer_id = #{query.customerId}
@@ -61,7 +57,6 @@
     <select id="queryList" resultType="com.youkang.system.domain.resp.order.OrderResp">
         SELECT
             o.order_id AS orderId,
-            o.order_tid AS orderTid,
             o.customer_id AS customerId,
             c.customer_name AS customerName,
             c.address AS customerAddress,
@@ -82,9 +77,6 @@
         <where>
             <if test="query.orderId != null and query.orderId != ''">
                 AND o.order_id LIKE CONCAT('%', #{query.orderId}, '%')
-            </if>
-            <if test="query.orderTid != null">
-                AND o.order_tid = #{query.orderTid}
             </if>
             <if test="query.customerId != null">
                 AND o.customer_id = #{query.customerId}
@@ -117,7 +109,6 @@
     <select id="queryById" resultType="com.youkang.system.domain.resp.order.OrderResp">
         SELECT
             o.order_id AS orderId,
-            o.order_tid AS orderTid,
             o.customer_id AS customerId,
             c.customer_name AS customerName,
             c.address AS customerAddress,

@@ -43,8 +43,8 @@ public class SampleInfoController {
      */
     @Operation(summary = "查询样品信息列表", description = "分页查询样品信息列表")
     @PreAuthorize("@ss.hasPermi('order:sample:list')")
-    @GetMapping("/list")
-    public R<PageResp> list(@Parameter(description = "样品查询条件") SampleQueryReq req) {
+    @PostMapping("/list")
+    public R<PageResp> list(@Parameter(description = "样品查询条件") @RequestBody SampleQueryReq req) {
         IPage<SampleResp> page = sampleInfoService.queryPage(req);
         return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
     }

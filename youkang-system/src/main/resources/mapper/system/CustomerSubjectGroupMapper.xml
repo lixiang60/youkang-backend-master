@@ -45,9 +45,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="req.customerPhone != null and req.customerPhone != ''">
                 and yci.customer_phone like concat('%',#{req.customerPhone},'%')
             </if>
-            <if test="req.company != null and req.company != ''">
-                and yci.company = #{req.company}
-            </if>
             <if test="req.customerAddress !=null and req.customerAddress !=''">
                 and yci.address like concat('%',#{req.customerAddress},'%')
             </if>
