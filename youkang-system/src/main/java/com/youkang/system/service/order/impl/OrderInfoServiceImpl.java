@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.youkang.common.exception.ServiceException;
 import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.StringUtils;
+import com.youkang.common.utils.mail.MailTemplate;
+import com.youkang.common.utils.mail.MailUtils;
 import com.youkang.system.domain.OrderInfo;
 import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.OrderAddReq;
@@ -14,7 +16,6 @@ import com.youkang.system.domain.req.order.OrderQueryReq;
 import com.youkang.system.domain.req.order.OrderUpdateReq;
 import com.youkang.system.domain.req.order.SampleAddReq;
 import com.youkang.system.domain.req.order.SampleBatchAddReq;
-import com.youkang.system.domain.req.order.SampleItemReq;
 import com.youkang.system.domain.resp.order.OrderResp;
 import com.youkang.system.mapper.OrderInfoMapper;
 import com.youkang.system.mapper.SampleInfoMapper;
@@ -49,6 +50,9 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     @Autowired
     private SampleInfoMapper sampleInfoMapper;
 
+    @Autowired
+    private MailUtils mailUtils;
+
     /**
      * 新增订单（自动生成订单ID）
      *
@@ -71,8 +75,16 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     public void addOrder(OrderAddReq req){
         String username = SecurityUtils.getUsername();
         if(req.getIsEmail()==1){
-            //todo 发送邮件
             log.info("发送邮件---");
+            MailTemplate mailTemplate = MailTemplate.builder()
+                    .title("订单信息")
+                    .recipientName(req.getCustomerInfo().getCustomerName())
+                    .content("订单信息")
+                    .senderName("有康科技")
+                    .contactPhone("13888888888")
+                    .contactEmail(req.getCustomerInfo().getEmail())
+                    .build();
+            mailUtils.sendHtmlByTemplate(req.getCustomerInfo().getEmail(),"订单信息",mailTemplate);
         }
         if (StringUtils.isEmpty(req.getOrderId())) {
             req.setOrderId(generateOrderId());

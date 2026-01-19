@@ -65,6 +65,21 @@ spring:
     restart:
       # 热部署开关
       enabled: false
+  mail:
+    host: stmp.qq.com
+    username: 1624058280@qq.com
+    password: kgmpqnugvxrrjeif
+    default-encoding: UTF-8
+    properties:
+        mail:
+          smtp:
+            auth: true
+            starttls: true
+            enable: true
+            required: true
+          socketFactory:
+              class: javax.net.ssl.SSLSocketFactory
+          timeout: 25000
   data:
     # redis 配置
     redis:
