@@ -68,6 +68,8 @@ mvn clean
 ```bash
 # 覆盖 Redis 密码并启动应用
 REDIS_PASSWORD=123 mvn spring-boot:run -pl youkang-admin
+# 覆盖redis_host 并启动应用
+export REDIS_HOST=124.222.41.12; mvn clean install -DskipTests; mvn spring-boot:run -pl youkang-admin
 
 # 或者运行编译后的 JAR
 REDIS_PASSWORD=123 java -jar youkang-admin/target/youkang-admin.jar

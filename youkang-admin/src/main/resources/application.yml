@@ -34,7 +34,7 @@ server:
 # 日志配置
 logging:
   level:
-    com.youkang: debug
+    com.youkang: info
     org.springframework: warn
 
 # 用户配置
@@ -125,7 +125,7 @@ mybatis:
 # PageHelper分页插件
 pagehelper:
   helperDialect: mysql
-  supportMethodsArguments: true
+  supportMethodsArguments: false
   params: count=countSql
 
 # Springdoc配置
