@@ -73,6 +73,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     @Transactional
     @Override
     public void addOrder(OrderAddReq req){
+
         String username = SecurityUtils.getUsername();
         if(req.getIsEmail()==1){
             log.info("发送邮件---");

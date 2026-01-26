@@ -218,4 +218,86 @@
         FROM yk_sample_info
         WHERE sample_id = #{sampleId}
     </select>
+
+    <select id="queryTemplatePage" resultType="com.youkang.system.domain.resp.order.SampleTemplateResp">
+        SELECT
+            s.order_id AS orderId,
+            COUNT(*) AS templateNumber,
+            MAX(c.customer_name) AS customerName,
+            MAX(c.address) AS customerAddress,
+            s.sample_id AS sampleId,
+            MAX(s.sample_type) AS sampleType,
+            MAX(s.primer) AS primer,
+            MAX(s.primer_concentration) AS primerConcentration,
+            MAX(s.carrier_name) AS carrierName,
+            MAX(s.antibiotic_type) AS antibioticType,
+            MAX(s.fragment_size) AS fragmentSize,
+            MAX(s.test_result) AS testResult,
+            MAX(s.origin_concentration) AS originConcentration,
+            MAX(s.template_plate_no) AS templatePlateNo,
+            MAX(s.template_hole_no) AS templateHoleNo,
+            MAX(s.performance) AS performance,
+            MAX(s.return_state) AS returnState,
+            MAX(s.flow_name) AS flowName,
+            MAX(s.create_user) AS createUser,
+            MAX(s.remark) AS remark
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        <where>
+            <if test="query.orderId != null and query.orderId != ''">
+                AND s.order_id LIKE CONCAT('%', #{query.orderId}, '%')
+            </if>
+            <if test="query.sampleId != null and query.sampleId != ''">
+                AND s.sample_id LIKE CONCAT('%', #{query.sampleId}, '%')
+            </if>
+            <if test="query.customerName != null and query.customerName != ''">
+                AND c.customer_name LIKE CONCAT('%', #{query.customerName}, '%')
+            </if>
+            <if test="query.returnState != null">
+                AND s.return_state = #{query.returnState}
+            </if>
+        </where>
+        GROUP BY s.order_id, s.sample_id
+        ORDER BY MAX(s.create_time) DESC
+    </select>
+
+    <select id="selectUsedHolesByPlateNo" resultType="string">
+        SELECT DISTINCT template_hole_no
+        FROM yk_sample_info
+        WHERE template_plate_no = #{plateNo}
+          AND template_hole_no IS NOT NULL
+          AND template_hole_no != ''
+        ORDER BY template_hole_no
+    </select>
+
+
+    <select id="templateBDT" resultType="com.youkang.system.domain.resp.order.SampleTemplateResp">
+        SELECT
+        s.order_id AS orderId,
+        COUNT(*) AS templateNumber,
+        MAX(c.customer_name) AS customerName,
+        MAX(c.address) AS customerAddress,
+        s.sample_id AS sampleId,
+        MAX(s.sample_type) AS sampleType,
+        MAX(s.primer) AS primer,
+        MAX(s.primer_concentration) AS primerConcentration,
+        MAX(s.carrier_name) AS carrierName,
+        MAX(s.antibiotic_type) AS antibioticType,
+        MAX(s.fragment_size) AS fragmentSize,
+        MAX(s.test_result) AS testResult,
+        MAX(s.origin_concentration) AS originConcentration,
+        MAX(s.template_plate_no) AS templatePlateNo,
+        MAX(s.template_hole_no) AS templateHoleNo,
+        MAX(s.performance) AS performance,
+        MAX(s.return_state) AS returnState,
+        MAX(s.flow_name) AS flowName,
+        MAX(s.create_user) AS createUser,
+        MAX(s.remark) AS remark
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        WHERE template_plate_no = #{req.plateNo}
+        GROUP BY s.order_id, s.sample_id
+    </select>
 </mapper>

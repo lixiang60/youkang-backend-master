@@ -2,11 +2,12 @@ package com.youkang.system.service.order;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.pagehelper.Page;
+import com.youkang.common.core.domain.PageResp;
 import com.youkang.system.domain.SampleInfo;
-import com.youkang.system.domain.req.order.SampleItemReq;
-import com.youkang.system.domain.req.order.SampleQueryReq;
-import com.youkang.system.domain.req.order.SampleUpdateReq;
+import com.youkang.system.domain.req.order.*;
 import com.youkang.system.domain.resp.order.SampleResp;
+import com.youkang.system.domain.resp.order.SampleTemplateResp;
 
 import java.util.List;
 
@@ -66,4 +67,16 @@ public interface ISampleInfoService extends IService<SampleInfo> {
      * @return 导入结果信息
      */
     String importSample(List<SampleInfo> sampleList, Boolean isUpdateSupport, String operName);
+
+
+    IPage<SampleTemplateResp> queryTemplatePage(SampleTemplateQueryReq req);
+
+
+    void updateTemplate(SampleTemplateUpdateReq req);
+
+
+    void updateTemplateHoleNo(HoleNoUpdateReq req);
+
+    List<SampleTemplateResp> templateBDT(TemplateQueryReq req);
+
 }

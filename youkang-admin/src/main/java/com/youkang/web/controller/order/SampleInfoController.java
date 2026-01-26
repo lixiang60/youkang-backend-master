@@ -8,10 +8,9 @@ import com.youkang.common.enums.BusinessType;
 import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.poi.ExcelUtil;
 import com.youkang.system.domain.SampleInfo;
-import com.youkang.system.domain.req.order.SampleItemReq;
-import com.youkang.system.domain.req.order.SampleQueryReq;
-import com.youkang.system.domain.req.order.SampleUpdateReq;
+import com.youkang.system.domain.req.order.*;
 import com.youkang.system.domain.resp.order.SampleResp;
+import com.youkang.system.domain.resp.order.SampleTemplateResp;
 import com.youkang.system.service.order.ISampleInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -96,7 +95,7 @@ public class SampleInfoController {
     @Operation(summary = "获取样品详情", description = "根据样品ID获取样品详细信息")
     @PreAuthorize("@ss.hasPermi('order:sample:query')")
     @GetMapping(value = "/{sampleId}")
-    public R<SampleResp> getInfo(@Parameter(description = "样品ID") @PathVariable("sampleId") String sampleId) {
+    public R<SampleResp> getInfo(@PathVariable String sampleId) {
         return R.ok(sampleInfoService.queryById(sampleId));
     }
 
@@ -135,4 +134,43 @@ public class SampleInfoController {
         boolean result = sampleInfoService.removeByIds(Arrays.asList(sampleIds));
         return result ? R.ok() : R.fail("删除样品信息失败");
     }
+
+    //============================================模板相关=================================================
+    @Operation(summary = "获取模板列表", description = "分页获取模板列表")
+    @PreAuthorize("@ss.hasPermi('order:sample:template:list')")
+    @PostMapping("/template/list")
+    public R<PageResp> templateList(@Parameter(description = "模板查询条件") @RequestBody SampleTemplateQueryReq req) {
+        IPage<SampleTemplateResp> page = sampleInfoService.queryTemplatePage(req);
+        return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
+    }
+    @Operation(summary = "添加模板板号", description = "添加模板板号")
+    @PreAuthorize("@ss.hasPermi('order:sample:template:update')")
+    @Log(title = "添加模板板号信息", businessType = BusinessType.UPDATE)
+    @PostMapping("/template/updateTemplateNo")
+    public R<Void> updateTemplateNo(@Parameter(description = "板号添加") @RequestBody SampleTemplateUpdateReq req) {
+        sampleInfoService.updateTemplate(req);
+        return R.ok();
+    }
+
+    @Operation(summary = "添加模板孔号", description = "添加模板孔号")
+    @PreAuthorize("@ss.hasPermi('order:sample:template:update')")
+    @Log(title = "添加模板孔号", businessType = BusinessType.UPDATE)
+    @PostMapping("/template/updateTemplateHoleNo")
+    public R<Void> updateTemplateHoleNo(@Parameter(description = "添加模板孔号") @RequestBody HoleNoUpdateReq req) {
+        sampleInfoService.updateTemplateHoleNo(req);
+        return R.ok();
+    }
+
+    @Operation(summary = "模板bdt", description = "模板bdt")
+    @PreAuthorize("@ss.hasPermi('order:sample:template:update')")
+    @Log(title = "模板bdt", businessType = BusinessType.UPDATE)
+    @PostMapping("/template/templateBDT")
+    public R<List<SampleTemplateResp>> templateBDT(@Parameter(description = "模板bdt") @RequestBody TemplateQueryReq req) {
+        sampleInfoService.templateBDT(req);
+        return R.ok();
+    }
+
+
+
+
 }

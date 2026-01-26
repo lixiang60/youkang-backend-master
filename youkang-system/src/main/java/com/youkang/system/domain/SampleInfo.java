@@ -32,7 +32,6 @@ public class SampleInfo {
 
     /** 样品编号 */
     @Excel(name = "样品编号")
-    @TableId(value = "sample_id", type = IdType.INPUT)
     private String sampleId;
 
     /** 样品类型 */
