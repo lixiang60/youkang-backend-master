@@ -20,8 +20,7 @@ import org.springframework.stereotype.Component;
  **/
 @SuppressWarnings(value = { "unchecked", "rawtypes" })
 @Component
-public class RedisCache
-{
+public class RedisCache {
     @Autowired
     public RedisTemplate redisTemplate;
 
@@ -264,5 +263,28 @@ public class RedisCache
     public Collection<String> keys(final String pattern)
     {
         return redisTemplate.keys(pattern);
+    }
+
+    /**
+     * 原子递增
+     *
+     * @param key Redis键
+     * @return 递增后的值
+     */
+    public Long increment(final String key)
+    {
+        return redisTemplate.opsForValue().increment(key);
+    }
+
+    /**
+     * 原子递增（指定增量）
+     *
+     * @param key Redis键
+     * @param delta 增量
+     * @return 递增后的值
+     */
+    public Long increment(final String key, final long delta)
+    {
+        return redisTemplate.opsForValue().increment(key, delta);
     }
 }

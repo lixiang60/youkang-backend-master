@@ -1,13 +1,10 @@
 package com.youkang.system.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
+
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.youkang.common.annotation.Excel;
-import com.youkang.common.core.domain.PageReq;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 
@@ -148,6 +145,11 @@ public class SampleInfo {
     @Excel(name = "生产公司")
     @TableField("produce_company")
     private String produceCompany;
+
+    /** 生产编号 */
+    @Excel(name = "生产编号")
+    @TableField("produce_id")
+    private String produceId;
 
     /** 孔号数量 */
     @Excel(name = "孔号数量")

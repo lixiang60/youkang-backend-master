@@ -63,6 +63,9 @@ public class SampleQueryReq extends PageReq {
     @Schema(description = "生产公司")
     private String produceCompany;
 
+    @Schema(description = "生产编号")
+    private String produceId;
+
     @Schema(description = "创建人")
     private String createUser;
 }

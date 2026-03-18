@@ -119,6 +119,10 @@ public class SampleResp {
     @Schema(description = "生产公司")
     private String produceCompany;
 
+    @Excel(name = "生产编号")
+    @Schema(description = "生产编号")
+    private String produceId;
+
     @Excel(name = "孔号数量")
     @Schema(description = "孔号数量")
     private Integer holeNumber;

@@ -30,6 +30,7 @@
             hole_no AS holeNo,
             belong_company AS belongCompany,
             produce_company AS produceCompany,
+            produce_id AS produceId,
             hole_number AS holeNumber,
             layout,
             create_user AS createUser,
@@ -84,6 +85,9 @@
             </if>
             <if test="query.produceCompany != null and query.produceCompany != ''">
                 AND produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
+            </if>
+            <if test="query.produceId != null and query.produceId != ''">
+                AND produce_id LIKE CONCAT('%', #{query.produceId}, '%')
             </if>
             <if test="query.createUser != null and query.createUser != ''">
                 AND create_user LIKE CONCAT('%', #{query.createUser}, '%')
@@ -120,6 +124,7 @@
             hole_no AS holeNo,
             belong_company AS belongCompany,
             produce_company AS produceCompany,
+            produce_id AS produceId,
             hole_number AS holeNumber,
             layout,
             create_user AS createUser,
@@ -175,6 +180,9 @@
             <if test="query.produceCompany != null and query.produceCompany != ''">
                 AND produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
             </if>
+            <if test="query.produceId != null and query.produceId != ''">
+                AND produce_id LIKE CONCAT('%', #{query.produceId}, '%')
+            </if>
             <if test="query.createUser != null and query.createUser != ''">
                 AND create_user LIKE CONCAT('%', #{query.createUser}, '%')
             </if>
@@ -210,6 +218,7 @@
             hole_no AS holeNo,
             belong_company AS belongCompany,
             produce_company AS produceCompany,
+            produce_id AS produceId,
             hole_number AS holeNumber,
             layout,
             create_user AS createUser,
@@ -221,43 +230,42 @@
 
     <select id="queryTemplatePage" resultType="com.youkang.system.domain.resp.order.SampleTemplateResp">
         SELECT
-            s.order_id AS orderId,
-            COUNT(*) AS templateNumber,
-            MAX(c.customer_name) AS customerName,
-            MAX(c.address) AS customerAddress,
-            s.sample_id AS sampleId,
-            MAX(s.sample_type) AS sampleType,
-            MAX(s.primer) AS primer,
-            MAX(s.primer_concentration) AS primerConcentration,
-            MAX(s.carrier_name) AS carrierName,
-            MAX(s.antibiotic_type) AS antibioticType,
-            MAX(s.fragment_size) AS fragmentSize,
-            MAX(s.test_result) AS testResult,
-            MAX(s.origin_concentration) AS originConcentration,
-            MAX(s.template_plate_no) AS templatePlateNo,
-            MAX(s.template_hole_no) AS templateHoleNo,
-            MAX(s.performance) AS performance,
-            MAX(s.return_state) AS returnState,
-            MAX(s.flow_name) AS flowName,
-            MAX(s.create_user) AS createUser,
-            MAX(s.remark) AS remark
+        s.order_id AS orderId,
+        COUNT(*) AS templateNumber,
+        MAX(c.customer_name) AS customerName,
+        MAX(c.address) AS customerAddress,
+        s.sample_id AS sampleId,
+        MAX(s.sample_type) AS sampleType,
+        MAX(s.primer) AS primer,
+        MAX(s.primer_concentration) AS primerConcentration,
+        MAX(s.carrier_name) AS carrierName,
+        MAX(s.antibiotic_type) AS antibioticType,
+        MAX(s.fragment_size) AS fragmentSize,
+        MAX(s.test_result) AS testResult,
+        MAX(s.origin_concentration) AS originConcentration,
+        MAX(s.template_plate_no) AS templatePlateNo,
+        MAX(s.template_hole_no) AS templateHoleNo,
+        MAX(s.performance) AS performance,
+        MAX(s.return_state) AS returnState,
+        MAX(s.flow_name) AS flowName,
+        MAX(s.create_user) AS createUser,
+        MAX(s.remark) AS remark
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
         LEFT JOIN yk_customer_info c ON o.customer_id = c.id
-        <where>
-            <if test="query.orderId != null and query.orderId != ''">
-                AND s.order_id LIKE CONCAT('%', #{query.orderId}, '%')
-            </if>
-            <if test="query.sampleId != null and query.sampleId != ''">
-                AND s.sample_id LIKE CONCAT('%', #{query.sampleId}, '%')
-            </if>
-            <if test="query.customerName != null and query.customerName != ''">
-                AND c.customer_name LIKE CONCAT('%', #{query.customerName}, '%')
-            </if>
-            <if test="query.returnState != null">
-                AND s.return_state = #{query.returnState}
-            </if>
-        </where>
+        where flow_name = '0'
+        <if test="query.orderId != null and query.orderId != ''">
+            AND s.order_id = #{query.orderId}
+        </if>
+        <if test="query.sampleId != null and query.sampleId != ''">
+            AND s.sample_id = #{query.sampleId}
+        </if>
+        <if test="query.customerName != null and query.customerName != ''">
+            AND c.customer_name LIKE CONCAT('%', #{query.customerName}, '%')
+        </if>
+        <if test="query.returnState != null">
+            AND s.return_state = #{query.returnState}
+        </if>
         GROUP BY s.order_id, s.sample_id
         ORDER BY MAX(s.create_time) DESC
     </select>
@@ -300,4 +308,53 @@
         WHERE template_plate_no = #{req.plateNo}
         GROUP BY s.order_id, s.sample_id
     </select>
+
+    <select id="queryTemplateProducePage" resultType="com.youkang.system.domain.resp.order.TemplateProduceResp">
+        SELECT
+        s.order_id AS orderId,
+        c.customer_name AS customerName,
+        c.address AS customerAddress,
+        s.sample_id AS sampleId,
+        s.sample_type AS sampleType,
+        s.primer AS primer,
+        s.primer_concentration AS primerConcentration,
+        s.carrier_name AS carrierName,
+        s.antibiotic_type AS antibioticType,
+        s.fragment_size AS fragmentSize,
+        s.test_result AS testResult,
+        s.origin_concentration AS originConcentration,
+        s.template_plate_no AS templatePlateNo,
+        s.template_hole_no AS templateHoleNo,
+        s.performance AS performance,
+        s.return_state AS returnState,
+        s.flow_name AS flowName,
+        s.create_user AS createUser,
+        s.origin_hole_no AS originHoleNo,
+        s.remark AS remark
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        where flow_name = '模板排版'
+        <if test="query.orderId != null and query.orderId != ''">
+            AND s.order_id = #{query.orderId}
+        </if>
+        <if test="query.sampleId != null and query.sampleId != ''">
+            AND s.sample_id = #{query.sampleId}
+        </if>
+        <if test="query.customerName != null and query.customerName != ''">
+            AND c.customer_name LIKE CONCAT('%', #{query.customerName}, '%')
+        </if>
+        <if test="query.createUser != null and query.createUser !=''">
+            AND s.create_user like CONCAT('%', #{query.createUser},'%')
+        </if>
+        <if test="query.sampleType != null and query.sampleType !=''">
+            AND s.sample_type like CONCAT('%', #{query.sampleType},'%')
+        </if>
+          <if test="query.templateNo != null and query.templateNo !=''">
+            AND s.template_plate_no like CONCAT('%', #{query.templateNo},'%')
+        </if>
+
+        ORDER BY s.create_time DESC
+    </select>
+
 </mapper>

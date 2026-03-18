@@ -7,6 +7,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
+
+@Schema(description = "模板排版")
 public class SampleTemplateResp {
     @Excel(name = "订单号")
     @Schema(description = "订单号")
@@ -83,6 +85,10 @@ public class SampleTemplateResp {
     @Excel(name = "创建人")
     @Schema(description = "创建人")
     private String createUser;
+
+    @Excel(name = "生产编号")
+    @Schema(description = "生产编号")
+    private String produceId;
 
     @Excel(name = "备注")
     @Schema(description = "备注")

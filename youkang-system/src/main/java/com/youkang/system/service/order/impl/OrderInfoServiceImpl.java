@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.youkang.common.core.redis.RedisCache;
 import com.youkang.common.exception.ServiceException;
 import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.StringUtils;
@@ -26,10 +27,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -41,8 +43,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> implements IOrderInfoService {
 
-    private static final DateTimeFormatter ORDER_ID_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-    private static final Random RANDOM = new Random();
+    private static final DateTimeFormatter ORDER_ID_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    private static final DateTimeFormatter PRODUCE_ID_FORMATTER = DateTimeFormatter.ofPattern("yyMMdd");
+    private static final String PRODUCE_ID_KEY_PREFIX = "sample:produce:";
 
     @Autowired
     private OrderInfoMapper orderInfoMapper;
@@ -53,6 +56,9 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     @Autowired
     private MailUtils mailUtils;
 
+    @Autowired
+    private RedisCache redisCache;
+
     /**
      * 新增订单（自动生成订单ID）
      *
@@ -61,7 +67,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
      */
     @Override
     public boolean save(OrderInfo orderInfo) {
-        // 自动生成订单ID：时间戳(yyyyMMddHHmm) + 4位随机数
+        // 自动生成订单ID：时间戳(yyyyMMddHHmmss) + 毫秒后3位
         if (StringUtils.isEmpty(orderInfo.getOrderId())) {
             orderInfo.setOrderId(generateOrderId());
         }
@@ -111,6 +117,10 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                 BeanUtils.copyProperties(item, sampleInfo);
                 sampleInfo.setOrderId(req.getOrderId());
                 sampleInfo.setCreateUser(username);
+                // 自动生成生产编号
+                if (StringUtils.isEmpty(sampleInfo.getProduceId())) {
+                    sampleInfo.setProduceId(generateProduceId());
+                }
                 return sampleInfo;
             }).collect(Collectors.toList());
             sampleInfoMapper.insert(sampleInfoList);
@@ -131,6 +141,10 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         }
         sampleInfo.setCreateUser(SecurityUtils.getUsername());
         sampleInfo.setCreateTime(LocalDateTime.now());
+        // 自动生成生产编号
+        if (StringUtils.isEmpty(sampleInfo.getProduceId())) {
+            sampleInfo.setProduceId(generateProduceId());
+        }
         sampleInfoMapper.insert(sampleInfo);
     }
 
@@ -143,6 +157,10 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                 BeanUtils.copyProperties(item, sampleInfo);
                 sampleInfo.setCreateUser(username);
                 sampleInfo.setCreateTime(LocalDateTime.now());
+                // 自动生成生产编号
+                if (StringUtils.isEmpty(sampleInfo.getProduceId())) {
+                    sampleInfo.setProduceId(generateProduceId());
+                }
                 return sampleInfo;
             }).collect(Collectors.toList());
             sampleInfoMapper.insert(sampleInfoList);
@@ -151,14 +169,38 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
     /**
      * 生成订单ID
-     * 格式：yyyyMMddHHmm + 4位随机数
+     * 格式：yyyyMMddHHmmss + 毫秒后3位（精确到毫秒，保证唯一性）
      *
      * @return 订单ID
      */
     private String generateOrderId() {
-        String timeStr = LocalDateTime.now().format(ORDER_ID_FORMATTER);
-        String randomStr = String.format("%04d", RANDOM.nextInt(10000));
-        return timeStr + randomStr;
+        LocalDateTime now = LocalDateTime.now();
+        String dateStr = now.format(ORDER_ID_FORMATTER);
+        int millis = (int) (System.currentTimeMillis() % 1000);
+        return dateStr + String.format("%03d", millis);
+    }
+
+    /**
+     * 生成生产编号
+     * 格式：MMdd + 4位序号（当日递增）
+     * 使用 Redis 原子递增保证并发安全
+     *
+     * @return 生产编号，如 03170001
+     */
+    private String generateProduceId() {
+        // 获取今日日期字符串MMdd
+        String dateStr = LocalDate.now().format(PRODUCE_ID_FORMATTER);
+        String key = PRODUCE_ID_KEY_PREFIX + dateStr;
+
+        // Redis原子递增
+        Long seq = redisCache.increment(key);
+        if (seq == 1) {
+            // 第一次生成时设置2天过期，自动清理旧数据
+            redisCache.expire(key, 2, TimeUnit.DAYS);
+        }
+
+        // 拼接生成8位生产编号：MMdd + 4位序号
+        return dateStr + String.format("%04d", seq);
     }
 
     /**

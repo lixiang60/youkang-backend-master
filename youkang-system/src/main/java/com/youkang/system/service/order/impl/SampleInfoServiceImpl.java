@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.youkang.common.core.redis.RedisCache;
 import com.youkang.common.exception.ServiceException;
 import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.StringUtils;
@@ -11,17 +12,21 @@ import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.*;
 import com.youkang.system.domain.resp.order.SampleResp;
 import com.youkang.system.domain.resp.order.SampleTemplateResp;
+import com.youkang.system.domain.resp.order.TemplateProduceResp;
 import com.youkang.system.mapper.SampleInfoMapper;
 import com.youkang.system.service.order.ISampleInfoService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 样品信息Service业务层处理
@@ -31,8 +36,14 @@ import java.util.Set;
 @Service
 public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleInfo> implements ISampleInfoService {
 
+    private static final DateTimeFormatter PRODUCE_ID_FORMATTER = DateTimeFormatter.ofPattern("yyMMdd");
+    private static final String PRODUCE_ID_KEY_PREFIX = "sample:produce:";
+
     @Autowired
     private SampleInfoMapper sampleInfoMapper;
+
+    @Autowired
+    private RedisCache redisCache;
 
     /**
      * 分页查询样品信息列表
@@ -81,7 +92,34 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         String username = SecurityUtils.getUsername();
         sampleInfo.setCreateUser(username);
         sampleInfo.setCreateTime(LocalDateTime.now());
+        // 自动生成生产编号
+        if (StringUtils.isEmpty(sampleInfo.getProduceId())) {
+            sampleInfo.setProduceId(generateProduceId());
+        }
         return this.save(sampleInfo);
+    }
+
+    /**
+     * 生成生产编号
+     * 格式：MMdd + 4位序号（当日递增）
+     * 使用 Redis 原子递增保证并发安全
+     *
+     * @return 生产编号，如 03170001
+     */
+    public String generateProduceId() {
+        // 获取今日日期字符串MMdd
+        String dateStr = LocalDate.now().format(PRODUCE_ID_FORMATTER);
+        String key = PRODUCE_ID_KEY_PREFIX + dateStr;
+
+        // Redis原子递增
+        Long seq = redisCache.increment(key);
+        if (seq == 1) {
+            // 第一次生成时设置2天过期，自动清理旧数据
+            redisCache.expire(key, 2, TimeUnit.DAYS);
+        }
+
+        // 拼接生成8位生产编号：MMdd + 4位序号
+        return dateStr + String.format("%04d", seq);
     }
 
     /**
@@ -187,6 +225,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                     .set(SampleInfo::getLayout, req.getTemplateStype())
                     .set(SampleInfo::getRemark, req.getRemark())
                     .set(SampleInfo::getPerformance, "模板排版")
+                    .set(SampleInfo::getFlowName, "模板生产")
                     .set(SampleInfo::getUpdateUser, username)
                     .set(SampleInfo::getUpdateTime, now)
                     .eq(SampleInfo::getOrderId, info.getOrderId())
@@ -215,8 +254,29 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     }
 
     @Override
+    public void ignoreTemp(SampleTemplateUpdateReq req) {
+        String username = SecurityUtils.getUsername();
+        req.getTemplateInfo().forEach(info -> {
+            this.lambdaUpdate()
+                    .set(SampleInfo::getRemark, req.getRemark())
+                    .set(SampleInfo::getPerformance, "模板排版")
+                    .set(SampleInfo::getFlowName, "模板排版")
+                    .set(SampleInfo::getUpdateUser, username)
+                    .eq(SampleInfo::getOrderId, info.getOrderId())
+                    .eq(SampleInfo::getSampleId, info.getSampleId())
+                    .update();
+        });
+    }
+
+    @Override
     public List<SampleTemplateResp> templateBDT(TemplateQueryReq req) {
         return sampleInfoMapper.templateBDT(req);
+    }
+
+    @Override
+    public int getHoleNum(String plateNo) {
+        List<String> usedHoles = sampleInfoMapper.selectUsedHolesByPlateNo(plateNo);
+        return 96 - usedHoles.size();
     }
 
     /**
@@ -280,6 +340,18 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
             }
         }
         return availableHoles;
+    }
+
+    //=============================================模板生产============================================
+    public Page<TemplateProduceResp> queryTemplateProudcePage(TemplateProduceQueryReq req) {
+        return sampleInfoMapper.queryTemplateProducePage(Page.of(req.getPageNum(), req.getPageSize()), req);
+    }
+
+    @Override
+    public void updateTempStatus(TemplateProduceUpdateReq req) {
+        this.lambdaUpdate().set(SampleInfo::getReturnState, req.getReturnState())
+                .in(SampleInfo::getOrderId, req.getOrderId())
+                .update();
     }
 
 

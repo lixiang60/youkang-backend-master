@@ -11,6 +11,7 @@ import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.*;
 import com.youkang.system.domain.resp.order.SampleResp;
 import com.youkang.system.domain.resp.order.SampleTemplateResp;
+import com.youkang.system.domain.resp.order.TemplateProduceResp;
 import com.youkang.system.service.order.ISampleInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -135,7 +136,7 @@ public class SampleInfoController {
         return result ? R.ok() : R.fail("删除样品信息失败");
     }
 
-    //============================================模板相关=================================================
+    //============================================模板排版=================================================
     @Operation(summary = "获取模板列表", description = "分页获取模板列表")
     @PreAuthorize("@ss.hasPermi('order:sample:template:list')")
     @PostMapping("/template/list")
@@ -143,7 +144,7 @@ public class SampleInfoController {
         IPage<SampleTemplateResp> page = sampleInfoService.queryTemplatePage(req);
         return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
     }
-    @Operation(summary = "添加模板板号", description = "添加模板板号")
+    @Operation(summary = "添加模板板号和孔号", description = "添加模板板号")
     @PreAuthorize("@ss.hasPermi('order:sample:template:update')")
     @Log(title = "添加模板板号信息", businessType = BusinessType.UPDATE)
     @PostMapping("/template/updateTemplateNo")
@@ -161,16 +162,45 @@ public class SampleInfoController {
         return R.ok();
     }
 
+    @Operation(summary = "排版忽略", description = "排版忽略")
+    @PreAuthorize("@ss.hasPermi('order:sample:template:ignoreTemp')")
+    @Log(title = "排版忽略", businessType = BusinessType.UPDATE)
+    @GetMapping("/template/ignoreTemp")
+    public R<Void> ignoreTemp(@RequestBody SampleTemplateUpdateReq req) {
+        sampleInfoService.ignoreTemp(req);
+        return R.ok();
+    }
+
     @Operation(summary = "模板bdt", description = "模板bdt")
     @PreAuthorize("@ss.hasPermi('order:sample:template:update')")
     @Log(title = "模板bdt", businessType = BusinessType.UPDATE)
     @PostMapping("/template/templateBDT")
     public R<List<SampleTemplateResp>> templateBDT(@Parameter(description = "模板bdt") @RequestBody TemplateQueryReq req) {
-        sampleInfoService.templateBDT(req);
-        return R.ok();
+        return R.ok(sampleInfoService.templateBDT(req));
     }
 
+    @Operation(summary = "获取特定板号剩余孔数量", description = "获取特定板号剩余孔数量")
+    @PreAuthorize("@ss.hasPermi('order:sample:template:getHoleNum')")
+    @GetMapping("/template/getHoleNum")
+    public R<Integer> getHoleNum(@RequestParam String templateNo) {
+        return R.ok(sampleInfoService.getHoleNum(templateNo));
+    }
 
+    //=============================================模板生产============================================
+    @Operation(summary = "获取模板生产列表", description = "分页获取模板列表")
+    @PreAuthorize("@ss.hasPermi('order:sample:template')")
+    @PostMapping("/template/produce/list")
+    public R<PageResp> templateProduceList(@RequestBody TemplateProduceQueryReq req) {
+        IPage<TemplateProduceResp> page = sampleInfoService.queryTemplateProudcePage(req);
+        return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
+    }
 
+    @Operation(summary = "设置模板状态", description = "设置模板状态")
+    @PreAuthorize("@ss.hasPermi('order:sample:template')")
+    @PostMapping("/template/produce/tempStatus")
+    public R<?> updateTempStatus(@RequestBody TemplateProduceUpdateReq req) {
+        sampleInfoService.updateTempStatus(req);
+        return R.ok();
+    }
 
 }

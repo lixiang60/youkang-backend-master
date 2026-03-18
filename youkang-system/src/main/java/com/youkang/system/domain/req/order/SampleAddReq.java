@@ -40,4 +40,7 @@ public class SampleAddReq {
 
     @Schema(description = "备注")
     private String remark;
+
+    @Schema(description = "生产编号")
+    private String produceId;
 }

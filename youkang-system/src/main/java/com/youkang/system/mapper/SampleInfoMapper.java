@@ -3,12 +3,10 @@ package com.youkang.system.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.youkang.system.domain.SampleInfo;
-import com.youkang.system.domain.req.order.SampleQueryReq;
-import com.youkang.system.domain.req.order.SampleTemplateQueryReq;
-import com.youkang.system.domain.req.order.SampleTemplateUpdateReq;
-import com.youkang.system.domain.req.order.TemplateQueryReq;
+import com.youkang.system.domain.req.order.*;
 import com.youkang.system.domain.resp.order.SampleResp;
 import com.youkang.system.domain.resp.order.SampleTemplateResp;
+import com.youkang.system.domain.resp.order.TemplateProduceResp;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -63,5 +61,8 @@ public interface SampleInfoMapper extends BaseMapper<SampleInfo> {
     List<String> selectUsedHolesByPlateNo(@Param("plateNo") String plateNo);
 
     List<SampleTemplateResp> templateBDT(@Param("req") TemplateQueryReq req);
+
+    //======================================模板生产模块======================================
+    Page<TemplateProduceResp> queryTemplateProducePage(Page<TemplateProduceResp> page, @Param("query") TemplateProduceQueryReq req);
 
 }
