@@ -1,5 +1,6 @@
 package com.youkang.system.service.order.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -10,9 +11,7 @@ import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.StringUtils;
 import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.*;
-import com.youkang.system.domain.resp.order.SampleResp;
-import com.youkang.system.domain.resp.order.SampleTemplateResp;
-import com.youkang.system.domain.resp.order.TemplateProduceResp;
+import com.youkang.system.domain.resp.order.*;
 import com.youkang.system.mapper.SampleInfoMapper;
 import com.youkang.system.service.order.ISampleInfoService;
 import org.springframework.beans.BeanUtils;
@@ -93,7 +92,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         sampleInfo.setCreateUser(username);
         sampleInfo.setCreateTime(LocalDateTime.now());
         // 自动生成生产编号
-        if (StringUtils.isEmpty(sampleInfo.getProduceId())) {
+        if (sampleInfo.getProduceId() == null) {
             sampleInfo.setProduceId(generateProduceId());
         }
         return this.save(sampleInfo);
@@ -101,13 +100,13 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
 
     /**
      * 生成生产编号
-     * 格式：MMdd + 4位序号（当日递增）
+     * 格式：yyMMdd + 4位序号（当日递增）
      * 使用 Redis 原子递增保证并发安全
      *
-     * @return 生产编号，如 03170001
+     * @return 生产编号，如 2503030001
      */
-    public String generateProduceId() {
-        // 获取今日日期字符串MMdd
+    public Long generateProduceId() {
+        // 获取今日日期字符串yyMMdd
         String dateStr = LocalDate.now().format(PRODUCE_ID_FORMATTER);
         String key = PRODUCE_ID_KEY_PREFIX + dateStr;
 
@@ -118,8 +117,8 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
             redisCache.expire(key, 2, TimeUnit.DAYS);
         }
 
-        // 拼接生成8位生产编号：MMdd + 4位序号
-        return dateStr + String.format("%04d", seq);
+        // 拼接生成10位生产编号：yyMMdd + 4位序号，转为 Long
+        return Long.parseLong(dateStr + String.format("%04d", seq));
     }
 
     /**
@@ -130,10 +129,12 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
      */
     @Override
     public boolean updateSample(SampleUpdateReq req) {
+        if (req.getProduceId() == null) {
+            throw new ServiceException("生产编号不能为空");
+        }
         SampleInfo sampleInfo = new SampleInfo();
         BeanUtils.copyProperties(req, sampleInfo);
-        String username = SecurityUtils.getUsername();
-        sampleInfo.setUpdateUser(username);
+        sampleInfo.setUpdateUser(SecurityUtils.getUsername());
         sampleInfo.setUpdateTime(LocalDateTime.now());
         return this.updateById(sampleInfo);
     }
@@ -158,25 +159,25 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
 
         for (SampleInfo sample : sampleList) {
             try {
-                // 验证样品id是否已存在
-                SampleInfo existSample = this.getById(sample.getSampleId());
+                // 验证生产编号是否已存在
+                SampleInfo existSample = this.getById(sample.getProduceId());
                 if (StringUtils.isNull(existSample)) {
                     // 新增样品
                     this.save(sample);
                     successNum++;
-                    successMsg.append("<br/>").append(successNum).append("、样品 ").append(sample.getSampleId()).append(" 导入成功");
+                    successMsg.append("<br/>").append(successNum).append("、样品 ").append(sample.getProduceId()).append(" 导入成功");
                 } else if (isUpdateSupport) {
                     // 更新样品
                     this.updateById(sample);
                     successNum++;
-                    successMsg.append("<br/>").append(successNum).append("、样品 ").append(sample.getSampleId()).append(" 更新成功");
+                    successMsg.append("<br/>").append(successNum).append("、样品 ").append(sample.getProduceId()).append(" 更新成功");
                 } else {
                     failureNum++;
-                    failureMsg.append("<br/>").append(failureNum).append("、样品 ").append(sample.getSampleId()).append(" 已存在");
+                    failureMsg.append("<br/>").append(failureNum).append("、样品 ").append(sample.getProduceId()).append(" 已存在");
                 }
             } catch (Exception e) {
                 failureNum++;
-                String msg = "<br/>" + failureNum + "、样品 " + sample.getSampleId() + " 导入失败：";
+                String msg = "<br/>" + failureNum + "、样品 " + sample.getProduceId() + " 导入失败：";
                 failureMsg.append(msg).append(e.getMessage());
             }
         }
@@ -248,6 +249,9 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                 .set(SampleInfo::getTemplateHoleNo, req.getTemplateHoleNo())
                 .set(SampleInfo::getUpdateUser, username)
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                .set(SampleInfo::getPerformance, "模板排版")
+                .set(SampleInfo::getFlowName, "模板生产")
+                .set(SampleInfo::getRemark, req.getRemark())
                 .eq(SampleInfo::getOrderId, req.getOrderId())
                 .eq(SampleInfo::getSampleId, req.getSampleId())
                 .update();
@@ -275,32 +279,10 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
 
     @Override
     public int getHoleNum(String plateNo) {
-        List<String> usedHoles = sampleInfoMapper.selectUsedHolesByPlateNo(plateNo);
+        List<UsedTemplateHoleResp> usedHoles = sampleInfoMapper.selectUsedHolesByPlateNo(plateNo);
         return 96 - usedHoles.size();
     }
 
-    /**
-     * 获取指定板号的下一个可用孔号
-     *
-     * @param plateNo 板号
-     * @return 可用孔号，如 "A1"，无空位返回 null
-     */
-    private String getNextAvailableHole(String plateNo) {
-        List<String> usedHoles = sampleInfoMapper.selectUsedHolesByPlateNo(plateNo);
-        Set<String> usedSet = new HashSet<>(usedHoles);
-
-        // 生成所有孔号 A1-H12 (8行12列 = 96个孔)
-        String[] rows = {"A", "B", "C", "D", "E", "F", "G", "H"};
-        for (String row : rows) {
-            for (int col = 1; col <= 12; col++) {
-                String hole = row + col;
-                if (!usedSet.contains(hole)) {
-                    return hole;  // 找到第一个空位
-                }
-            }
-        }
-        return null;  // 板子已满
-    }
 
     /**
      * 获取指定板号的所有可用孔号列表
@@ -310,7 +292,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
      * @return 可用孔号列表
      */
     private List<String> getAvailableHoles(String plateNo, String sortType) {
-        List<String> usedHoles = sampleInfoMapper.selectUsedHolesByPlateNo(plateNo);
+        List<String> usedHoles = sampleInfoMapper.selectUsedHolesByPlateNo(plateNo).stream().map(UsedTemplateHoleResp::getTemplateHoleNo).toList();
         Set<String> usedSet = new HashSet<>(usedHoles);
 
         List<String> availableHoles = new ArrayList<>();
@@ -319,20 +301,20 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         boolean isHorizontal = "横排".equals(sortType);
 
         if (isHorizontal) {
-            // 横排：A1-A12, B1-B12, ..., H1-H12 (按行优先)
+            // 横排：A01-A12, B01-B12, ..., H01-H12 (按行优先)
             for (String row : rows) {
                 for (int col = 1; col <= 12; col++) {
-                    String hole = row + col;
+                    String hole = row + String.format("%02d", col);
                     if (!usedSet.contains(hole)) {
                         availableHoles.add(hole);
                     }
                 }
             }
         } else {
-            // 竖排：A1-H1, A2-H2, ..., A12-H12 (按列优先)
+            // 竖排：A01-H01, A02-H02, ..., A12-H12 (按列优先)
             for (int col = 1; col <= 12; col++) {
                 for (String row : rows) {
-                    String hole = row + col;
+                    String hole = row + String.format("%02d", col);
                     if (!usedSet.contains(hole)) {
                         availableHoles.add(hole);
                     }
@@ -349,9 +331,81 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
 
     @Override
     public void updateTempStatus(TemplateProduceUpdateReq req) {
+        String returnState = req.getReturnState();
+        String flowName;
+        if (returnState.equals("模板重抽") || returnState.equals("模板重切")){
+            flowName = "模板生产";
+        } else if (returnState.equals("模板失败")) {
+            flowName = "模板邮件";
+        }else {
+            flowName = "模板成功";
+        }
         this.lambdaUpdate().set(SampleInfo::getReturnState, req.getReturnState())
-                .in(SampleInfo::getOrderId, req.getOrderId())
+                .set(SampleInfo::getRemark, req.getRemark())
+                .set(SampleInfo::getFlowName, flowName)
+                .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
+                .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                .in(SampleInfo::getProduceId, req.getProduceIdList())
                 .update();
+    }
+
+    @Override
+    public void updateOriginConcentration(OriginConcentrationUpdateReq req){
+
+        //如果用户传了板号则flowname，流程名称设置为反应生产；否则为模板成功
+        //1.没有传板号
+        if (StringUtils.isEmpty(req.getPlateNo())) {
+            //更新浓度，更新状态为模板成功
+            this.lambdaUpdate().set(SampleInfo::getOriginConcentration, req.getOriginConcentration())
+                    .set(SampleInfo::getFlowName, "模板成功")
+                    .set(SampleInfo::getReturnState, "模板成功")
+                    .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
+                    .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                    .in(SampleInfo::getProduceId, req.getProduceIdList())
+                    .update();
+        }else {
+            //2.有传板号
+            this.lambdaUpdate().set(SampleInfo::getOriginConcentration, req.getOriginConcentration())
+                    .set(SampleInfo::getFlowName, "反应生产")
+                    .set(SampleInfo::getReturnState, "反应生产")
+                    .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
+                    .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                    .in(SampleInfo::getProduceId, req.getProduceIdList())
+                    .update();
+        }
+
+    }
+
+    @Override
+    public void sendBack(TemplateProduceUpdateReq req){
+        this.lambdaUpdate().set(SampleInfo::getReturnState, "模板退回")
+                .set(SampleInfo::getFlowName, "0")
+                .set(SampleInfo::getTemplatePlateNo,null)
+                .set(SampleInfo::getTemplateHoleNo,null)
+                .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
+                .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                .in(SampleInfo::getProduceId, req.getProduceIdList())
+                .update();
+    }
+
+    @Override
+    public List<PCRGelCutResp> pcrGelCut(PCRGelCutReq req) {
+        return sampleInfoMapper.pcrGelCut(req);
+    }
+
+    @Override
+    public List<ResampleResp> queryResampleList(ResampleQueryReq req) {
+        return sampleInfoMapper.queryResampleList(req);
+    }
+
+    @Override
+    public List<UsedTemplateHoleResp> getUserTemplateHole(HoleNoUpdateReq req){
+        return sampleInfoMapper.selectUsedHolesByPlateNo(req.getTemplatePlateNo());
+    }
+
+    @Override
+    public List<TemplateFailedResp> queryTemplateFailedList() {
+        return sampleInfoMapper.queryTemplateFailedList();
     }
 
 

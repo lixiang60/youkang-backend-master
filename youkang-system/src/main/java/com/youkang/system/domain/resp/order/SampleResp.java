@@ -97,7 +97,7 @@ public class SampleResp {
 
     @Excel(name = "返回状态")
     @Schema(description = "返回状态")
-    private Integer returnState;
+    private String returnState;
 
     @Excel(name = "流程名称")
     @Schema(description = "流程名称")
@@ -121,7 +121,7 @@ public class SampleResp {
 
     @Excel(name = "生产编号")
     @Schema(description = "生产编号")
-    private String produceId;
+    private Long produceId;
 
     @Excel(name = "孔号数量")
     @Schema(description = "孔号数量")

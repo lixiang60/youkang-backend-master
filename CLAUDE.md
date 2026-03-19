@@ -33,7 +33,7 @@ mvn compile -pl youkang-admin -am
 
 | 变量名 | 描述 | 默认值 |
 |--------|------|--------|
-| `REDIS_HOST` | Redis 服务器地址 | `124.222.41.12` |
+| `REDIS_HOST` | Redis 服务器地址 | `127.0.0.1` |
 | `REDIS_PORT` | Redis 服务器端口 | `6379` |
 | `REDIS_PASSWORD` | Redis 密码 | (见 application.yml) |
 | `REDIS_DB` | Redis 数据库索引 | `0` |
@@ -57,9 +57,9 @@ SQL 脚本位于 `/sql` 目录：
 
 | 模块 | 职责 |
 |------|------|
-| **youkang-admin** | Web 入口，REST 控制器（按 `system`/`monitor`/`tool`/`common` 领域组织），应用配置 |
+| **youkang-admin** | Web 入口，REST 控制器（按 `system`/`monitor`/`tool`/`common`/`order`/`customer` 领域组织），应用配置 |
 | **youkang-framework** | 安全（JWT、Spring Security）、AOP 切面（日志/数据权限/数据源/限流）、全局异常处理、动态数据源 |
-| **youkang-system** | 业务逻辑层，领域实体（SysUser/SysRole/SysMenu/SysDept 等），MyBatis 映射器 |
+| **youkang-system** | 业务逻辑层，领域实体，MyBatis 映射器，服务实现 |
 | **youkang-common** | 共享注解、工具类、BaseEntity、AjaxResult、TableDataInfo、自定义异常 |
 | **youkang-quartz** | Quartz 定时任务调度和执行日志 |
 | **youkang-generator** | 代码生成器（Velocity 模板），生成 CRUD 代码和 Vue 前端 |
@@ -73,7 +73,7 @@ SQL 脚本位于 `/sql` 目录：
 | 配置项 | 说明 |
 |--------|------|
 | JWT 认证 | 请求头 `Authorization`，有效期 30 分钟 |
-| Redis | 缓存会话/令牌/权限 |
+| Redis | 缓存会话/令牌/权限/业务序号 |
 | MyBatis 映射器 | `classpath*:mapper/**/*Mapper.xml` |
 | Swagger UI | `http://localhost:3564/swagger-ui.html` |
 | Druid 监控 | `/druid/*`（用户名：`youkang`，密码：`123456`）|
@@ -101,6 +101,57 @@ public class XxxController extends BaseController {
     }
 }
 ```
+
+### 服务层模式
+服务层使用 **MyBatis-Plus** 作为 ORM 框架：
+```java
+@Service
+public class XxxServiceImpl extends ServiceImpl<XxxMapper, Xxx> implements IXxxService {
+
+    @Autowired
+    private XxxMapper xxxMapper;
+
+    // 分页查询（使用 MyBatis-Plus Page）
+    public IPage<XxxResp> queryPage(XxxQueryReq req) {
+        Page<XxxResp> page = new Page<>(req.getPageNum(), req.getPageSize());
+        return xxxMapper.queryPage(page, req);
+    }
+
+    // 条件查询（使用 LambdaQueryWrapper）
+    public Xxx getByField(String field, Object value) {
+        return this.lambdaQuery().eq(Xxx::getField, value).one();
+    }
+
+    // 条件更新（使用 LambdaUpdateWrapper）
+    public void updateByCondition(Long id, String newValue) {
+        this.lambdaUpdate()
+            .set(Xxx::getField, newValue)
+            .eq(Xxx::getId, id)
+            .update();
+    }
+}
+```
+
+### 请求/响应对象模式
+业务模块使用 `req`/`resp` 目录分离请求和响应对象：
+```
+youkang-system/src/main/java/com/youkang/system/domain/
+├── SampleInfo.java              # 实体类（对应数据库表）
+├── req/
+│   └── order/
+│       ├── SampleAddReq.java    # 新增请求
+│       ├── SampleUpdateReq.java # 更新请求
+│       └── SampleQueryReq.java  # 查询请求（含 pageNum/pageSize）
+└── resp/
+    └── order/
+        └── SampleResp.java      # 响应对象
+```
+
+### 业务领域模块
+系统包含以下业务领域（位于 `youkang-system/service/` 和 `youkang-admin/controller/`）：
+- **system**: 系统管理（用户、角色、菜单、部门、字典、配置、通知）
+- **customer**: 客户管理（客户信息、主体分组）
+- **order**: 订单管理（订单信息、样品信息、模板排版/生产）
 
 ### 权限表达式（`ss` bean）
 - `@ss.hasPermi('system:user:add')` - 检查权限
@@ -130,6 +181,10 @@ public class XxxController extends BaseController {
 
 ### 文件上传
 路径配置：`youkang.profile`（默认 `D:/youkang/uploadPath`），最大 10MB/文件。
+
+### Redis 使用
+- 缓存用户会话、令牌、权限、字典数据
+- 业务序号生成（使用 `RedisCache.increment()` 原子递增）
 
 ## 无测试套件
 此项目不包括测试套件。通过 API 端点进行手动测试。

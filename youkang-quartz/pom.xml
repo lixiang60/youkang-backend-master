@@ -35,6 +35,12 @@
             <artifactId>youkang-common</artifactId>
         </dependency>
 
+        <!-- 系统模块 -->
+        <dependency>
+            <groupId>com.youkang</groupId>
+            <artifactId>youkang-system</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

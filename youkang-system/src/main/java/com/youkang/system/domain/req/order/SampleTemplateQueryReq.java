@@ -19,6 +19,6 @@ public class SampleTemplateQueryReq extends PageReq {
     private String customerName;
 
     @Schema(description = "返回状态")
-    private Integer returnState;
+    private String returnState;
 
 }

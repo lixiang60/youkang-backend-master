@@ -2,6 +2,7 @@ package com.youkang.system.domain;
 
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.youkang.common.annotation.Excel;
 import lombok.Data;
@@ -119,7 +120,7 @@ public class SampleInfo {
     /** 返回状态 */
     @Excel(name = "返回状态")
     @TableField("return_state")
-    private Integer returnState;
+    private String returnState;
 
     /** 流程名称 */
     @Excel(name = "流程名称")
@@ -148,8 +149,8 @@ public class SampleInfo {
 
     /** 生产编号 */
     @Excel(name = "生产编号")
-    @TableField("produce_id")
-    private String produceId;
+    @TableId(value = "produce_id")
+    private Long produceId;
 
     /** 孔号数量 */
     @Excel(name = "孔号数量")
@@ -187,5 +188,14 @@ public class SampleInfo {
     @TableField("remark")
     private String remark;
 
+    /** 原孔号 */
+    @Excel(name = "原孔号")
+    @TableField("origin_hole_no")
+    private String originHoleNo;
+
+    /** 所属实验室 */
+    @Excel(name = "所属实验室")
+    @TableField("belong_lab")
+    private String belongLab;
 
 }

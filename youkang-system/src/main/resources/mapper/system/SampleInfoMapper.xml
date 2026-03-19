@@ -71,7 +71,7 @@
             <if test="query.performance != null and query.performance != ''">
                 AND performance = #{query.performance}
             </if>
-            <if test="query.returnState != null">
+            <if test="query.returnState != null and query.returnState != ''">
                 AND return_state = #{query.returnState}
             </if>
             <if test="query.flowName != null and query.flowName != ''">
@@ -86,8 +86,8 @@
             <if test="query.produceCompany != null and query.produceCompany != ''">
                 AND produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
             </if>
-            <if test="query.produceId != null and query.produceId != ''">
-                AND produce_id LIKE CONCAT('%', #{query.produceId}, '%')
+            <if test="query.produceId != null">
+                AND produce_id = #{query.produceId}
             </if>
             <if test="query.createUser != null and query.createUser != ''">
                 AND create_user LIKE CONCAT('%', #{query.createUser}, '%')
@@ -165,7 +165,7 @@
             <if test="query.performance != null and query.performance != ''">
                 AND performance = #{query.performance}
             </if>
-            <if test="query.returnState != null">
+            <if test="query.returnState != null and query.returnState != ''">
                 AND return_state = #{query.returnState}
             </if>
             <if test="query.flowName != null and query.flowName != ''">
@@ -180,8 +180,8 @@
             <if test="query.produceCompany != null and query.produceCompany != ''">
                 AND produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
             </if>
-            <if test="query.produceId != null and query.produceId != ''">
-                AND produce_id LIKE CONCAT('%', #{query.produceId}, '%')
+            <if test="query.produceId != null">
+                AND produce_id = #{query.produceId}
             </if>
             <if test="query.createUser != null and query.createUser != ''">
                 AND create_user LIKE CONCAT('%', #{query.createUser}, '%')
@@ -270,8 +270,8 @@
         ORDER BY MAX(s.create_time) DESC
     </select>
 
-    <select id="selectUsedHolesByPlateNo" resultType="string">
-        SELECT DISTINCT template_hole_no
+    <select id="selectUsedHolesByPlateNo" resultType="com.youkang.system.domain.resp.order.UsedTemplateHoleResp">
+        SELECT template_hole_no,produce_id
         FROM yk_sample_info
         WHERE template_plate_no = #{plateNo}
           AND template_hole_no IS NOT NULL
@@ -334,7 +334,7 @@
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
         LEFT JOIN yk_customer_info c ON o.customer_id = c.id
-        where flow_name = '模板排版'
+        where flow_name = '模板生产'
         <if test="query.orderId != null and query.orderId != ''">
             AND s.order_id = #{query.orderId}
         </if>
@@ -355,6 +355,81 @@
         </if>
 
         ORDER BY s.create_time DESC
+    </select>
+
+    <!--======================================PCR切胶查询======================================-->
+    <select id="pcrGelCut" resultType="com.youkang.system.domain.resp.order.PCRGelCutResp">
+        SELECT
+            c.customer_name AS customerName,
+            s.produce_id AS produceId,
+            s.sample_id AS sampleId,
+            s.fragment_size AS fragmentSize
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        <where>
+            <if test="req.startOrderNo != null and req.startOrderNo != ''">
+                AND s.order_id &gt;= #{req.startOrderNo}
+            </if>
+            <if test="req.endOrderNo != null and req.endOrderNo != ''">
+                AND s.order_id &lt;= #{req.endOrderNo}
+            </if>
+            <if test="req.belongCompany != null and req.belongCompany != ''">
+                AND s.belong_company = #{req.belongCompany}
+            </if>
+        </where>
+        ORDER BY s.order_id, s.sample_id
+    </select>
+
+    <!--======================================重抽样品查询======================================-->
+    <select id="queryResampleList" resultType="com.youkang.system.domain.resp.order.ResampleResp">
+        SELECT
+            s.produce_id AS produceId,
+            s.origin_hole_no AS originHoleNo,
+            c.customer_name AS customerName,
+            s.return_state AS returnState,
+            s.sample_type AS sampleType,
+            s.sample_id AS sampleId,
+            s.carrier_name AS carrierName,
+            s.antibiotic_type AS antibioticType,
+            s.sample_position AS samplePosition,
+            s.remark AS remark
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        <where>
+            AND s.return_state IN ('模板重抽', '报告重抽')
+            <if test="req.templatePlateNos != null and req.templatePlateNos != ''">
+                AND s.template_plate_no IN
+                <foreach collection="req.templatePlateNos.split(',')" item="plateNo" open="(" separator="," close=")">
+                    #{plateNo}
+                </foreach>
+            </if>
+            <if test="req.belongLab != null and req.belongLab != ''">
+                AND s.belong_lab = #{req.belongLab}
+            </if>
+        </where>
+        ORDER BY s.template_plate_no, s.template_hole_no
+    </select>
+
+    <!--======================================模板失败样品查询（用于发送邮件）======================================-->
+    <select id="queryTemplateFailedList" resultType="com.youkang.system.domain.resp.order.TemplateFailedResp">
+        SELECT
+            c.id AS customerId,
+            c.customer_name AS customerName,
+            c.email AS customerEmail,
+            s.create_time AS createTime,
+            s.order_id AS orderId,
+            s.sample_id AS sampleId,
+            s.return_state AS returnState,
+            s.remark AS remark
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        WHERE s.flow_name = '模板邮件'
+          AND c.email IS NOT NULL
+          AND c.email != ''
+        ORDER BY c.id, s.create_time DESC
     </select>
 
 </mapper>

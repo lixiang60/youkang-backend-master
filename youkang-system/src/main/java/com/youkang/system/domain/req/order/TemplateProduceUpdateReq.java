@@ -11,7 +11,7 @@ import java.util.List;
 public class TemplateProduceUpdateReq {
 
     @Schema(description = "订单号")
-    private List<String> orderId;
+    private List<Long> produceIdList;
 
     @Schema(description = "返回状态")
     private String returnState;

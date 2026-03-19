@@ -4,9 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.*;
-import com.youkang.system.domain.resp.order.SampleResp;
-import com.youkang.system.domain.resp.order.SampleTemplateResp;
-import com.youkang.system.domain.resp.order.TemplateProduceResp;
+import com.youkang.system.domain.resp.order.*;
 
 import java.util.List;
 
@@ -90,5 +88,27 @@ public interface ISampleInfoService extends IService<SampleInfo> {
 
     void updateTempStatus(TemplateProduceUpdateReq req);
 
+    void updateOriginConcentration(OriginConcentrationUpdateReq req);
+
+    void sendBack(TemplateProduceUpdateReq req);
+
+    List<PCRGelCutResp> pcrGelCut(PCRGelCutReq req);
+
+    /**
+     * 查询重抽样品列表（模板重抽、报告重抽）
+     *
+     * @param req 查询条件
+     * @return 重抽样品列表
+     */
+    List<ResampleResp> queryResampleList(ResampleQueryReq req);
+
+    List<UsedTemplateHoleResp> getUserTemplateHole(HoleNoUpdateReq req);
+
+    /**
+     * 查询模板失败样品列表（用于发送邮件通知）
+     *
+     * @return 模板失败样品列表
+     */
+    List<TemplateFailedResp> queryTemplateFailedList();
 
 }

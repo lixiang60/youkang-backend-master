@@ -70,7 +70,7 @@ public class TemplateProduceResp {
 
     @Excel(name = "返回状态")
     @Schema(description = "返回状态")
-    private Integer returnState;
+    private String returnState;
 
     @Excel(name = "流程名称")
     @Schema(description = "流程名称")
@@ -86,7 +86,7 @@ public class TemplateProduceResp {
 
     @Excel(name = "生产编号")
     @Schema(description = "生产编号")
-    private String produceId;
+    private Long produceId;
 
     @Excel(name = "备注")
     @Schema(description = "备注")

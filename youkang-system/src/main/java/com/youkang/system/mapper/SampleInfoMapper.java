@@ -4,9 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.*;
-import com.youkang.system.domain.resp.order.SampleResp;
-import com.youkang.system.domain.resp.order.SampleTemplateResp;
-import com.youkang.system.domain.resp.order.TemplateProduceResp;
+import com.youkang.system.domain.resp.order.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -58,11 +56,34 @@ public interface SampleInfoMapper extends BaseMapper<SampleInfo> {
      * @param plateNo 板号
      * @return 已占用的孔号列表
      */
-    List<String> selectUsedHolesByPlateNo(@Param("plateNo") String plateNo);
+    List<UsedTemplateHoleResp> selectUsedHolesByPlateNo(@Param("plateNo") String plateNo);
 
     List<SampleTemplateResp> templateBDT(@Param("req") TemplateQueryReq req);
 
     //======================================模板生产模块======================================
     Page<TemplateProduceResp> queryTemplateProducePage(Page<TemplateProduceResp> page, @Param("query") TemplateProduceQueryReq req);
+
+    /**
+     * PCR切胶查询
+     *
+     * @param req 查询条件
+     * @return PCR切胶响应列表
+     */
+    List<PCRGelCutResp> pcrGelCut(@Param("req") PCRGelCutReq req);
+
+    /**
+     * 查询重抽样品列表（模板重抽、报告重抽）
+     *
+     * @param req 查询条件
+     * @return 重抽样品列表
+     */
+    List<ResampleResp> queryResampleList(@Param("req") ResampleQueryReq req);
+
+    /**
+     * 查询模板失败样品列表（用于发送邮件通知）
+     *
+     * @return 模板失败样品列表
+     */
+    List<TemplateFailedResp> queryTemplateFailedList();
 
 }

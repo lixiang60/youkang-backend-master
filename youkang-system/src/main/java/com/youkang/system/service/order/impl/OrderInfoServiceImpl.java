@@ -118,7 +118,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                 sampleInfo.setOrderId(req.getOrderId());
                 sampleInfo.setCreateUser(username);
                 // 自动生成生产编号
-                if (StringUtils.isEmpty(sampleInfo.getProduceId())) {
+                if (sampleInfo.getProduceId() == null) {
                     sampleInfo.setProduceId(generateProduceId());
                 }
                 return sampleInfo;
@@ -142,9 +142,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         sampleInfo.setCreateUser(SecurityUtils.getUsername());
         sampleInfo.setCreateTime(LocalDateTime.now());
         // 自动生成生产编号
-        if (StringUtils.isEmpty(sampleInfo.getProduceId())) {
-            sampleInfo.setProduceId(generateProduceId());
-        }
+        sampleInfo.setProduceId(generateProduceId());
         sampleInfoMapper.insert(sampleInfo);
     }
 
@@ -158,7 +156,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                 sampleInfo.setCreateUser(username);
                 sampleInfo.setCreateTime(LocalDateTime.now());
                 // 自动生成生产编号
-                if (StringUtils.isEmpty(sampleInfo.getProduceId())) {
+                if (sampleInfo.getProduceId() == null) {
                     sampleInfo.setProduceId(generateProduceId());
                 }
                 return sampleInfo;
@@ -182,13 +180,13 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
     /**
      * 生成生产编号
-     * 格式：MMdd + 4位序号（当日递增）
+     * 格式：yyMMdd + 4位序号（当日递增）
      * 使用 Redis 原子递增保证并发安全
      *
-     * @return 生产编号，如 03170001
+     * @return 生产编号，如 2503030001
      */
-    private String generateProduceId() {
-        // 获取今日日期字符串MMdd
+    private Long generateProduceId() {
+        // 获取今日日期字符串yyMMdd
         String dateStr = LocalDate.now().format(PRODUCE_ID_FORMATTER);
         String key = PRODUCE_ID_KEY_PREFIX + dateStr;
 
@@ -199,8 +197,8 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             redisCache.expire(key, 2, TimeUnit.DAYS);
         }
 
-        // 拼接生成8位生产编号：MMdd + 4位序号
-        return dateStr + String.format("%04d", seq);
+        // 拼接生成10位生产编号：yyMMdd + 4位序号，转为 Long
+        return Long.parseLong(dateStr + String.format("%04d", seq));
     }
 
     /**

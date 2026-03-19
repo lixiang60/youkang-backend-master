@@ -9,9 +9,7 @@ import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.poi.ExcelUtil;
 import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.*;
-import com.youkang.system.domain.resp.order.SampleResp;
-import com.youkang.system.domain.resp.order.SampleTemplateResp;
-import com.youkang.system.domain.resp.order.TemplateProduceResp;
+import com.youkang.system.domain.resp.order.*;
 import com.youkang.system.service.order.ISampleInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -153,7 +151,7 @@ public class SampleInfoController {
         return R.ok();
     }
 
-    @Operation(summary = "添加模板孔号", description = "添加模板孔号")
+    @Operation(summary = "单个添加模板孔号", description = "添加模板孔号")
     @PreAuthorize("@ss.hasPermi('order:sample:template:update')")
     @Log(title = "添加模板孔号", businessType = BusinessType.UPDATE)
     @PostMapping("/template/updateTemplateHoleNo")
@@ -202,5 +200,50 @@ public class SampleInfoController {
         sampleInfoService.updateTempStatus(req);
         return R.ok();
     }
+
+    @Operation(summary = "设置原浓度以及添加版号孔号", description = "设置原浓度以及添加版号孔号")
+    @PreAuthorize("@ss.hasPermi('order:sample:template')")
+    @PostMapping("/template/produce/originConcentration")
+    public R<?> updateOriginConcentration(@RequestBody OriginConcentrationUpdateReq req) {
+        sampleInfoService.updateOriginConcentration(req);
+        return R.ok();
+    }
+
+    @Operation(summary = "退回", description = "模板生产退回")
+    @PreAuthorize("@ss.hasPermi('order:sample:template')")
+    @PostMapping("/template/produce/sendBack")
+    public R<?> sendBack(@RequestBody TemplateProduceUpdateReq req) {
+        sampleInfoService.sendBack(req);
+        return R.ok();
+    }
+
+    @Operation(summary = "PCR切胶", description = "PCR切胶")
+    @PreAuthorize("@ss.hasPermi('order:sample:template')")
+    @PostMapping("/template/produce/pcrGelCut")
+    public R<List<PCRGelCutResp>> pcrGelCut(@RequestBody PCRGelCutReq req) {
+        return R.ok(sampleInfoService.pcrGelCut(req));
+    }
+
+    @Operation(summary = "查询重抽样品列表", description = "通过模板板号查询模板重抽、报告重抽的样品列表")
+    @PreAuthorize("@ss.hasPermi('order:sample:template')")
+    @PostMapping("/template/produce/resampleList")
+    public R<List<ResampleResp>> resampleList(@RequestBody ResampleQueryReq req) {
+        return R.ok(sampleInfoService.queryResampleList(req));
+    }
+
+    @Operation(summary = "根据板号获取已经使用的孔号", description = "根据板号获取已经使用的孔号")
+    @PreAuthorize("@ss.hasPermi('order:sample:template')")
+    @PostMapping("/template/produce/getUserTemplateHole")
+    public R<List<UsedTemplateHoleResp>> getUserTemplateHole(@RequestBody HoleNoUpdateReq req) {
+        return R.ok(sampleInfoService.getUserTemplateHole(req));
+    }
+
+    @Operation(summary = "查询模板失败样品列表", description = "查询所有流程在模板邮件的样品列表")
+    @PreAuthorize("@ss.hasPermi('order:sample:template')")
+    @GetMapping("/template/produce/templateFailedList")
+    public R<List<TemplateFailedResp>> templateFailedList() {
+        return R.ok(sampleInfoService.queryTemplateFailedList());
+    }
+
 
 }

@@ -19,4 +19,7 @@ public class HoleNoUpdateReq {
 
     @Schema(description = "模板孔号")
     private String templateHoleNo;
+
+    @Schema(description = "备注")
+    private String remark;
 }

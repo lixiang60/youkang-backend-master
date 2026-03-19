@@ -49,7 +49,7 @@ public class SampleQueryReq extends PageReq {
     private String performance;
 
     @Schema(description = "返回状态")
-    private Integer returnState;
+    private String returnState;
 
     @Schema(description = "流程名称")
     private String flowName;
@@ -64,7 +64,7 @@ public class SampleQueryReq extends PageReq {
     private String produceCompany;
 
     @Schema(description = "生产编号")
-    private String produceId;
+    private Long produceId;
 
     @Schema(description = "创建人")
     private String createUser;

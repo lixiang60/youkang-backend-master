@@ -42,5 +42,5 @@ public class SampleAddReq {
     private String remark;
 
     @Schema(description = "生产编号")
-    private String produceId;
+    private Long produceId;
 }
