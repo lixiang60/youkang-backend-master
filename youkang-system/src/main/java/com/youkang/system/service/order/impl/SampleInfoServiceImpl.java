@@ -377,11 +377,11 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     public void updateTempStatus(TemplateProduceUpdateReq req) {
         String returnState = req.getReturnState();
         String flowName;
-        if (returnState.equals("模板重抽") || returnState.equals("模板重切")){
+        if (returnState.equals("模板重抽") || returnState.equals("模板重切")) {
             flowName = "模板生产";
         } else if (returnState.equals("模板失败")) {
             flowName = "模板邮件";
-        }else {
+        } else {
             flowName = "模板成功";
         }
         this.lambdaUpdate().set(SampleInfo::getReturnState, req.getReturnState())
@@ -401,7 +401,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     }
 
     @Override
-    public void updateOriginConcentration(OriginConcentrationUpdateReq req){
+    public void updateOriginConcentration(OriginConcentrationUpdateReq req) {
 
         //如果用户传了板号则flowname，流程名称设置为反应生产；否则为模板成功
         //1.没有传板号
@@ -421,7 +421,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                     "模板生产",
                     null
             );
-        }else {
+        } else {
             //2.有传板号
             this.lambdaUpdate().set(SampleInfo::getOriginConcentration, req.getOriginConcentration())
                     .set(SampleInfo::getFlowName, "反应生产")
@@ -442,11 +442,11 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     }
 
     @Override
-    public void sendBack(TemplateProduceUpdateReq req){
+    public void sendBack(TemplateProduceUpdateReq req) {
         this.lambdaUpdate().set(SampleInfo::getReturnState, "模板退回")
                 .set(SampleInfo::getFlowName, "0")
-                .set(SampleInfo::getTemplatePlateNo,null)
-                .set(SampleInfo::getTemplateHoleNo,null)
+                .set(SampleInfo::getTemplatePlateNo, null)
+                .set(SampleInfo::getTemplateHoleNo, null)
                 .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .in(SampleInfo::getProduceId, req.getProduceIdList())
@@ -471,7 +471,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     }
 
     @Override
-    public List<UsedTemplateHoleResp> getUserTemplateHole(HoleNoUpdateReq req){
+    public List<UsedTemplateHoleResp> getUserTemplateHole(HoleNoUpdateReq req) {
         return sampleInfoMapper.selectUsedHolesByPlateNo(req.getTemplatePlateNo());
     }
 
@@ -650,7 +650,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     }
 
     @Override
-    public void sampleInsufficient(SampleCommonReq req){
+    public void sampleInsufficient(SampleCommonReq req) {
         List<Long> produceIdList = req.getProduceIdList();
         this.lambdaUpdate()
                 .set(SampleInfo::getRemark, req.getRemark())
@@ -667,8 +667,9 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                 req.getRemark()
         );
     }
+
     @Override
-    public void reactionPre(SampleCommonReq req){
+    public void reactionPre(SampleCommonReq req) {
         List<Long> produceIdList = req.getProduceIdList();
         this.lambdaUpdate()
                 .set(SampleInfo::getRemark, req.getRemark())
@@ -682,6 +683,24 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                 produceIdList,
                 SampleFlowOperation.REACTION_PRE.getDescription(),
                 "反应生产",
+                req.getRemark()
+        );
+    }
+
+    @Override
+    public void reactionPreSendBack(SampleCommonReq req) {
+        List<Long> produceIdList = req.getProduceIdList();
+        this.lambdaUpdate()
+                .set(SampleInfo::getRemark, req.getRemark())
+                .set(SampleInfo::getFlowName, "反应预做")
+                .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
+                .in(SampleInfo::getProduceId, produceIdList)
+                .update();
+        sampleFlowLogService.batchRecordLog(
+                produceIdList,
+                SampleFlowOperation.REACTION_PRE_SEND_BACK.getDescription(),
+                "反应预做",
                 req.getRemark()
         );
     }

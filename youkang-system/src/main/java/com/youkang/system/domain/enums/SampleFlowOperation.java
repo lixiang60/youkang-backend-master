@@ -43,7 +43,12 @@ public enum SampleFlowOperation {
     /** 样品不足 */
     SAMPLE_INSUFFICIENT("样品不足"),
 
-    REACTION_PRE("反应预做");
+    REACTION_PRE("反应预做"),
+
+    REACTION_PRE_SEND_BACK("反应预做退回"),
+
+
+    ;
 
     private final String description;
 

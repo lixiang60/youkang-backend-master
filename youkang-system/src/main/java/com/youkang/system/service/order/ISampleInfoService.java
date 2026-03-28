@@ -148,4 +148,6 @@ public interface ISampleInfoService extends IService<SampleInfo> {
 
     void reactionPre(SampleCommonReq req);
 
+    void reactionPreSendBack(SampleCommonReq req);
+
 }

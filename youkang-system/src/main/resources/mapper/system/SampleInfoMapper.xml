@@ -332,6 +332,7 @@
     <select id="queryTemplateProducePage" resultType="com.youkang.system.domain.resp.order.TemplateProduceResp">
         SELECT
         s.order_id AS orderId,
+        s.produce_id AS produceId,
         c.customer_name AS customerName,
         c.address AS customerAddress,
         s.sample_id AS sampleId,
@@ -359,6 +360,9 @@
         where flow_name = '模板生产'
         <if test="query.orderId != null and query.orderId != ''">
             AND s.order_id = #{query.orderId}
+        </if>
+        <if test="query.produceId != null and query.produceId != ''">
+            AND s.produce_id = #{query.produceId}
         </if>
         <if test="query.sampleId != null and query.sampleId != ''">
             AND s.sample_id = #{query.sampleId}

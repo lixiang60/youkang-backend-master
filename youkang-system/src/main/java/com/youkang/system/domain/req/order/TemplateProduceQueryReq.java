@@ -12,6 +12,9 @@ public class TemplateProduceQueryReq extends PageReq {
     @Schema(description = "模板板号")
     private String templateNo;
 
+    @Schema(description = "生产id")
+    private Long produceId;
+
     @Schema(description = "订单号")
     private String orderId;
 

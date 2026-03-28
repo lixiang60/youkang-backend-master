@@ -305,4 +305,12 @@ public class SampleInfoController {
         return R.ok();
     }
 
+    @Operation(summary = "反应预做退回", description = "反应预做退回")
+    @PreAuthorize("@ss.hasPermi('order:sample:reactionPreSendBack')")
+    @PostMapping("/reactionPreSendBack")
+    public R<?> reactionPreSendBack(@RequestBody SampleCommonReq req) {
+        sampleInfoService.reactionPreSendBack(req);
+        return R.ok();
+    }
+
 }
