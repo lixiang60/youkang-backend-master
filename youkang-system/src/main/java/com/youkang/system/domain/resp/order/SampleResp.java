@@ -131,6 +131,14 @@ public class SampleResp {
     @Schema(description = "排版方式")
     private String layout;
 
+    @Excel(name = "原孔号")
+    @Schema(description = "原孔号")
+    private String originHoleNo;
+
+    @Excel(name = "所属实验室")
+    @Schema(description = "所属实验室")
+    private String belongLab;
+
     @Excel(name = "创建人")
     @Schema(description = "创建人")
     private String createUser;
@@ -154,4 +162,12 @@ public class SampleResp {
     @Excel(name = "报告状态")
     @Schema(description = "报告状态")
     private String reportStatus;
+
+    @Excel(name = "客户姓名")
+    @Schema(description = "客户姓名")
+    private String customerName;
+
+    @Excel(name = "客户地址")
+    @Schema(description = "客户地址")
+    private String customerAddress;
 }

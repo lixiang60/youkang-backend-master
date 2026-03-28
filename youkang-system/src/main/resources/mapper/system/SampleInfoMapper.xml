@@ -232,9 +232,13 @@
             report_status AS reportStatus,
             create_user AS createUser,
             create_time AS createTime,
-            remark
-        FROM yk_sample_info
-        WHERE sample_id = #{sampleId}
+            remark,
+            c.customer_name AS customerName,
+            c.address AS customerAddress
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        WHERE s.produce_id = #{produceId}
     </select>
 
     <select id="queryTemplatePage" resultType="com.youkang.system.domain.resp.order.SampleTemplateResp">

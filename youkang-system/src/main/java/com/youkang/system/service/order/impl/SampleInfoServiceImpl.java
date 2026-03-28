@@ -73,14 +73,14 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     }
 
     /**
-     * 根据样品ID查询样品详情
+     * 根据生产编号查询样品详情
      *
-     * @param sampleId 样品ID
+     * @param produceId 生产编号
      * @return 样品响应
      */
     @Override
-    public SampleResp queryById(String sampleId) {
-        return sampleInfoMapper.queryById(sampleId);
+    public SampleResp queryById(Long produceId) {
+        return sampleInfoMapper.queryById(produceId);
     }
 
     /**

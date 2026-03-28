@@ -34,12 +34,12 @@ public interface SampleInfoMapper extends BaseMapper<SampleInfo> {
     List<SampleResp> queryList(@Param("query") SampleQueryReq req);
 
     /**
-     * 根据样品ID查询样品详情
+     * 根据生产编号查询样品详情
      *
-     * @param sampleId 样品ID
+     * @param produceId 生产编号
      * @return 样品响应
      */
-    SampleResp queryById(@Param("sampleId") String sampleId);
+    SampleResp queryById(@Param("produceId") Long produceId);
 
     /**
      * 分页查询模板信息

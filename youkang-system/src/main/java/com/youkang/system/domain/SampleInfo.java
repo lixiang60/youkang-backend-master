@@ -18,6 +18,11 @@ import java.time.LocalDateTime;
 @TableName("yk_sample_info")
 public class SampleInfo {
 
+    /** 生产编号 */
+    @Excel(name = "生产编号")
+    @TableId(value = "produce_id")
+    private Long produceId;
+
     /** 订单号 */
     @Excel(name = "订单号")
     @TableField("order_id")
@@ -146,11 +151,6 @@ public class SampleInfo {
     @Excel(name = "生产公司")
     @TableField("produce_company")
     private String produceCompany;
-
-    /** 生产编号 */
-    @Excel(name = "生产编号")
-    @TableId(value = "produce_id")
-    private Long produceId;
 
     /** 孔号数量 */
     @Excel(name = "孔号数量")

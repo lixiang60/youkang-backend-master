@@ -91,11 +91,11 @@ public class SampleInfoController {
     /**
      * 获取样品详细信息
      */
-    @Operation(summary = "获取样品详情", description = "根据样品ID获取样品详细信息")
+    @Operation(summary = "获取样品详情", description = "根据生产编号获取样品详细信息")
     @PreAuthorize("@ss.hasPermi('order:sample:query')")
-    @GetMapping(value = "/{sampleId}")
-    public R<SampleResp> getInfo(@PathVariable String sampleId) {
-        return R.ok(sampleInfoService.queryById(sampleId));
+    @GetMapping(value = "/{produceId}")
+    public R<SampleResp> getInfo(@PathVariable Long produceId) {
+        return R.ok(sampleInfoService.queryById(produceId));
     }
 
     /**
@@ -128,9 +128,9 @@ public class SampleInfoController {
     @Operation(summary = "删除样品", description = "批量删除样品信息")
     @PreAuthorize("@ss.hasPermi('order:sample:remove')")
     @Log(title = "样品信息", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{sampleIds}")
-    public R<Void> remove(@Parameter(description = "样品ID数组") @PathVariable String[] sampleIds) {
-        boolean result = sampleInfoService.removeByIds(Arrays.asList(sampleIds));
+    @DeleteMapping("/{produceIds}")
+    public R<Void> remove(@Parameter(description = "生产编号数组") @PathVariable Long[] produceIds) {
+        boolean result = sampleInfoService.removeByIds(Arrays.asList(produceIds));
         return result ? R.ok() : R.fail("删除样品信息失败");
     }
 

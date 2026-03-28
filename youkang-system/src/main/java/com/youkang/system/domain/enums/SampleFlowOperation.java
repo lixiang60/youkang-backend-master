@@ -1,10 +1,13 @@
 package com.youkang.system.domain.enums;
 
+import lombok.Getter;
+
 /**
  * 样品流程操作类型枚举
  *
  * @author youkang
  */
+@Getter
 public enum SampleFlowOperation {
 
     /** 添加模板板号 */
@@ -40,7 +43,4 @@ public enum SampleFlowOperation {
         this.description = description;
     }
 
-    public String getDescription() {
-        return description;
-    }
 }

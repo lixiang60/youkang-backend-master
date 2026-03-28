@@ -32,12 +32,12 @@ public interface ISampleInfoService extends IService<SampleInfo> {
     List<SampleResp> queryList(SampleQueryReq req);
 
     /**
-     * 根据样品ID查询样品详情
+     * 根据生产编号查询样品详情
      *
-     * @param sampleId 样品ID
+     * @param produceId 生产编号
      * @return 样品响应
      */
-    SampleResp queryById(String sampleId);
+    SampleResp queryById(Long produceId);
 
     /**
      * 新增样品

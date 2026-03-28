@@ -14,7 +14,10 @@ import lombok.Setter;
 @Schema(description = "样品更新请求")
 public class SampleUpdateReq {
 
-    @Schema(description = "样品编号", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "生产编号", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Long produceId;
+
+    @Schema(description = "样品编号")
     private String sampleId;
 
     @Schema(description = "订单号")
@@ -91,9 +94,6 @@ public class SampleUpdateReq {
 
     @Schema(description = "生产公司")
     private String produceCompany;
-
-    @Schema(description = "生产编号")
-    private Long produceId;
 
     @Schema(description = "孔号数量")
     private Integer holeNumber;
