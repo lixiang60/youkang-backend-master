@@ -149,5 +149,8 @@ public interface ISampleInfoService extends IService<SampleInfo> {
     void reactionPre(SampleCommonReq req);
 
     void reactionPreSendBack(SampleCommonReq req);
+    //=============================================报告生产============================================
+
+    void capillaryAdd(PlateNoCommonReq req);
 
 }

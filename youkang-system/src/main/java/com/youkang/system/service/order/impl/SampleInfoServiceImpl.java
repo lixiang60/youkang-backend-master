@@ -705,4 +705,15 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         );
     }
 
+    //=============================================报告生产============================================
+    @Override
+    public void capillaryAdd(PlateNoCommonReq req) {
+        this.lambdaUpdate()
+                .set(SampleInfo::getFlowName, "报告生产")
+                .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
+                .eq(SampleInfo::getPlateNo, req.getPlateNo())
+                .update();
+    }
+
 }

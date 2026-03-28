@@ -47,6 +47,8 @@ public enum SampleFlowOperation {
 
     REACTION_PRE_SEND_BACK("反应预做退回"),
 
+    CAPILLARY_ADD("毛细管添加"),
+
 
     ;
 

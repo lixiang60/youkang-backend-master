@@ -163,7 +163,7 @@ public class SampleInfoController {
     @Operation(summary = "排版忽略", description = "排版忽略")
     @PreAuthorize("@ss.hasPermi('order:sample:template:ignoreTemp')")
     @Log(title = "排版忽略", businessType = BusinessType.UPDATE)
-    @GetMapping("/template/ignoreTemp")
+    @PostMapping("/template/ignoreTemp")
     public R<Void> ignoreTemp(@RequestBody SampleTemplateUpdateReq req) {
         sampleInfoService.ignoreTemp(req);
         return R.ok();
@@ -209,7 +209,7 @@ public class SampleInfoController {
         return R.ok();
     }
 
-    @Operation(summary = "退回", description = "模板生产退回")
+    @Operation(summary = "模板生产退回", description = "模板生产退回")
     @PreAuthorize("@ss.hasPermi('order:sample:template')")
     @PostMapping("/template/produce/sendBack")
     public R<?> sendBack(@RequestBody TemplateProduceUpdateReq req) {
@@ -310,6 +310,14 @@ public class SampleInfoController {
     @PostMapping("/reactionPreSendBack")
     public R<?> reactionPreSendBack(@RequestBody SampleCommonReq req) {
         sampleInfoService.reactionPreSendBack(req);
+        return R.ok();
+    }
+    //=============================================报告生产============================================
+    @Operation(summary = "毛细管添加", description = "毛细管添加")
+    @PreAuthorize("@ss.hasPermi('order:sample:capillaryAdd')")
+    @PostMapping("/capillaryAdd")
+    public R<?> capillaryAdd(@RequestBody PlateNoCommonReq req) {
+        sampleInfoService.capillaryAdd(req);
         return R.ok();
     }
 
