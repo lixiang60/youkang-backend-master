@@ -39,6 +39,18 @@
 - [四、模板生产管理](#四模板生产管理)
   - [4.1 获取模板生产列表](#41-获取模板生产列表)
   - [4.2 设置模板状态](#42-设置模板状态)
+  - [4.3 设置原浓度](#43-设置原浓度)
+  - [4.4 模板生产退回](#44-模板生产退回)
+  - [4.5 PCR切胶查询](#45-pcr切胶查询)
+  - [4.6 查询重抽样品列表](#46-查询重抽样品列表)
+  - [4.7 根据板号获取已使用的孔号](#47-根据板号获取已使用的孔号)
+  - [4.8 查询模板失败样品列表](#48-查询模板失败样品列表)
+
+- [五、反应生产管理](#五反应生产管理)
+  - [5.1 设置原浓度](#51-设置原浓度)
+  - [5.2 批量添加板号和孔号](#52-批量添加板号和孔号)
+  - [5.3 单个添加孔号](#53-单个添加孔号)
+  - [5.4 测序BDT](#54-测序bdt)
 
 ---
 
@@ -551,11 +563,11 @@
 
 ### 2.5 获取样品详情
 
-**接口描述**: 根据样品ID获取样品详细信息
+**接口描述**: 根据生产编号获取样品详细信息
 
 **请求方式**: `GET`
 
-**接口路径**: `/order/sample/{sampleId}`
+**接口路径**: `/order/sample/{produceId}`
 
 **权限要求**: `order:sample:query`
 
@@ -563,7 +575,97 @@
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| sampleId | String | 是 | 样品ID |
+| produceId | Long | 是 | 生产编号 |
+
+**响应参数**:
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| produceId | Long | 生产编号 |
+| orderId | String | 订单号 |
+| orderHistory | String | 历史订单号 |
+| sampleId | String | 样品编号 |
+| sampleType | String | 样品类型 |
+| samplePosition | String | 样品位置 |
+| primer | String | 引物 |
+| primerType | String | 引物类型 |
+| primerPosition | String | 引物位置 |
+| primerConcentration | String | 引物浓度 |
+| seq | String | 序列 |
+| project | String | 测序项目 |
+| carrierName | String | 载体名称 |
+| antibioticType | String | 抗生素类型 |
+| plasmidLength | String | 质粒长度 |
+| fragmentSize | String | 片段大小 |
+| testResult | String | 是否测通 |
+| originConcentration | String | 原浓度 |
+| templatePlateNo | String | 模板板号 |
+| templateHoleNo | String | 模板孔号 |
+| performance | String | 完成情况 |
+| returnState | String | 返回状态 |
+| flowName | String | 流程名称 |
+| plateNo | String | 板号 |
+| holeNo | String | 孔号 |
+| belongCompany | String | 所属公司 |
+| produceCompany | String | 生产公司 |
+| holeNumber | Integer | 孔号数量 |
+| layout | String | 排版方式 |
+| originHoleNo | String | 原孔号 |
+| belongLab | String | 所属实验室 |
+| reportStatus | String | 报告状态 |
+| createUser | String | 创建人 |
+| createTime | String | 创建时间 |
+| remark | String | 备注 |
+| customerName | String | 客户姓名 |
+| customerAddress | String | 客户地址 |
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "produceId": 2603170001,
+    "orderId": "20260317143052051",
+    "orderHistory": "",
+    "sampleId": "S001",
+    "sampleType": "质粒",
+    "samplePosition": "A1",
+    "primer": "M13F",
+    "primerType": "通用引物",
+    "primerPosition": "正向",
+    "primerConcentration": "10μM",
+    "seq": "ATCG...",
+    "project": "Sanger测序",
+    "carrierName": "pUC19",
+    "antibioticType": "氨苄青霉素",
+    "plasmidLength": "2686",
+    "fragmentSize": "1000",
+    "testResult": "是",
+    "originConcentration": "100ng/μL",
+    "templatePlateNo": "P001",
+    "templateHoleNo": "A1",
+    "performance": "模板排版",
+    "returnState": "0",
+    "flowName": "模板排版",
+    "plateNo": "P001",
+    "holeNo": "A1",
+    "belongCompany": "有康科技",
+    "produceCompany": "生产公司A",
+    "holeNumber": 1,
+    "layout": "横排",
+    "originHoleNo": "A1",
+    "belongLab": "有康实验室",
+    "reportStatus": "正常",
+    "createUser": "admin",
+    "createTime": "2026-03-17 14:30:52",
+    "remark": "备注",
+    "customerName": "张三",
+    "customerAddress": "北京市"
+  }
+}
+```
 
 ---
 
@@ -577,7 +679,86 @@
 
 **权限要求**: `order:sample:add`
 
-**请求参数**: SampleItemReq（包含样品所有字段）
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| orderId | String | 否 | 订单号 |
+| orderHistory | String | 否 | 历史订单号 |
+| sampleId | String | 否 | 样品编号 |
+| sampleType | String | 否 | 样品类型 |
+| samplePosition | String | 否 | 样品位置 |
+| primer | String | 否 | 引物 |
+| primerType | String | 否 | 引物类型 |
+| primerPosition | String | 否 | 引物位置 |
+| primerConcentration | String | 否 | 引物浓度 |
+| seq | String | 否 | 序列 |
+| project | String | 否 | 测序项目 |
+| carrierName | String | 否 | 载体名称 |
+| antibioticType | String | 否 | 抗生素类型 |
+| plasmidLength | String | 否 | 质粒长度 |
+| fragmentSize | String | 否 | 片段大小 |
+| testResult | String | 否 | 是否测通 |
+| originConcentration | String | 否 | 原浓度 |
+| templatePlateNo | String | 否 | 模板板号 |
+| templateHoleNo | String | 否 | 模板孔号 |
+| performance | String | 否 | 完成情况 |
+| returnState | String | 否 | 返回状态 |
+| flowName | String | 否 | 流程名称 |
+| plateNo | String | 否 | 板号 |
+| holeNo | String | 否 | 孔号 |
+| belongCompany | String | 否 | 所属公司 |
+| produceCompany | String | 否 | 生产公司 |
+| produceId | Long | 否 | 生产编号（为空自动生成） |
+| holeNumber | Integer | 否 | 孔号数量 |
+| layout | String | 否 | 排版方式 |
+| remark | String | 否 | 备注 |
+
+**请求示例**:
+
+```json
+{
+  "orderId": "20260317143052051",
+  "orderHistory": "",
+  "sampleId": "S001",
+  "sampleType": "质粒",
+  "samplePosition": "A1",
+  "primer": "M13F",
+  "primerType": "通用引物",
+  "primerPosition": "正向",
+  "primerConcentration": "10μM",
+  "seq": "ATCG",
+  "project": "Sanger测序",
+  "carrierName": "pUC19",
+  "antibioticType": "氨苄青霉素",
+  "plasmidLength": "2686",
+  "fragmentSize": "1000",
+  "testResult": "是",
+  "originConcentration": "100ng/μL",
+  "templatePlateNo": "",
+  "templateHoleNo": "",
+  "performance": "",
+  "returnState": "",
+  "flowName": "0",
+  "plateNo": "",
+  "holeNo": "",
+  "belongCompany": "有康科技",
+  "produceCompany": "生产公司A",
+  "produceId": null,
+  "holeNumber": 1,
+  "layout": "横排",
+  "remark": "备注"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
 
 ---
 
@@ -591,7 +772,86 @@
 
 **权限要求**: `order:sample:edit`
 
-**请求参数**: SampleUpdateReq（sampleId为必填）
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceId | Long | 是 | 生产编号 |
+| orderId | String | 否 | 订单号 |
+| orderHistory | String | 否 | 历史订单号 |
+| sampleId | String | 否 | 样品编号 |
+| sampleType | String | 否 | 样品类型 |
+| samplePosition | String | 否 | 样品位置 |
+| primer | String | 否 | 引物 |
+| primerType | String | 否 | 引物类型 |
+| primerPosition | String | 否 | 引物位置 |
+| primerConcentration | String | 否 | 引物浓度 |
+| seq | String | 否 | 序列 |
+| project | String | 否 | 测序项目 |
+| carrierName | String | 否 | 载体名称 |
+| antibioticType | String | 否 | 抗生素类型 |
+| plasmidLength | String | 否 | 质粒长度 |
+| fragmentSize | String | 否 | 片段大小 |
+| testResult | String | 否 | 是否测通 |
+| originConcentration | String | 否 | 原浓度 |
+| templatePlateNo | String | 否 | 模板板号 |
+| templateHoleNo | String | 否 | 模板孔号 |
+| performance | String | 否 | 完成情况 |
+| returnState | String | 否 | 返回状态 |
+| flowName | String | 否 | 流程名称 |
+| plateNo | String | 否 | 板号 |
+| holeNo | String | 否 | 孔号 |
+| belongCompany | String | 否 | 所属公司 |
+| produceCompany | String | 否 | 生产公司 |
+| holeNumber | Integer | 否 | 孔号数量 |
+| layout | String | 否 | 排版方式 |
+| remark | String | 否 | 备注 |
+
+**请求示例**:
+
+```json
+{
+  "produceId": 2603170001,
+  "orderId": "20260317143052051",
+  "orderHistory": "",
+  "sampleId": "S001",
+  "sampleType": "质粒",
+  "samplePosition": "A1",
+  "primer": "M13F",
+  "primerType": "通用引物",
+  "primerPosition": "正向",
+  "primerConcentration": "10μM",
+  "seq": "ATCG",
+  "project": "Sanger测序",
+  "carrierName": "pUC19",
+  "antibioticType": "氨苄青霉素",
+  "plasmidLength": "2686",
+  "fragmentSize": "1000",
+  "testResult": "是",
+  "originConcentration": "100ng/μL",
+  "templatePlateNo": "P001",
+  "templateHoleNo": "A1",
+  "performance": "模板排版",
+  "returnState": "0",
+  "flowName": "模板生产",
+  "plateNo": "",
+  "holeNo": "",
+  "belongCompany": "有康科技",
+  "produceCompany": "生产公司A",
+  "holeNumber": 1,
+  "layout": "横排",
+  "remark": "备注"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
 
 ---
 
@@ -601,11 +861,30 @@
 
 **请求方式**: `DELETE`
 
-**接口路径**: `/order/sample/{sampleIds}`
+**接口路径**: `/order/sample/{produceIds}`
 
 **权限要求**: `order:sample:remove`
 
-**路径参数**: sampleIds - 样品ID数组
+**路径参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceIds | Long[] | 是 | 生产编号数组（逗号分隔） |
+
+**请求示例**:
+
+```
+DELETE /order/sample/2603170001,2603170002
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
 
 ---
 
@@ -695,8 +974,10 @@
 | templateInfo | Array | 是 | 模板信息列表 |
 | templateInfo[].orderId | String | 是 | 订单号 |
 | templateInfo[].sampleId | String | 是 | 样品编号 |
+| templateInfo[].produceId | Long | 否 | 生产编号 |
 | templateStype | String | 是 | 排版方式（横排/竖排） |
 | templatePlateNo | String | 是 | 模板板号 |
+| templateHoleNo | String | 否 | 模板孔号 |
 | remark | String | 否 | 备注 |
 
 **请求示例**:
@@ -704,12 +985,30 @@
 ```json
 {
   "templateInfo": [
-    {"orderId": "20260317143052051", "sampleId": "S001"},
-    {"orderId": "20260317143052051", "sampleId": "S002"}
+    {
+      "orderId": "20260317143052051",
+      "sampleId": "S001",
+      "produceId": 2603170001
+    },
+    {
+      "orderId": "20260317143052051",
+      "sampleId": "S002",
+      "produceId": 2603170002
+    }
   ],
   "templateStype": "横排",
   "templatePlateNo": "P001",
-  "remark": "备注"
+  "templateHoleNo": "",
+  "remark": "批量分配模板板号"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
 }
 ```
 
@@ -731,14 +1030,38 @@
 |--------|------|------|------|
 | orderId | String | 是 | 订单号 |
 | sampleId | String | 是 | 样品编号 |
+| produceId | Long | 否 | 生产编号 |
 | templatePlateNo | String | 是 | 模板板号 |
 | templateHoleNo | String | 是 | 模板孔号 |
+| remark | String | 否 | 备注 |
+
+**请求示例**:
+
+```json
+{
+  "orderId": "20260317143052051",
+  "sampleId": "S001",
+  "produceId": 2603170001,
+  "templatePlateNo": "P001",
+  "templateHoleNo": "A01",
+  "remark": "单独分配孔号"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
 
 ---
 
 ### 3.4 排版忽略
 
-**接口描述**: 排版忽略（更新样品备注和流程）
+**接口描述**: 将选中的样品标记为"模板排版"状态（忽略），不再进行后续模板生产流程
 
 **请求方式**: `GET`
 
@@ -746,9 +1069,50 @@
 
 **权限要求**: `order:sample:template:ignoreTemp`
 
-**请求参数**: SampleTemplateUpdateReq（Body方式）
+**请求参数**:
 
-**注意**: 此接口使用GET但接收Body参数
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| templateInfo | Array | 是 | 要忽略的样品列表 |
+| templateInfo[].orderId | String | 是 | 订单号 |
+| templateInfo[].sampleId | String | 是 | 样品编号 |
+| templateInfo[].produceId | Long | 否 | 生产编号 |
+| templateStype | String | 否 | 排版方式（忽略接口不使用） |
+| templatePlateNo | String | 否 | 模板板号（忽略接口不使用） |
+| templateHoleNo | String | 否 | 模板孔号（忽略接口不使用） |
+| remark | String | 否 | 备注信息 |
+
+**请求示例**:
+
+```json
+{
+  "templateInfo": [
+    {
+      "orderId": "20260317143052051",
+      "sampleId": "S001",
+      "produceId": 2603170001
+    },
+    {
+      "orderId": "20260317143052051",
+      "sampleId": "S002",
+      "produceId": 2603170002
+    }
+  ],
+  "templateStype": "横排",
+  "templatePlateNo": "P001",
+  "templateHoleNo": "A01",
+  "remark": "客户要求跳过模板生产"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
 
 ---
 
@@ -766,7 +1130,15 @@
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| templateNo | String | 是 | 模板编号 |
+| templateNo | String | 是 | 模板编号/板号 |
+
+**请求示例**:
+
+```json
+{
+  "templateNo": "P001"
+}
+```
 
 **响应示例**:
 
@@ -897,23 +1269,170 @@
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| orderId | Array | 是 | 订单号列表 |
-| returnState | String | 是 | 返回状态 |
+| produceIdList | Array[Long] | 是 | 生产编号列表 |
+| returnState | String | 是 | 返回状态（模板重抽/模板重切/模板失败/模板成功） |
 | remark | String | 否 | 备注 |
 
 **请求示例**:
 
 ```json
 {
-  "orderId": ["20260317143052051", "20260317143052052"],
-  "returnState": "1",
-  "remark": "已完成"
+  "produceIdList": [2603170001, 2603170002],
+  "returnState": "模板成功",
+  "remark": "模板制作完成"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
 }
 ```
 
 ---
 
-### 4.3 查询重抽样品列表
+### 4.3 设置原浓度
+
+**接口描述**: 设置原浓度，可选同时添加板号（添加板号则流转到反应生产，否则流转到模板成功）
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/template/produce/originConcentration`
+
+**权限要求**: `order:sample:template`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceIdList | Array[Long] | 是 | 生产编号列表 |
+| originConcentration | String | 是 | 原浓度 |
+| templateStype | String | 否 | 排版方式（横排/竖排） |
+| plateNo | String | 否 | 板号（有值则流转到反应生产） |
+| remark | String | 否 | 备注 |
+
+**请求示例**:
+
+```json
+{
+  "produceIdList": [2603170001, 2603170002],
+  "originConcentration": "100ng/μL",
+  "templateStype": "横排",
+  "plateNo": "R001",
+  "remark": "设置原浓度并添加板号"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+### 4.4 模板生产退回
+
+**接口描述**: 将模板生产中的样品退回到模板排版阶段
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/template/produce/sendBack`
+
+**权限要求**: `order:sample:template`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceIdList | Array[Long] | 是 | 生产编号列表 |
+| returnState | String | 否 | 返回状态 |
+| remark | String | 否 | 备注 |
+
+**请求示例**:
+
+```json
+{
+  "produceIdList": [2603170001, 2603170002],
+  "returnState": "模板退回",
+  "remark": "质量问题退回"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+### 4.5 PCR切胶查询
+
+**接口描述**: 根据订单号范围和所属公司查询PCR切胶信息
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/template/produce/pcrGelCut`
+
+**权限要求**: `order:sample:template`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| startOrderNo | String | 否 | 起始订单号 |
+| endOrderNo | String | 否 | 结束订单号 |
+| belongCompany | String | 否 | 所属公司 |
+
+**请求示例**:
+
+```json
+{
+  "startOrderNo": "20260317001",
+  "endOrderNo": "20260317999",
+  "belongCompany": "有康科技"
+}
+```
+
+**响应参数**:
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| customerName | String | 客户姓名 |
+| produceId | Long | 生产编号 |
+| sampleId | String | 样品编号 |
+| fragmentSize | String | 片段大小 |
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": [
+    {
+      "customerName": "张三",
+      "produceId": 2603170001,
+      "sampleId": "S001",
+      "fragmentSize": "1000"
+    }
+  ]
+}
+```
+
+---
+
+### 4.6 查询重抽样品列表
 
 **接口描述**: 通过模板板号查询模板重抽、报告重抽的样品列表
 
@@ -1089,6 +1608,227 @@
 
 ---
 
+## 五、反应生产管理
+
+### 基础路径
+
+```
+/order/sample/reactionProduce
+```
+
+---
+
+### 5.1 设置原浓度
+
+**接口描述**: 根据生产编号批量设置原浓度
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/reactionProduce/originConcentration`
+
+**权限要求**: `order:sample:reactionProduce`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceIdList | Array[Long] | 是 | 生产编号列表 |
+| originConcentration | String | 是 | 原浓度 |
+
+**请求示例**:
+
+```json
+{
+  "produceIdList": [2603170001, 2603170002, 2603170003],
+  "originConcentration": "100ng/μL"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+### 5.2 批量添加板号和孔号
+
+**接口描述**: 根据生产编号批量添加板号和孔号，自动按排版方式分配孔号
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/reactionProduce/plate`
+
+**权限要求**: `order:sample:reactionProduce`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceIdList | Array[Long] | 是 | 生产编号列表 |
+| layout | String | 是 | 排版方式（横排/竖排） |
+| plateNo | String | 是 | 板号 |
+| remark | String | 否 | 备注 |
+
+**请求示例**:
+
+```json
+{
+  "produceIdList": [2603170001, 2603170002, 2603170003],
+  "layout": "横排",
+  "plateNo": "R001",
+  "remark": "反应生产批量分配"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+### 5.3 单个添加孔号
+
+**接口描述**: 根据生产编号单个添加孔号
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/reactionProduce/holeNo`
+
+**权限要求**: `order:sample:reactionProduce`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceId | Long | 是 | 生产编号 |
+| plateNo | String | 是 | 板号 |
+| holeNo | String | 是 | 孔号 |
+| remark | String | 否 | 备注 |
+
+**请求示例**:
+
+```json
+{
+  "produceId": 2603170001,
+  "plateNo": "R001",
+  "holeNo": "A01",
+  "remark": "单独分配孔号"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+### 5.4 测序BDT
+
+**接口描述**: 根据板号查询测序BDT信息
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/reactionProduce/sequencingBDT`
+
+**权限要求**: `order:sample:reactionProduce`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| plateNo | String | 是 | 板号 |
+
+**请求示例**:
+
+```json
+{
+  "plateNo": "R001"
+}
+```
+
+**响应参数**:
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| orderId | String | 订单号 |
+| templateNumber | Integer | 模板数量 |
+| customerName | String | 客户姓名 |
+| customerAddress | String | 客户地址 |
+| sampleId | String | 样品编号 |
+| sampleType | String | 样品类型 |
+| primer | String | 引物 |
+| primerConcentration | String | 引物浓度 |
+| carrierName | String | 载体名称 |
+| antibioticType | String | 抗生素类型 |
+| fragmentSize | String | 片段大小 |
+| testResult | String | 是否测通 |
+| originConcentration | String | 原浓度 |
+| plateNo | String | 板号 |
+| holeNo | String | 孔号 |
+| performance | String | 完成情况 |
+| returnState | String | 返回状态 |
+| flowName | String | 流程名称 |
+| createUser | String | 创建人 |
+| produceId | Long | 生产编号 |
+| originHoleNo | String | 原孔号 |
+| belongLab | String | 所属实验室 |
+| reportStatus | String | 报告状态 |
+| remark | String | 备注 |
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": [
+    {
+      "orderId": "20260317143052051",
+      "templateNumber": 1,
+      "customerName": "张三",
+      "customerAddress": "北京市",
+      "sampleId": "S001",
+      "sampleType": "质粒",
+      "primer": "M13F",
+      "primerConcentration": "10μM",
+      "carrierName": "pUC19",
+      "antibioticType": "氨苄青霉素",
+      "fragmentSize": "1000",
+      "testResult": "是",
+      "originConcentration": "100ng/μL",
+      "plateNo": "R001",
+      "holeNo": "A01",
+      "performance": "反应生产",
+      "returnState": "反应生产",
+      "flowName": "0",
+      "createUser": "admin",
+      "produceId": 2603170001,
+      "originHoleNo": "A1",
+      "belongLab": "有康实验室",
+      "reportStatus": "正常",
+      "remark": "备注"
+    }
+  ]
+}
+```
+
+---
+
 ## 附录
 
 ### 通用响应结构
@@ -1125,4 +1865,4 @@
 
 ---
 
-*文档生成时间: 2026-03-19*
+*文档生成时间: 2026-03-28*
