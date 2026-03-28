@@ -33,6 +33,9 @@
             produce_id AS produceId,
             hole_number AS holeNumber,
             layout,
+            origin_hole_no AS originHoleNo,
+            belong_lab AS belongLab,
+            report_status AS reportStatus,
             create_user AS createUser,
             create_time AS createTime,
             remark
@@ -127,6 +130,9 @@
             produce_id AS produceId,
             hole_number AS holeNumber,
             layout,
+            origin_hole_no AS originHoleNo,
+            belong_lab AS belongLab,
+            report_status AS reportStatus,
             create_user AS createUser,
             create_time AS createTime,
             remark
@@ -221,6 +227,9 @@
             produce_id AS produceId,
             hole_number AS holeNumber,
             layout,
+            origin_hole_no AS originHoleNo,
+            belong_lab AS belongLab,
+            report_status AS reportStatus,
             create_user AS createUser,
             create_time AS createTime,
             remark
@@ -249,6 +258,9 @@
         MAX(s.return_state) AS returnState,
         MAX(s.flow_name) AS flowName,
         MAX(s.create_user) AS createUser,
+        MAX(s.origin_hole_no) AS originHoleNo,
+        MAX(s.belong_lab) AS belongLab,
+        MAX(s.report_status) AS reportStatus,
         MAX(s.remark) AS remark
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
@@ -301,6 +313,9 @@
         MAX(s.return_state) AS returnState,
         MAX(s.flow_name) AS flowName,
         MAX(s.create_user) AS createUser,
+        MAX(s.origin_hole_no) AS originHoleNo,
+        MAX(s.belong_lab) AS belongLab,
+        MAX(s.report_status) AS reportStatus,
         MAX(s.remark) AS remark
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
@@ -330,6 +345,8 @@
         s.flow_name AS flowName,
         s.create_user AS createUser,
         s.origin_hole_no AS originHoleNo,
+        s.belong_lab AS belongLab,
+        s.report_status AS reportStatus,
         s.remark AS remark
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
@@ -393,6 +410,8 @@
             s.carrier_name AS carrierName,
             s.antibiotic_type AS antibioticType,
             s.sample_position AS samplePosition,
+            s.belong_lab AS belongLab,
+            s.report_status AS reportStatus,
             s.remark AS remark
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
@@ -430,6 +449,40 @@
           AND c.email IS NOT NULL
           AND c.email != ''
         ORDER BY c.id, s.create_time DESC
+    </select>
+
+    <!--======================================测序BDT查询======================================-->
+    <select id="sequencingBDT" resultType="com.youkang.system.domain.resp.order.SequencingBDTResp">
+        SELECT
+            s.order_id AS orderId,
+            COUNT(*) AS templateNumber,
+            MAX(c.customer_name) AS customerName,
+            MAX(c.address) AS customerAddress,
+            s.sample_id AS sampleId,
+            MAX(s.sample_type) AS sampleType,
+            MAX(s.primer) AS primer,
+            MAX(s.primer_concentration) AS primerConcentration,
+            MAX(s.carrier_name) AS carrierName,
+            MAX(s.antibiotic_type) AS antibioticType,
+            MAX(s.fragment_size) AS fragmentSize,
+            MAX(s.test_result) AS testResult,
+            MAX(s.origin_concentration) AS originConcentration,
+            MAX(s.plate_no) AS plateNo,
+            MAX(s.hole_no) AS holeNo,
+            MAX(s.performance) AS performance,
+            MAX(s.return_state) AS returnState,
+            MAX(s.flow_name) AS flowName,
+            MAX(s.create_user) AS createUser,
+            MAX(s.produce_id) AS produceId,
+            MAX(s.origin_hole_no) AS originHoleNo,
+            MAX(s.belong_lab) AS belongLab,
+            MAX(s.report_status) AS reportStatus,
+            MAX(s.remark) AS remark
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        WHERE s.plate_no = #{req.plateNo}
+        GROUP BY s.order_id, s.sample_id
     </select>
 
 </mapper>

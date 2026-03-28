@@ -198,4 +198,9 @@ public class SampleInfo {
     @TableField("belong_lab")
     private String belongLab;
 
+    /** 报告状态 */
+    @Excel(name = "报告状态")
+    @TableField("report_status")
+    private String reportStatus;
+
 }

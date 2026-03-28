@@ -10,9 +10,11 @@ import com.youkang.common.exception.ServiceException;
 import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.StringUtils;
 import com.youkang.system.domain.SampleInfo;
+import com.youkang.system.domain.enums.SampleFlowOperation;
 import com.youkang.system.domain.req.order.*;
 import com.youkang.system.domain.resp.order.*;
 import com.youkang.system.mapper.SampleInfoMapper;
+import com.youkang.system.service.order.ISampleFlowLogService;
 import com.youkang.system.service.order.ISampleInfoService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,9 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
 
     @Autowired
     private RedisCache redisCache;
+
+    @Autowired
+    private ISampleFlowLogService sampleFlowLogService;
 
     /**
      * 分页查询样品信息列表
@@ -232,6 +237,24 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                     .eq(SampleInfo::getOrderId, info.getOrderId())
                     .eq(SampleInfo::getSampleId, info.getSampleId());
             this.update(updateWrapper);
+            // 记录流程流转日志
+            if (info.getProduceId() != null) {
+                sampleFlowLogService.recordLog(
+                        info.getProduceId(),
+                        SampleFlowOperation.ADD_TEMPLATE_PLATE_NO.getDescription(),
+                        "模板生产",
+                        "0",
+                        req.getTemplatePlateNo(),
+                        holeNo,
+                        null,
+                        null,
+                        req.getTemplateStype(),
+                        null,
+                        null,
+                        null,
+                        req.getRemark()
+                );
+            }
         }
     }
 
@@ -255,6 +278,24 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                 .eq(SampleInfo::getOrderId, req.getOrderId())
                 .eq(SampleInfo::getSampleId, req.getSampleId())
                 .update();
+        // 记录流程流转日志
+        if (req.getProduceId() != null) {
+            sampleFlowLogService.recordLog(
+                    req.getProduceId(),
+                    SampleFlowOperation.ADD_TEMPLATE_HOLE_NO.getDescription(),
+                    "模板生产",
+                    "0",
+                    req.getTemplatePlateNo(),
+                    req.getTemplateHoleNo(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    req.getRemark()
+            );
+        }
     }
 
     @Override
@@ -347,6 +388,21 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .in(SampleInfo::getProduceId, req.getProduceIdList())
                 .update();
+        // 批量记录流程流转日志
+        sampleFlowLogService.batchRecordLog(
+                req.getProduceIdList(),
+                SampleFlowOperation.SET_STATUS.getDescription(),
+                flowName,
+                "模板生产",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                returnState,
+                req.getRemark()
+        );
     }
 
     @Override
@@ -363,6 +419,21 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                     .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                     .in(SampleInfo::getProduceId, req.getProduceIdList())
                     .update();
+            // 批量记录流程流转日志
+            sampleFlowLogService.batchRecordLog(
+                    req.getProduceIdList(),
+                    SampleFlowOperation.SET_ORIGIN_CONCENTRATION.getDescription(),
+                    "模板成功",
+                    "模板生产",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    req.getOriginConcentration(),
+                    "模板成功",
+                    null
+            );
         }else {
             //2.有传板号
             this.lambdaUpdate().set(SampleInfo::getOriginConcentration, req.getOriginConcentration())
@@ -372,6 +443,21 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                     .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                     .in(SampleInfo::getProduceId, req.getProduceIdList())
                     .update();
+            // 批量记录流程流转日志
+            sampleFlowLogService.batchRecordLog(
+                    req.getProduceIdList(),
+                    SampleFlowOperation.SET_ORIGIN_CONCENTRATION.getDescription(),
+                    "反应生产",
+                    "模板生产",
+                    null,
+                    null,
+                    req.getPlateNo(),
+                    null,
+                    null,
+                    req.getOriginConcentration(),
+                    "反应生产",
+                    null
+            );
         }
 
     }
@@ -386,6 +472,21 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .in(SampleInfo::getProduceId, req.getProduceIdList())
                 .update();
+        // 批量记录流程流转日志
+        sampleFlowLogService.batchRecordLog(
+                req.getProduceIdList(),
+                SampleFlowOperation.SEND_BACK.getDescription(),
+                "0",
+                "模板生产",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "模板退回",
+                null
+        );
     }
 
     @Override
@@ -408,5 +509,157 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         return sampleInfoMapper.queryTemplateFailedList();
     }
 
+    //=============================================反应生产============================================
+
+    @Override
+    public void updateReactionProduceOriginConcentration(ReactionProduceOriginConcentrationReq req) {
+        this.lambdaUpdate()
+                .set(SampleInfo::getOriginConcentration, req.getOriginConcentration())
+                .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
+                .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                .in(SampleInfo::getProduceId, req.getProduceIdList())
+                .update();
+    }
+
+    @Override
+    public void updateReactionProducePlate(ReactionProducePlateReq req) {
+        List<Long> produceIdList = req.getProduceIdList();
+        if (produceIdList == null || produceIdList.isEmpty()) {
+            throw new ServiceException("生产编号列表不能为空");
+        }
+
+        // 获取可用孔号列表（按横排/竖排排序）
+        List<String> availableHoles = getAvailableHolesForReactionProduce(req.getPlateNo(), req.getLayout());
+
+        if (availableHoles.size() < produceIdList.size()) {
+            throw new ServiceException("当前板号剩余孔号数量不足,剩余：" + availableHoles.size() + "个，请重新选择");
+        }
+
+        String username = SecurityUtils.getUsername();
+        LocalDateTime now = LocalDateTime.now();
+
+        // 遍历生产编号列表，为每个样品分配孔号并更新
+        for (int i = 0; i < produceIdList.size(); i++) {
+            Long produceId = produceIdList.get(i);
+            String holeNo = availableHoles.get(i);
+            this.lambdaUpdate()
+                    .set(SampleInfo::getPlateNo, req.getPlateNo())
+                    .set(SampleInfo::getHoleNo, holeNo)
+                    .set(SampleInfo::getRemark, req.getRemark())
+                    .set(SampleInfo::getUpdateUser, username)
+                    .set(SampleInfo::getUpdateTime, now)
+                    .set(SampleInfo::getFlowName, "0")
+                    .eq(SampleInfo::getProduceId, produceId)
+                    .update();
+            // 记录流程流转日志
+            sampleFlowLogService.recordLog(
+                    produceId,
+                    SampleFlowOperation.ADD_REACTION_PLATE_NO.getDescription(),
+                    "0",
+                    "反应生产",
+                    null,
+                    null,
+                    req.getPlateNo(),
+                    holeNo,
+                    req.getLayout(),
+                    null,
+                    null,
+                    null,
+                    req.getRemark()
+            );
+        }
+    }
+
+    @Override
+    public void updateReactionProduceHoleNo(ReactionProduceHoleNoReq req) {
+        // 查看当前板号孔号有无被占用
+        boolean exists = this.lambdaQuery()
+                .eq(SampleInfo::getPlateNo, req.getPlateNo())
+                .eq(SampleInfo::getHoleNo, req.getHoleNo())
+                .exists();
+        if (exists) {
+            throw new ServiceException("当前板号孔号已被占用");
+        }
+        String username = SecurityUtils.getUsername();
+        this.lambdaUpdate()
+                .set(SampleInfo::getPlateNo, req.getPlateNo())
+                .set(SampleInfo::getHoleNo, req.getHoleNo())
+                .set(SampleInfo::getRemark, req.getRemark())
+                .set(SampleInfo::getUpdateUser, username)
+                .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                .set(SampleInfo::getFlowName, "0")
+                .eq(SampleInfo::getProduceId, req.getProduceId())
+                .update();
+        // 记录流程流转日志
+        sampleFlowLogService.recordLog(
+                req.getProduceId(),
+                SampleFlowOperation.ADD_REACTION_HOLE_NO.getDescription(),
+                "0",
+                "反应生产",
+                null,
+                null,
+                req.getPlateNo(),
+                req.getHoleNo(),
+                null,
+                null,
+                null,
+                null,
+                req.getRemark()
+        );
+    }
+
+    /**
+     * 获取指定板号的所有可用孔号列表（反应生产用）
+     *
+     * @param plateNo  板号
+     * @param sortType 排序方式：横排/竖排
+     * @return 可用孔号列表
+     */
+    private List<String> getAvailableHolesForReactionProduce(String plateNo, String sortType) {
+        // 查询当前板号已使用的孔号
+        List<String> usedHoles = this.lambdaQuery()
+                .select(SampleInfo::getHoleNo)
+                .eq(SampleInfo::getPlateNo, plateNo)
+                .isNotNull(SampleInfo::getHoleNo)
+                .list()
+                .stream()
+                .map(SampleInfo::getHoleNo)
+                .filter(h -> h != null && !h.isEmpty())
+                .toList();
+        Set<String> usedSet = new HashSet<>(usedHoles);
+
+        List<String> availableHoles = new ArrayList<>();
+        String[] rows = {"A", "B", "C", "D", "E", "F", "G", "H"};
+
+        boolean isHorizontal = "横排".equals(sortType);
+
+        if (isHorizontal) {
+            // 横排：A01-A12, B01-B12, ..., H01-H12 (按行优先)
+            for (String row : rows) {
+                for (int col = 1; col <= 12; col++) {
+                    String hole = row + String.format("%02d", col);
+                    if (!usedSet.contains(hole)) {
+                        availableHoles.add(hole);
+                    }
+                }
+            }
+        } else {
+            // 竖排：A01-H01, A02-H02, ..., A12-H12 (按列优先)
+            for (int col = 1; col <= 12; col++) {
+                for (String row : rows) {
+                    String hole = row + String.format("%02d", col);
+                    if (!usedSet.contains(hole)) {
+                        availableHoles.add(hole);
+                    }
+                }
+            }
+        }
+        return availableHoles;
+    }
+
+    @Override
+    public List<SequencingBDTResp> sequencingBDT(SequencingBDTReq req) {
+        return sampleInfoMapper.sequencingBDT(req);
+    }
 
 }

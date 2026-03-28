@@ -14,6 +14,9 @@ public class HoleNoUpdateReq {
     @Schema(description = "样品编号")
     private String sampleId;
 
+    @Schema(description = "生产编号")
+    private Long produceId;
+
     @Schema(description = "模板板号")
     private String templatePlateNo;
 

@@ -10,4 +10,7 @@ public class TemplateInfoReq {
     private String orderId;
 
     private String sampleId;
+
+    /** 生产编号 */
+    private Long produceId;
 }

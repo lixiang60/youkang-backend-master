@@ -10,7 +10,10 @@
       "Bash(tree:*)",
       "Bash(mvn compile:*)",
       "Bash(del \"D:\\\\github_projects\\\\erp\\\\youkang-backend-master\\\\nul\")",
-      "Bash(git -C \"D:\\\\github_projects\\\\erp\\\\youkang-backend-master\" status --short)"
+      "Bash(git -C \"D:\\\\github_projects\\\\erp\\\\youkang-backend-master\" status --short)",
+      "Bash(claude:*)",
+      "Bash(npm update:*)",
+      "Bash(npm --version)"
     ],
     "deny": [],
     "ask": []

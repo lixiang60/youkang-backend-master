@@ -177,7 +177,7 @@ public class SampleInfoController {
         return R.ok(sampleInfoService.templateBDT(req));
     }
 
-    @Operation(summary = "获取特定板号剩余孔数量", description = "获取特定板号剩余孔数量")
+    @Operation(summary = "获取特定模板板号剩余孔数量", description = "获取特定板号剩余孔数量")
     @PreAuthorize("@ss.hasPermi('order:sample:template:getHoleNum')")
     @GetMapping("/template/getHoleNum")
     public R<Integer> getHoleNum(@RequestParam String templateNo) {
@@ -245,5 +245,40 @@ public class SampleInfoController {
         return R.ok(sampleInfoService.queryTemplateFailedList());
     }
 
+    //=============================================反应生产============================================
+
+    @Operation(summary = "反应生产-设置原浓度", description = "根据生产编号设置原浓度")
+    @PreAuthorize("@ss.hasPermi('order:sample:reactionProduce')")
+    @Log(title = "反应生产-设置原浓度", businessType = BusinessType.UPDATE)
+    @PostMapping("/reactionProduce/originConcentration")
+    public R<Void> updateReactionProduceOriginConcentration(@RequestBody ReactionProduceOriginConcentrationReq req) {
+        sampleInfoService.updateReactionProduceOriginConcentration(req);
+        return R.ok();
+    }
+
+    @Operation(summary = "反应生产-添加板号和孔号", description = "根据生产编号批量添加板号和孔号")
+    @PreAuthorize("@ss.hasPermi('order:sample:reactionProduce')")
+    @Log(title = "反应生产-添加板号和孔号", businessType = BusinessType.UPDATE)
+    @PostMapping("/reactionProduce/plate")
+    public R<Void> updateReactionProducePlate(@RequestBody ReactionProducePlateReq req) {
+        sampleInfoService.updateReactionProducePlate(req);
+        return R.ok();
+    }
+
+    @Operation(summary = "反应生产-单个添加孔号", description = "根据生产编号单个添加孔号")
+    @PreAuthorize("@ss.hasPermi('order:sample:reactionProduce')")
+    @Log(title = "反应生产-单个添加孔号", businessType = BusinessType.UPDATE)
+    @PostMapping("/reactionProduce/holeNo")
+    public R<Void> updateReactionProduceHoleNo(@RequestBody ReactionProduceHoleNoReq req) {
+        sampleInfoService.updateReactionProduceHoleNo(req);
+        return R.ok();
+    }
+
+    @Operation(summary = "测序BDT", description = "根据板号查询测序BDT")
+    @PreAuthorize("@ss.hasPermi('order:sample:reactionProduce')")
+    @PostMapping("/reactionProduce/sequencingBDT")
+    public R<List<SequencingBDTResp>> sequencingBDT(@RequestBody SequencingBDTReq req) {
+        return R.ok(sampleInfoService.sequencingBDT(req));
+    }
 
 }

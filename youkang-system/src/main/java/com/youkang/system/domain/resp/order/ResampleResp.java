@@ -54,4 +54,8 @@ public class ResampleResp {
     @Excel(name = "样品备注")
     @Schema(description = "样品备注")
     private String remark;
+
+    @Excel(name = "报告状态")
+    @Schema(description = "报告状态")
+    private String reportStatus;
 }

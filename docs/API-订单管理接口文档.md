@@ -913,6 +913,182 @@
 
 ---
 
+### 4.3 查询重抽样品列表
+
+**接口描述**: 通过模板板号查询模板重抽、报告重抽的样品列表
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/template/produce/resampleList`
+
+**权限要求**: `order:sample:template`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| templatePlateNos | String | 否 | 模板板号列表，多个用逗号分隔 |
+| belongLab | String | 否 | 所属实验室 |
+
+**请求示例**:
+
+```json
+{
+  "templatePlateNos": "P001,P002",
+  "belongLab": "有康实验室"
+}
+```
+
+**响应参数**:
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| produceId | Long | 流水号/生产编号 |
+| originHoleNo | String | 原孔号 |
+| customerName | String | 客户姓名 |
+| returnState | String | 返回状态 |
+| sampleType | String | 样本类型 |
+| sampleId | String | 样品编号 |
+| carrierName | String | 载体名称 |
+| antibioticType | String | 抗生素类型 |
+| samplePosition | String | 样品位置 |
+| remark | String | 样品备注 |
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": [
+    {
+      "produceId": 2503170001,
+      "originHoleNo": "A1",
+      "customerName": "张三",
+      "returnState": "模板重抽",
+      "sampleType": "质粒",
+      "sampleId": "S001",
+      "carrierName": "pUC19",
+      "antibioticType": "氨苄青霉素",
+      "samplePosition": "A1",
+      "remark": "需要重新送样"
+    }
+  ]
+}
+```
+
+---
+
+### 4.4 根据板号获取已使用的孔号
+
+**接口描述**: 根据模板板号获取已经被使用的孔号列表
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/template/produce/getUserTemplateHole`
+
+**权限要求**: `order:sample:template`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| templatePlateNo | String | 是 | 模板板号 |
+
+**请求示例**:
+
+```json
+{
+  "templatePlateNo": "P001"
+}
+```
+
+**响应参数**:
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| templateHoleNo | String | 模板孔号 |
+| produceId | Long | 生产编号 |
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": [
+    {
+      "templateHoleNo": "A01",
+      "produceId": 2503170001
+    },
+    {
+      "templateHoleNo": "A02",
+      "produceId": 2503170002
+    }
+  ]
+}
+```
+
+---
+
+### 4.5 查询模板失败样品列表
+
+**接口描述**: 查询所有流程在"模板邮件"的样品列表，用于发送邮件通知
+
+**请求方式**: `GET`
+
+**接口路径**: `/order/sample/template/produce/templateFailedList`
+
+**权限要求**: `order:sample:template`
+
+**请求参数**: 无
+
+**响应参数**:
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| customerId | Integer | 客户ID |
+| customerName | String | 客户姓名 |
+| customerEmail | String | 客户邮箱 |
+| createTime | String | 送样日期 |
+| orderId | String | 订单号 |
+| sampleId | String | 样品编号 |
+| returnState | String | 模板状态 |
+| remark | String | 失败原因 |
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": [
+    {
+      "customerId": 1,
+      "customerName": "张三",
+      "customerEmail": "zhangsan@example.com",
+      "createTime": "2026-03-17T14:30:00",
+      "orderId": "20260317143052051",
+      "sampleId": "S001",
+      "returnState": "模板失败",
+      "remark": "质粒浓度过低"
+    },
+    {
+      "customerId": 1,
+      "customerName": "张三",
+      "customerEmail": "zhangsan@example.com",
+      "createTime": "2026-03-17T15:00:00",
+      "orderId": "20260317150001234",
+      "sampleId": "S002",
+      "returnState": "模板失败",
+      "remark": "样品降解"
+    }
+  ]
+}
+```
+
+---
+
 ## 附录
 
 ### 通用响应结构
@@ -949,4 +1125,4 @@
 
 ---
 
-*文档生成时间: 2026-03-17*
+*文档生成时间: 2026-03-19*

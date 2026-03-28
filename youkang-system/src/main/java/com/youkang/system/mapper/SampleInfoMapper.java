@@ -86,4 +86,12 @@ public interface SampleInfoMapper extends BaseMapper<SampleInfo> {
      */
     List<TemplateFailedResp> queryTemplateFailedList();
 
+    /**
+     * 测序BDT查询
+     *
+     * @param req 查询条件（板号）
+     * @return 测序BDT响应列表
+     */
+    List<SequencingBDTResp> sequencingBDT(@Param("req") SequencingBDTReq req);
+
 }

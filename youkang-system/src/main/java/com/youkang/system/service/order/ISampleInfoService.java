@@ -111,4 +111,35 @@ public interface ISampleInfoService extends IService<SampleInfo> {
      */
     List<TemplateFailedResp> queryTemplateFailedList();
 
+    //=============================================反应生产============================================
+
+    /**
+     * 反应生产-设置原浓度
+     *
+     * @param req 设置原浓度请求
+     */
+    void updateReactionProduceOriginConcentration(ReactionProduceOriginConcentrationReq req);
+
+    /**
+     * 反应生产-批量添加板号和孔号
+     *
+     * @param req 添加板号和孔号请求
+     */
+    void updateReactionProducePlate(ReactionProducePlateReq req);
+
+    /**
+     * 反应生产-单个添加孔号
+     *
+     * @param req 添加孔号请求
+     */
+    void updateReactionProduceHoleNo(ReactionProduceHoleNoReq req);
+
+    /**
+     * 测序BDT查询
+     *
+     * @param req 查询条件（板号）
+     * @return 测序BDT响应列表
+     */
+    List<SequencingBDTResp> sequencingBDT(SequencingBDTReq req);
+
 }

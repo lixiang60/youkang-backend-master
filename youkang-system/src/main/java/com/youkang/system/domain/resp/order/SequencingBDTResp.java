@@ -5,11 +5,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * 测序BDT响应
+ */
 @Getter
 @Setter
+@Schema(description = "测序BDT响应")
+public class SequencingBDTResp {
 
-@Schema(description = "模板排版")
-public class SampleTemplateResp {
     @Excel(name = "订单号")
     @Schema(description = "订单号")
     private String orderId;
@@ -62,13 +65,13 @@ public class SampleTemplateResp {
     @Schema(description = "原浓度")
     private String originConcentration;
 
-    @Excel(name = "模板板号")
-    @Schema(description = "模板板号")
-    private String templatePlateNo;
+    @Excel(name = "板号")
+    @Schema(description = "板号")
+    private String plateNo;
 
-    @Excel(name = "模板孔号")
-    @Schema(description = "模板孔号")
-    private String templateHoleNo;
+    @Excel(name = "孔号")
+    @Schema(description = "孔号")
+    private String holeNo;
 
     @Excel(name = "完成情况")
     @Schema(description = "完成情况")
