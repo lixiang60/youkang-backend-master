@@ -281,4 +281,28 @@ public class SampleInfoController {
         return R.ok(sampleInfoService.sequencingBDT(req));
     }
 
+    @Operation(summary = "反应停止", description = "反应停止")
+    @PreAuthorize("@ss.hasPermi('order:sample:reactionStop')")
+    @PostMapping("/reactionStop")
+    public R<?> reactionStop(@RequestBody SampleCommonReq req) {
+        sampleInfoService.reactionStop(req);
+        return R.ok();
+    }
+
+    @Operation(summary = "样品不足", description = "样品不足")
+    @PreAuthorize("@ss.hasPermi('order:sample:sampleInsufficient')")
+    @PostMapping("/sampleInsufficient")
+    public R<?> insufficient(@RequestBody SampleCommonReq req) {
+        sampleInfoService.sampleInsufficient(req);
+        return R.ok();
+    }
+
+    @Operation(summary = "反应预做", description = "反应预做")
+    @PreAuthorize("@ss.hasPermi('order:sample:reactionPre')")
+    @PostMapping("/reactionPre")
+    public R<?> reactionPre(@RequestBody SampleCommonReq req) {
+        sampleInfoService.reactionPre(req);
+        return R.ok();
+    }
+
 }

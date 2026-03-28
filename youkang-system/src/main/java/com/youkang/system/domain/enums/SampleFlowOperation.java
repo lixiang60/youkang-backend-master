@@ -35,7 +35,15 @@ public enum SampleFlowOperation {
     SEND_BACK("退回"),
 
     /** 忽略 */
-    IGNORE("忽略");
+    IGNORE("忽略"),
+
+    /** 反应停止 */
+    REACTION_STOP("反应停止"),
+
+    /** 样品不足 */
+    SAMPLE_INSUFFICIENT("样品不足"),
+
+    REACTION_PRE("反应预做");
 
     private final String description;
 

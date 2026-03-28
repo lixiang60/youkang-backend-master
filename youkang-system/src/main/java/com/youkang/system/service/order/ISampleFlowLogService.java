@@ -32,44 +32,22 @@ public interface ISampleFlowLogService extends IService<SampleFlowLog> {
     List<SampleFlowLogResp> queryByProduceId(Long produceId);
 
     /**
-     * 记录流程流转日志
+     * 记录流程流转日志（自动查询样品完整信息）
      *
      * @param produceId 生产编号
      * @param operation 操作类型
-     * @param flowName 流程名称
-     * @param beforeFlowName 流转前流程名称
-     * @param templatePlateNo 模板板号
-     * @param templateHoleNo 模板孔号
-     * @param plateNo 板号
-     * @param holeNo 孔号
-     * @param layout 排版方式
-     * @param holeNumber 孔号数
-     * @param originConcentration 原浓度
-     * @param returnState 返回状态
+     * @param beforeFlowName 流转前流程名称（可为空，为空时自动从样品信息获取）
      * @param remark 备注
      */
-    void recordLog(Long produceId, String operation, String flowName, String beforeFlowName,
-                   String templatePlateNo, String templateHoleNo, String plateNo, String holeNo,
-                   String layout, Integer holeNumber, String originConcentration,
-                   String returnState, String remark);
+    void recordLog(Long produceId, String operation, String beforeFlowName, String remark);
 
     /**
-     * 批量记录流程流转日志
+     * 批量记录流程流转日志（自动查询样品完整信息）
      *
      * @param produceIds 生产编号列表
      * @param operation 操作类型
-     * @param flowName 流程名称
-     * @param beforeFlowName 流转前流程名称
-     * @param templatePlateNo 模板板号
-     * @param templateHoleNo 模板孔号
-     * @param plateNo 板号
-     * @param holeNo 孔号
-     * @param layout 排版方式
-     * @param originConcentration 原浓度
-     * @param returnState 返回状态
+     * @param beforeFlowName 流转前流程名称（可为空，为空时自动从样品信息获取）
      * @param remark 备注
      */
-    void batchRecordLog(List<Long> produceIds, String operation, String flowName, String beforeFlowName,
-                        String templatePlateNo, String templateHoleNo, String plateNo, String holeNo,
-                        String layout, String originConcentration, String returnState, String remark);
+    void batchRecordLog(List<Long> produceIds, String operation, String beforeFlowName, String remark);
 }

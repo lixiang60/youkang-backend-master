@@ -142,4 +142,10 @@ public interface ISampleInfoService extends IService<SampleInfo> {
      */
     List<SequencingBDTResp> sequencingBDT(SequencingBDTReq req);
 
+    void reactionStop(SampleCommonReq req);
+
+    void sampleInsufficient(SampleCommonReq req);
+
+    void reactionPre(SampleCommonReq req);
+
 }

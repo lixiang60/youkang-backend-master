@@ -16,6 +16,7 @@ import com.youkang.system.domain.resp.order.*;
 import com.youkang.system.mapper.SampleInfoMapper;
 import com.youkang.system.service.order.ISampleFlowLogService;
 import com.youkang.system.service.order.ISampleInfoService;
+import com.youkang.system.utils.HoleNoUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -225,10 +226,14 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         for (int i = 0; i < templateInfo.size(); i++) {
             TemplateInfoReq info = templateInfo.get(i);
             String holeNo = availableHoles.get(i);
+            // 计算孔号数（1-96）
+            Integer holeNumber = HoleNoUtils.calculateHoleNumber(holeNo, req.getTemplateStype());
+
             LambdaUpdateWrapper<SampleInfo> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.set(SampleInfo::getTemplatePlateNo, req.getTemplatePlateNo())
                     .set(SampleInfo::getTemplateHoleNo, holeNo)
                     .set(SampleInfo::getLayout, req.getTemplateStype())
+                    .set(SampleInfo::getHoleNumber, holeNumber)
                     .set(SampleInfo::getRemark, req.getRemark())
                     .set(SampleInfo::getPerformance, "模板排版")
                     .set(SampleInfo::getFlowName, "模板生产")
@@ -237,21 +242,13 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                     .eq(SampleInfo::getOrderId, info.getOrderId())
                     .eq(SampleInfo::getSampleId, info.getSampleId());
             this.update(updateWrapper);
+
             // 记录流程流转日志
             if (info.getProduceId() != null) {
                 sampleFlowLogService.recordLog(
                         info.getProduceId(),
                         SampleFlowOperation.ADD_TEMPLATE_PLATE_NO.getDescription(),
-                        "模板生产",
                         "0",
-                        req.getTemplatePlateNo(),
-                        holeNo,
-                        null,
-                        null,
-                        req.getTemplateStype(),
-                        null,
-                        null,
-                        null,
                         req.getRemark()
                 );
             }
@@ -266,10 +263,24 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         if (exists) {
             throw new ServiceException("当前板号孔号已被占用");
         }
+
+        // 查询样品信息获取排版方式
+        SampleInfo sampleInfo = this.lambdaQuery()
+                .eq(SampleInfo::getOrderId, req.getOrderId())
+                .eq(SampleInfo::getSampleId, req.getSampleId())
+                .one();
+        if (sampleInfo == null) {
+            throw new ServiceException("样品信息不存在");
+        }
+
+        // 计算孔号数
+        Integer holeNumber = HoleNoUtils.calculateHoleNumber(req.getTemplateHoleNo(), sampleInfo.getLayout());
+
         String username = SecurityUtils.getUsername();
         this.lambdaUpdate()
                 .set(SampleInfo::getTemplatePlateNo, req.getTemplatePlateNo())
                 .set(SampleInfo::getTemplateHoleNo, req.getTemplateHoleNo())
+                .set(SampleInfo::getHoleNumber, holeNumber)
                 .set(SampleInfo::getUpdateUser, username)
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .set(SampleInfo::getPerformance, "模板排版")
@@ -278,20 +289,12 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                 .eq(SampleInfo::getOrderId, req.getOrderId())
                 .eq(SampleInfo::getSampleId, req.getSampleId())
                 .update();
+
         // 记录流程流转日志
         if (req.getProduceId() != null) {
             sampleFlowLogService.recordLog(
                     req.getProduceId(),
                     SampleFlowOperation.ADD_TEMPLATE_HOLE_NO.getDescription(),
-                    "模板生产",
-                    "0",
-                    req.getTemplatePlateNo(),
-                    req.getTemplateHoleNo(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
                     null,
                     req.getRemark()
             );
@@ -392,15 +395,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         sampleFlowLogService.batchRecordLog(
                 req.getProduceIdList(),
                 SampleFlowOperation.SET_STATUS.getDescription(),
-                flowName,
                 "模板生产",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                returnState,
                 req.getRemark()
         );
     }
@@ -423,15 +418,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
             sampleFlowLogService.batchRecordLog(
                     req.getProduceIdList(),
                     SampleFlowOperation.SET_ORIGIN_CONCENTRATION.getDescription(),
-                    "模板成功",
                     "模板生产",
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    req.getOriginConcentration(),
-                    "模板成功",
                     null
             );
         }else {
@@ -447,15 +434,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
             sampleFlowLogService.batchRecordLog(
                     req.getProduceIdList(),
                     SampleFlowOperation.SET_ORIGIN_CONCENTRATION.getDescription(),
-                    "反应生产",
                     "模板生产",
-                    null,
-                    null,
-                    req.getPlateNo(),
-                    null,
-                    null,
-                    req.getOriginConcentration(),
-                    "反应生产",
                     null
             );
         }
@@ -476,15 +455,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         sampleFlowLogService.batchRecordLog(
                 req.getProduceIdList(),
                 SampleFlowOperation.SEND_BACK.getDescription(),
-                "0",
                 "模板生产",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                "模板退回",
                 null
         );
     }
@@ -542,9 +513,13 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         for (int i = 0; i < produceIdList.size(); i++) {
             Long produceId = produceIdList.get(i);
             String holeNo = availableHoles.get(i);
+            // 计算孔号数（1-96）
+            Integer holeNumber = HoleNoUtils.calculateHoleNumber(holeNo, req.getLayout());
             this.lambdaUpdate()
                     .set(SampleInfo::getPlateNo, req.getPlateNo())
                     .set(SampleInfo::getHoleNo, holeNo)
+                    .set(SampleInfo::getLayout, req.getLayout())
+                    .set(SampleInfo::getHoleNumber, holeNumber)
                     .set(SampleInfo::getRemark, req.getRemark())
                     .set(SampleInfo::getUpdateUser, username)
                     .set(SampleInfo::getUpdateTime, now)
@@ -555,16 +530,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
             sampleFlowLogService.recordLog(
                     produceId,
                     SampleFlowOperation.ADD_REACTION_PLATE_NO.getDescription(),
-                    "0",
                     "反应生产",
-                    null,
-                    null,
-                    req.getPlateNo(),
-                    holeNo,
-                    req.getLayout(),
-                    null,
-                    null,
-                    null,
                     req.getRemark()
             );
         }
@@ -580,10 +546,20 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         if (exists) {
             throw new ServiceException("当前板号孔号已被占用");
         }
+        // 查询样品信息获取排版方式
+        SampleInfo sampleInfo = this.lambdaQuery()
+                .eq(SampleInfo::getProduceId, req.getProduceId())
+                .one();
+        if (sampleInfo == null) {
+            throw new ServiceException("样品信息不存在");
+        }
+        // 计算孔号数
+        Integer holeNumber = HoleNoUtils.calculateHoleNumber(req.getHoleNo(), sampleInfo.getLayout());
         String username = SecurityUtils.getUsername();
         this.lambdaUpdate()
                 .set(SampleInfo::getPlateNo, req.getPlateNo())
                 .set(SampleInfo::getHoleNo, req.getHoleNo())
+                .set(SampleInfo::getHoleNumber, holeNumber)
                 .set(SampleInfo::getRemark, req.getRemark())
                 .set(SampleInfo::getUpdateUser, username)
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
@@ -594,16 +570,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         sampleFlowLogService.recordLog(
                 req.getProduceId(),
                 SampleFlowOperation.ADD_REACTION_HOLE_NO.getDescription(),
-                "0",
                 "反应生产",
-                null,
-                null,
-                req.getPlateNo(),
-                req.getHoleNo(),
-                null,
-                null,
-                null,
-                null,
                 req.getRemark()
         );
     }
@@ -660,6 +627,63 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     @Override
     public List<SequencingBDTResp> sequencingBDT(SequencingBDTReq req) {
         return sampleInfoMapper.sequencingBDT(req);
+    }
+
+    @Override
+    public void reactionStop(SampleCommonReq req) {
+        List<Long> produceIdList = req.getProduceIdList();
+        String remark = req.getRemark();
+        this.lambdaUpdate()
+                .set(SampleInfo::getRemark, remark)
+                .set(SampleInfo::getFlowName, "反应停止")
+                .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
+                .in(SampleInfo::getProduceId, produceIdList)
+                .update();
+        // 批量记录流程流转日志
+        sampleFlowLogService.batchRecordLog(
+                produceIdList,
+                SampleFlowOperation.REACTION_STOP.getDescription(),
+                "反应生产",
+                remark
+        );
+    }
+
+    @Override
+    public void sampleInsufficient(SampleCommonReq req){
+        List<Long> produceIdList = req.getProduceIdList();
+        this.lambdaUpdate()
+                .set(SampleInfo::getRemark, req.getRemark())
+                .set(SampleInfo::getFlowName, "样品不足")
+                .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
+                .in(SampleInfo::getProduceId, produceIdList)
+                .update();
+        // 批量记录流程流转日志
+        sampleFlowLogService.batchRecordLog(
+                produceIdList,
+                SampleFlowOperation.SAMPLE_INSUFFICIENT.getDescription(),
+                "反应生产",
+                req.getRemark()
+        );
+    }
+    @Override
+    public void reactionPre(SampleCommonReq req){
+        List<Long> produceIdList = req.getProduceIdList();
+        this.lambdaUpdate()
+                .set(SampleInfo::getRemark, req.getRemark())
+                .set(SampleInfo::getFlowName, "反应预做")
+                .set(SampleInfo::getUpdateTime, LocalDateTime.now())
+                .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
+                .in(SampleInfo::getProduceId, produceIdList)
+                .update();
+        // 批量记录流程流转日志
+        sampleFlowLogService.batchRecordLog(
+                produceIdList,
+                SampleFlowOperation.REACTION_PRE.getDescription(),
+                "反应生产",
+                req.getRemark()
+        );
     }
 
 }
