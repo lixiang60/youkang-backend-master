@@ -66,7 +66,14 @@ public interface ISampleInfoService extends IService<SampleInfo> {
     String importSample(List<SampleInfo> sampleList, Boolean isUpdateSupport, String operName);
 
 
+    //============================================测序样品相关操作=================================================
+    void arrangeReturn(SampleReturnReq req);
 
+    int getSampleCount(SampleReturnReq req);
+
+    void updateSampleReimburseStatus(List<Long> produceIds,String reimburseType);
+
+    void removeSampleReimburseStatus(List<Long> produceIds,String reimburseType);
     //============================================模板排版=================================================
     IPage<SampleTemplateResp> queryTemplatePage(SampleTemplateQueryReq req);
 
@@ -152,5 +159,12 @@ public interface ISampleInfoService extends IService<SampleInfo> {
     //=============================================报告生产============================================
 
     void capillaryAdd(PlateNoCommonReq req);
+
+    /**
+     * 修改报告状态
+     *
+     * @param req 报告状态修改请求
+     */
+    void updateReportStatus(ReportStatusUpdateReq req);
 
 }

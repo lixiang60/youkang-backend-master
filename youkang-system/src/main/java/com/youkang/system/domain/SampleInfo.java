@@ -203,4 +203,14 @@ public class SampleInfo {
     @TableField("report_status")
     private String reportStatus;
 
+    /** 返还状态 */
+    @Excel(name = "返还状态")
+    @TableField("reimburse_status")
+    private String reimburseStatus;
+
+    /** 报告异常原因 */
+    @Excel(name = "报告异常原因")
+    @TableField("report_error_reason")
+    private String reportErrorReason;
+
 }

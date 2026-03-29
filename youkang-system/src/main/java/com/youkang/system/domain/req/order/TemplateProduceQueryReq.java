@@ -4,6 +4,7 @@ import com.youkang.common.core.domain.PageReq;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.logging.log4j.message.StringFormattedMessage;
 
 @Getter
 @Setter
@@ -29,4 +30,7 @@ public class TemplateProduceQueryReq extends PageReq {
 
     @Schema(description = "创建人")
     private String createUser;
+
+    @Schema(description = "流程名称")
+    private String flowName;
 }

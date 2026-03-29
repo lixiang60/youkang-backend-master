@@ -134,6 +134,16 @@ public class SampleInfoController {
         return result ? R.ok() : R.fail("删除样品信息失败");
     }
 
+
+    //============================================测序样品功能模块=================================================
+    @Operation(summary = "安排返还-前端需要做校验，只能传同一orderId下的样品信息", description = "安排返还")
+    @PreAuthorize("@ss.hasPermi('order:sample:sequence:arrangeReturn')")
+    @PostMapping("/sequence/arrangeReturn")
+    public R<Void> arrangeReturn(@Parameter(description = "安排返还请求") @RequestBody SampleReturnReq req) {
+        sampleInfoService.arrangeReturn(req);
+        return R.ok();
+    }
+
     //============================================模板排版=================================================
     @Operation(summary = "获取模板列表", description = "分页获取模板列表")
     @PreAuthorize("@ss.hasPermi('order:sample:template:list')")
@@ -185,8 +195,8 @@ public class SampleInfoController {
     }
 
     //=============================================模板生产============================================
-    @Operation(summary = "获取模板生产列表", description = "分页获取模板列表")
-    @PreAuthorize("@ss.hasPermi('order:sample:template')")
+    @Operation(summary = "获取各流程数据列表", description = "分页获取各流程数据列表")
+    @PreAuthorize("@ss.hasPermi('order:sample:flow')")
     @PostMapping("/template/produce/list")
     public R<PageResp> templateProduceList(@RequestBody TemplateProduceQueryReq req) {
         IPage<TemplateProduceResp> page = sampleInfoService.queryTemplateProudcePage(req);
@@ -318,6 +328,15 @@ public class SampleInfoController {
     @PostMapping("/capillaryAdd")
     public R<?> capillaryAdd(@RequestBody PlateNoCommonReq req) {
         sampleInfoService.capillaryAdd(req);
+        return R.ok();
+    }
+
+    @Operation(summary = "修改报告状态", description = "修改报告状态，支持：报告成功、报告取消、报告重做、报告重抽")
+    @PreAuthorize("@ss.hasPermi('order:sample:reportStatus')")
+    @Log(title = "修改报告状态", businessType = BusinessType.UPDATE)
+    @PostMapping("/reportStatus/update")
+    public R<?> updateReportStatus(@RequestBody ReportStatusUpdateReq req) {
+        sampleInfoService.updateReportStatus(req);
         return R.ok();
     }
 

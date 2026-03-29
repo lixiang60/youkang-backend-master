@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.youkang.system.mapper.ReimburseRecordMapper">
+
+    <select id="queryPage" resultType="com.youkang.system.domain.resp.order.ReimburseRecordResp">
+        SELECT
+            id,
+            customer_name AS customerName,
+            order_id AS orderId,
+            schedule_time AS scheduleTime,
+            scheduler,
+            reimburse_type AS reimburseType,
+            reimburse_count AS reimburseCount,
+            produce_ids AS produceIds,
+            status,
+            reimburse_time AS reimburseTime,
+            reimburser,
+            belong_company AS belongCompany,
+            produce_company AS produceCompany,
+            remark,
+            create_user AS createUser,
+            create_time AS createTime
+        FROM yk_reimburse_record
+        <where>
+            <if test="query.customerName != null and query.customerName != ''">
+                AND customer_name LIKE CONCAT('%', #{query.customerName}, '%')
+            </if>
+            <if test="query.orderId != null and query.orderId != ''">
+                AND order_id LIKE CONCAT('%', #{query.orderId}, '%')
+            </if>
+            <if test="query.status != null and query.status != ''">
+                AND status = #{query.status}
+            </if>
+            <if test="query.reimburseType != null and query.reimburseType != ''">
+                AND reimburse_type = #{query.reimburseType}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="queryById" resultType="com.youkang.system.domain.resp.order.ReimburseRecordResp">
+        SELECT
+            id,
+            customer_name AS customerName,
+            order_id AS orderId,
+            schedule_time AS scheduleTime,
+            scheduler,
+            reimburse_type AS reimburseType,
+            reimburse_count AS reimburseCount,
+            produce_ids AS produceIds,
+            status,
+            reimburse_time AS reimburseTime,
+            reimburser,
+            belong_company AS belongCompany,
+            produce_company AS produceCompany,
+            remark,
+            create_user AS createUser,
+            create_time AS createTime
+        FROM yk_reimburse_record
+        WHERE id = #{id}
+    </select>
+
+</mapper>

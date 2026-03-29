@@ -6,6 +6,7 @@ import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.*;
 import com.youkang.system.domain.resp.order.*;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -94,4 +95,22 @@ public interface SampleInfoMapper extends BaseMapper<SampleInfo> {
      */
     List<SequencingBDTResp> sequencingBDT(@Param("req") SequencingBDTReq req);
 
+    /**
+     * 批量追加备注
+     *
+     * @param produceIds 生产编号列表
+     * @param remark     要追加的备注
+     */
+    void appendRemark(@Param("produceIds") List<Long> produceIds, @Param("remark") String remark);
+
+    /**
+     * 根据订单号和样品编号查询样品信息
+     *
+     * @param orderId  订单号
+     * @param sampleId 样品编号
+     * @return 样品响应
+     */
+    List<SampleResp> queryByOrderIdAndProduceId(@Param("orderId") String orderId, @Param("produceIdList") List<Long> produceIdList);
+
+    int getSampleCount(@Param("orderId") String orderId, @Param("produceIdList") List<Long> produceIdList);
 }

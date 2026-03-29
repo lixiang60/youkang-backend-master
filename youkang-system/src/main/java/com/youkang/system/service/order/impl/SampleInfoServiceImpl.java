@@ -1,6 +1,5 @@
 package com.youkang.system.service.order.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -13,13 +12,16 @@ import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.enums.SampleFlowOperation;
 import com.youkang.system.domain.req.order.*;
 import com.youkang.system.domain.resp.order.*;
+import com.youkang.system.mapper.ReimburseRecordMapper;
 import com.youkang.system.mapper.SampleInfoMapper;
+import com.youkang.system.service.order.IReimburseRecordService;
 import com.youkang.system.service.order.ISampleFlowLogService;
 import com.youkang.system.service.order.ISampleInfoService;
 import com.youkang.system.utils.HoleNoUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 样品信息Service业务层处理
@@ -49,6 +52,26 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
 
     @Autowired
     private ISampleFlowLogService sampleFlowLogService;
+
+    @Autowired
+    private IReimburseRecordService reimburseRecordService;
+
+    /**
+     * 构建追加后的备注字符串
+     *
+     * @param existingRemark 原有备注
+     * @param newRemark      新备注
+     * @return 追加后的备注
+     */
+    private String buildAppendedRemark(String existingRemark, String newRemark) {
+        if (newRemark == null || newRemark.isEmpty()) {
+            return existingRemark;
+        }
+        if (existingRemark == null || existingRemark.isEmpty()) {
+            return newRemark;
+        }
+        return existingRemark + ";" + newRemark;
+    }
 
     /**
      * 分页查询样品信息列表
@@ -197,6 +220,103 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         return successMsg.toString();
     }
 
+
+    //=====================================测序样品相关操作======================================
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void arrangeReturn(SampleReturnReq req){
+        List<Long> produceIdList = req.getProduceIdList();
+        String newReimburseType = req.getReimburseType();
+
+        // 查询需要更新的记录
+        List<SampleInfo> sampleList = this.lambdaQuery()
+                .select(SampleInfo::getProduceId, SampleInfo::getReimburseStatus)
+                .eq(SampleInfo::getOrderId, req.getOrderId())
+                .in(SampleInfo::getProduceId, produceIdList)
+                .list();
+
+        // 遍历更新，将新的 reimburseType 拼接到原有值前面
+        for (SampleInfo sample : sampleList) {
+            String existingStatus = sample.getReimburseStatus();
+            String updatedStatus;
+            if (StringUtils.isEmpty(existingStatus)) {
+                updatedStatus = newReimburseType;
+            } else {
+                updatedStatus = newReimburseType + ";" + existingStatus;
+            }
+
+            this.lambdaUpdate()
+                    .set(SampleInfo::getReimburseStatus, updatedStatus)
+                    .eq(SampleInfo::getProduceId, sample.getProduceId())
+                    .update();
+        }
+
+        // 添加返还记录
+        reimburseRecordService.addRecord(req);
+    }
+
+    @Override
+    public int getSampleCount(SampleReturnReq req){
+        List<Long> produceIdList = req.getProduceIdList();
+        String orderId = req.getOrderId();
+        return sampleInfoMapper.getSampleCount(orderId,produceIdList);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateSampleReimburseStatus(List<Long> produceIds,String reimburseType){
+        if (produceIds == null || produceIds.isEmpty()) {
+            return;
+        }
+
+        // 将 "安排返还xxx" 转换为 "已返还xxx"
+        String newStatus = reimburseType.replace("安排", "已");
+
+        // 查询需要更新的记录
+        List<SampleInfo> sampleList = this.lambdaQuery()
+                .select(SampleInfo::getProduceId, SampleInfo::getReimburseStatus)
+                .in(SampleInfo::getProduceId, produceIds)
+                .list();
+        for (SampleInfo sample : sampleList) {
+            String oldStatus = sample.getReimburseStatus();
+            String updateStatus;
+            if (StringUtils.isEmpty(oldStatus)) {
+                updateStatus = newStatus;
+            } else {
+                // 新值拼接在现有值的前面
+                updateStatus = newStatus + ";" + oldStatus;
+            }
+            this.lambdaUpdate().set(SampleInfo::getReimburseStatus, updateStatus)
+                    .eq(SampleInfo::getProduceId, sample.getProduceId())
+                    .update();
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void removeSampleReimburseStatus(List<Long> produceIds,String reimburseType){
+
+        // 查询需要更新的记录
+        List<SampleInfo> sampleList = this.lambdaQuery()
+                .select(SampleInfo::getProduceId, SampleInfo::getReimburseStatus)
+                .in(SampleInfo::getProduceId, produceIds)
+                .list();
+        for (SampleInfo sample : sampleList) {
+            String oldStatus = sample.getReimburseStatus();
+            String newStatus = oldStatus;
+            // 将存在的安排事项替换为空
+            // 优先匹配带分号的情况，再匹配不带分号的情况
+            if (oldStatus.contains(reimburseType + ";")) {
+                newStatus = oldStatus.replace(reimburseType + ";", "");
+            } else if (oldStatus.contains(reimburseType)) {
+                newStatus = oldStatus.replace(reimburseType, "");
+            }
+            this.lambdaUpdate().set(SampleInfo::getReimburseStatus, newStatus)
+                    .eq(SampleInfo::getProduceId, sample.getProduceId())
+                    .update();
+        }
+    }
     //=====================================模板排版======================================
 
     @Override
@@ -229,12 +349,20 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
             // 计算孔号数（1-96）
             Integer holeNumber = HoleNoUtils.calculateHoleNumber(holeNo, req.getTemplateStype());
 
+            // 查询原有备注
+            SampleInfo existingSample = this.lambdaQuery()
+                    .select(SampleInfo::getRemark)
+                    .eq(SampleInfo::getOrderId, info.getOrderId())
+                    .eq(SampleInfo::getSampleId, info.getSampleId())
+                    .one();
+            String appendedRemark = buildAppendedRemark(existingSample != null ? existingSample.getRemark() : null, req.getRemark());
+
             LambdaUpdateWrapper<SampleInfo> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.set(SampleInfo::getTemplatePlateNo, req.getTemplatePlateNo())
                     .set(SampleInfo::getTemplateHoleNo, holeNo)
                     .set(SampleInfo::getLayout, req.getTemplateStype())
                     .set(SampleInfo::getHoleNumber, holeNumber)
-                    .set(SampleInfo::getRemark, req.getRemark())
+                    .set(SampleInfo::getRemark, appendedRemark)
                     .set(SampleInfo::getPerformance, "模板排版")
                     .set(SampleInfo::getFlowName, "模板生产")
                     .set(SampleInfo::getUpdateUser, username)
@@ -276,6 +404,9 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         // 计算孔号数
         Integer holeNumber = HoleNoUtils.calculateHoleNumber(req.getTemplateHoleNo(), sampleInfo.getLayout());
 
+        // 追加备注
+        String appendedRemark = buildAppendedRemark(sampleInfo.getRemark(), req.getRemark());
+
         String username = SecurityUtils.getUsername();
         this.lambdaUpdate()
                 .set(SampleInfo::getTemplatePlateNo, req.getTemplatePlateNo())
@@ -285,7 +416,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .set(SampleInfo::getPerformance, "模板排版")
                 .set(SampleInfo::getFlowName, "模板生产")
-                .set(SampleInfo::getRemark, req.getRemark())
+                .set(SampleInfo::getRemark, appendedRemark)
                 .eq(SampleInfo::getOrderId, req.getOrderId())
                 .eq(SampleInfo::getSampleId, req.getSampleId())
                 .update();
@@ -305,8 +436,16 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     public void ignoreTemp(SampleTemplateUpdateReq req) {
         String username = SecurityUtils.getUsername();
         req.getTemplateInfo().forEach(info -> {
+            // 查询原有备注
+            SampleInfo existingSample = this.lambdaQuery()
+                    .select(SampleInfo::getRemark)
+                    .eq(SampleInfo::getOrderId, info.getOrderId())
+                    .eq(SampleInfo::getSampleId, info.getSampleId())
+                    .one();
+            String appendedRemark = buildAppendedRemark(existingSample != null ? existingSample.getRemark() : null, req.getRemark());
+
             this.lambdaUpdate()
-                    .set(SampleInfo::getRemark, req.getRemark())
+                    .set(SampleInfo::getRemark, appendedRemark)
                     .set(SampleInfo::getPerformance, "模板排版")
                     .set(SampleInfo::getFlowName, "模板排版")
                     .set(SampleInfo::getUpdateUser, username)
@@ -385,12 +524,15 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
             flowName = "模板成功";
         }
         this.lambdaUpdate().set(SampleInfo::getReturnState, req.getReturnState())
-                .set(SampleInfo::getRemark, req.getRemark())
                 .set(SampleInfo::getFlowName, flowName)
                 .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .in(SampleInfo::getProduceId, req.getProduceIdList())
                 .update();
+        // 追加备注
+        if (req.getRemark() != null && !req.getRemark().isEmpty()) {
+            sampleInfoMapper.appendRemark(req.getProduceIdList(), req.getRemark());
+        }
         // 批量记录流程流转日志
         sampleFlowLogService.batchRecordLog(
                 req.getProduceIdList(),
@@ -515,12 +657,20 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
             String holeNo = availableHoles.get(i);
             // 计算孔号数（1-96）
             Integer holeNumber = HoleNoUtils.calculateHoleNumber(holeNo, req.getLayout());
+
+            // 查询原有备注
+            SampleInfo existingSample = this.lambdaQuery()
+                    .select(SampleInfo::getRemark)
+                    .eq(SampleInfo::getProduceId, produceId)
+                    .one();
+            String appendedRemark = buildAppendedRemark(existingSample != null ? existingSample.getRemark() : null, req.getRemark());
+
             this.lambdaUpdate()
                     .set(SampleInfo::getPlateNo, req.getPlateNo())
                     .set(SampleInfo::getHoleNo, holeNo)
                     .set(SampleInfo::getLayout, req.getLayout())
                     .set(SampleInfo::getHoleNumber, holeNumber)
-                    .set(SampleInfo::getRemark, req.getRemark())
+                    .set(SampleInfo::getRemark, appendedRemark)
                     .set(SampleInfo::getUpdateUser, username)
                     .set(SampleInfo::getUpdateTime, now)
                     .set(SampleInfo::getFlowName, "0")
@@ -555,12 +705,14 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         }
         // 计算孔号数
         Integer holeNumber = HoleNoUtils.calculateHoleNumber(req.getHoleNo(), sampleInfo.getLayout());
+        // 追加备注
+        String appendedRemark = buildAppendedRemark(sampleInfo.getRemark(), req.getRemark());
         String username = SecurityUtils.getUsername();
         this.lambdaUpdate()
                 .set(SampleInfo::getPlateNo, req.getPlateNo())
                 .set(SampleInfo::getHoleNo, req.getHoleNo())
                 .set(SampleInfo::getHoleNumber, holeNumber)
-                .set(SampleInfo::getRemark, req.getRemark())
+                .set(SampleInfo::getRemark, appendedRemark)
                 .set(SampleInfo::getUpdateUser, username)
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .set(SampleInfo::getFlowName, "0")
@@ -634,12 +786,15 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         List<Long> produceIdList = req.getProduceIdList();
         String remark = req.getRemark();
         this.lambdaUpdate()
-                .set(SampleInfo::getRemark, remark)
                 .set(SampleInfo::getFlowName, "反应停止")
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
                 .in(SampleInfo::getProduceId, produceIdList)
                 .update();
+        // 追加备注
+        if (remark != null && !remark.isEmpty()) {
+            sampleInfoMapper.appendRemark(produceIdList, remark);
+        }
         // 批量记录流程流转日志
         sampleFlowLogService.batchRecordLog(
                 produceIdList,
@@ -653,12 +808,15 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     public void sampleInsufficient(SampleCommonReq req) {
         List<Long> produceIdList = req.getProduceIdList();
         this.lambdaUpdate()
-                .set(SampleInfo::getRemark, req.getRemark())
                 .set(SampleInfo::getFlowName, "样品不足")
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
                 .in(SampleInfo::getProduceId, produceIdList)
                 .update();
+        // 追加备注
+        if (req.getRemark() != null && !req.getRemark().isEmpty()) {
+            sampleInfoMapper.appendRemark(produceIdList, req.getRemark());
+        }
         // 批量记录流程流转日志
         sampleFlowLogService.batchRecordLog(
                 produceIdList,
@@ -672,12 +830,15 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     public void reactionPre(SampleCommonReq req) {
         List<Long> produceIdList = req.getProduceIdList();
         this.lambdaUpdate()
-                .set(SampleInfo::getRemark, req.getRemark())
                 .set(SampleInfo::getFlowName, "反应预做")
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
                 .in(SampleInfo::getProduceId, produceIdList)
                 .update();
+        // 追加备注
+        if (req.getRemark() != null && !req.getRemark().isEmpty()) {
+            sampleInfoMapper.appendRemark(produceIdList, req.getRemark());
+        }
         // 批量记录流程流转日志
         sampleFlowLogService.batchRecordLog(
                 produceIdList,
@@ -691,12 +852,15 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     public void reactionPreSendBack(SampleCommonReq req) {
         List<Long> produceIdList = req.getProduceIdList();
         this.lambdaUpdate()
-                .set(SampleInfo::getRemark, req.getRemark())
                 .set(SampleInfo::getFlowName, "反应预做")
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
                 .in(SampleInfo::getProduceId, produceIdList)
                 .update();
+        // 追加备注
+        if (req.getRemark() != null && !req.getRemark().isEmpty()) {
+            sampleInfoMapper.appendRemark(produceIdList, req.getRemark());
+        }
         sampleFlowLogService.batchRecordLog(
                 produceIdList,
                 SampleFlowOperation.REACTION_PRE_SEND_BACK.getDescription(),
@@ -714,6 +878,93 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                 .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
                 .eq(SampleInfo::getPlateNo, req.getPlateNo())
                 .update();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateReportStatus(ReportStatusUpdateReq req) {
+        List<Long> produceIdList = req.getProduceIdList();
+        String reportStatus = req.getReportStatus();
+
+        String username = SecurityUtils.getUsername();
+        LocalDateTime now = LocalDateTime.now();
+
+        // 根据报告状态设置不同的字段值
+        String performance;
+        String returnState;
+        String flowName;
+        boolean clearReactionPlateHole = false;  // 是否清除反应板号和孔号
+        boolean clearTemplatePlateHole = false;  // 是否清除模板板号和孔号
+
+        switch (reportStatus) {
+            case "报告成功":
+                performance = "报告成功";
+                returnState = "报告成功";
+                flowName = "0";
+                break;
+            case "报告取消":
+                performance = "报告取消";
+                returnState = "报告成功";
+                flowName = "0";
+                break;
+            case "报告重做":
+                performance = "模板成功";
+                returnState = "报告重做";
+                flowName = "反应生产";
+                clearReactionPlateHole = true;
+                break;
+            case "报告重抽":
+                performance = "模板排版";
+                returnState = "报告重抽";
+                flowName = "模板排版";
+                clearReactionPlateHole = true;
+                clearTemplatePlateHole = true;
+                break;
+            default:
+                throw new ServiceException("不支持的报告状态：" + reportStatus);
+        }
+
+        // 构建更新条件
+        LambdaUpdateWrapper<SampleInfo> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(SampleInfo::getPerformance, performance)
+                .set(SampleInfo::getReturnState, returnState)
+                .set(SampleInfo::getFlowName, flowName)
+                .set(SampleInfo::getReportErrorReason, req.getReportErrorReason())
+                .set(SampleInfo::getUpdateUser, username)
+                .set(SampleInfo::getUpdateTime, now)
+                .in(SampleInfo::getProduceId, produceIdList);
+
+        // 设置原浓度（如果传了的话）
+        if (StringUtils.isNotEmpty(req.getOriginConcentration())) {
+            updateWrapper.set(SampleInfo::getOriginConcentration, req.getOriginConcentration());
+        }
+
+        // 清除反应板号和孔号
+        if (clearReactionPlateHole) {
+            updateWrapper.set(SampleInfo::getPlateNo, null)
+                    .set(SampleInfo::getHoleNo, null);
+        }
+
+        // 清除模板板号和孔号
+        if (clearTemplatePlateHole) {
+            updateWrapper.set(SampleInfo::getTemplatePlateNo, null)
+                    .set(SampleInfo::getTemplateHoleNo, null);
+        }
+
+        this.update(updateWrapper);
+
+        // 追加备注
+        if (StringUtils.isNotEmpty(req.getRemark())) {
+            sampleInfoMapper.appendRemark(produceIdList, req.getRemark());
+        }
+
+        // 批量记录流程流转日志
+        sampleFlowLogService.batchRecordLog(
+                produceIdList,
+                SampleFlowOperation.UPDATE_REPORT_STATUS.getDescription(),
+                "报告生产",
+                req.getRemark()
+        );
     }
 
 }

@@ -95,4 +95,8 @@ public class TemplateProduceResp {
     @Excel(name = "报告状态")
     @Schema(description = "报告状态")
     private String reportStatus;
+
+    @Excel(name = "报告异常原因")
+    @Schema(description = "报告异常原因")
+    private String reportErrorReason;
 }

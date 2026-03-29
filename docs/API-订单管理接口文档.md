@@ -51,6 +51,20 @@
   - [5.2 批量添加板号和孔号](#52-批量添加板号和孔号)
   - [5.3 单个添加孔号](#53-单个添加孔号)
   - [5.4 测序BDT](#54-测序bdt)
+  - [5.5 反应停止](#55-反应停止)
+  - [5.6 样品不足](#56-样品不足)
+  - [5.7 反应预做](#57-反应预做)
+  - [5.8 反应预做退回](#58-反应预做退回)
+
+- [六、报告生产管理](#六报告生产管理)
+  - [6.1 修改报告状态](#61-修改报告状态)
+  - [6.2 毛细管添加](#62-毛细管添加)
+
+- [七、返还记录管理](#七返还记录管理)
+  - [7.1 查询返还记录列表](#71-查询返还记录列表)
+  - [7.2 获取返还记录详情](#72-获取返还记录详情)
+  - [7.3 确认返还](#73-确认返还)
+  - [7.4 删除返还记录](#74-删除返还记录)
 
 ---
 
@@ -1829,6 +1843,487 @@ DELETE /order/sample/2603170001,2603170002
 
 ---
 
+### 5.5 反应停止
+
+**接口描述**: 将选中的样品标记为反应停止状态
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/reactionStop`
+
+**权限要求**: `order:sample:reactionStop`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceIdList | Array[Long] | 是 | 生产编号列表 |
+| remark | String | 否 | 备注 |
+
+**请求示例**:
+
+```json
+{
+  "produceIdList": [2603170001, 2603170002],
+  "remark": "客户要求停止"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+### 5.6 样品不足
+
+**接口描述**: 将选中的样品标记为样品不足状态
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/sampleInsufficient`
+
+**权限要求**: `order:sample:sampleInsufficient`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceIdList | Array[Long] | 是 | 生产编号列表 |
+| remark | String | 否 | 备注 |
+
+**请求示例**:
+
+```json
+{
+  "produceIdList": [2603170001, 2603170002],
+  "remark": "样品量不足，需要重新送样"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+### 5.7 反应预做
+
+**接口描述**: 将选中的样品标记为反应预做状态
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/reactionPre`
+
+**权限要求**: `order:sample:reactionPre`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceIdList | Array[Long] | 是 | 生产编号列表 |
+| remark | String | 否 | 备注 |
+
+**请求示例**:
+
+```json
+{
+  "produceIdList": [2603170001, 2603170002],
+  "remark": "预先准备反应"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+### 5.8 反应预做退回
+
+**接口描述**: 将反应预做状态的样品退回
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/reactionPreSendBack`
+
+**权限要求**: `order:sample:reactionPreSendBack`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceIdList | Array[Long] | 是 | 生产编号列表 |
+| remark | String | 否 | 备注 |
+
+**请求示例**:
+
+```json
+{
+  "produceIdList": [2603170001, 2603170002],
+  "remark": "退回反应预做"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+## 六、报告生产管理
+
+### 基础路径
+
+```
+/order/sample
+```
+
+---
+
+### 6.1 修改报告状态
+
+**接口描述**: 修改报告状态，支持报告成功、报告取消、报告重做、报告重抽四种状态
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/reportStatus/update`
+
+**权限要求**: `order:sample:reportStatus`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| produceIdList | Array[Long] | 是 | 生产编号列表 |
+| originConcentration | String | 否 | 原浓度 |
+| remark | String | 否 | 备注 |
+| reportErrorReason | String | 否 | 报告异常原因 |
+| reportStatus | String | 是 | 报告状态（报告成功/报告取消/报告重做/报告重抽） |
+
+**请求示例**:
+
+```json
+{
+  "produceIdList": [2603170001, 2603170002],
+  "originConcentration": "100ng/μL",
+  "remark": "报告处理完成",
+  "reportErrorReason": "样品浓度不足",
+  "reportStatus": "报告成功"
+}
+```
+
+**报告状态说明**:
+
+| 报告状态 | 完成情况 | 返回状态 | 流程名称 | 其他操作 |
+|----------|----------|----------|----------|----------|
+| 报告成功 | 报告成功 | 报告成功 | 0 | 无 |
+| 报告取消 | 报告取消 | 报告成功 | 0 | 无 |
+| 报告重做 | 模板成功 | 报告重做 | 反应生产 | 清除反应板号和孔号 |
+| 报告重抽 | 模板排版 | 报告重抽 | 模板排版 | 清除反应板号/孔号、模板板号/孔号 |
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+### 6.2 毛细管添加
+
+**接口描述**: 根据板号将样品流转到报告生产阶段
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/sample/capillaryAdd`
+
+**权限要求**: `order:sample:capillaryAdd`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| plateNo | String | 是 | 板号 |
+
+**请求示例**:
+
+```json
+{
+  "plateNo": "R001"
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+## 七、返还记录管理
+
+### 基础路径
+
+```
+/order/reimburse
+```
+
+---
+
+### 7.1 查询返还记录列表
+
+**接口描述**: 分页查询返还记录列表
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/reimburse/list`
+
+**权限要求**: `order:reimburse:list`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| pageNum | Integer | 否 | 页码，默认1 |
+| pageSize | Integer | 否 | 每页数量，默认10 |
+| customerName | String | 否 | 客户姓名 |
+| orderId | String | 否 | 订单号 |
+| status | String | 否 | 状态（待返还/已返还） |
+| reimburseType | String | 否 | 返还类型 |
+
+**请求示例**:
+
+```json
+{
+  "pageNum": 1,
+  "pageSize": 10,
+  "customerName": "张三",
+  "orderId": "20260317143052051",
+  "status": "待返还",
+  "reimburseType": "安排返还"
+}
+```
+
+**响应参数**:
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| id | Long | 记录ID |
+| customerName | String | 客户姓名 |
+| orderId | String | 订单号 |
+| scheduleTime | DateTime | 返还安排时间 |
+| scheduler | String | 安排人 |
+| reimburseType | String | 返还类型 |
+| reimburseCount | Integer | 返还数量 |
+| produceIds | String | 生产编号集（逗号分隔） |
+| status | String | 状态：待返还/已返还 |
+| reimburseTime | DateTime | 返还时间 |
+| reimburser | String | 返还人 |
+| belongCompany | String | 所属公司 |
+| produceCompany | String | 生产公司 |
+| remark | String | 备注 |
+| createUser | String | 创建人 |
+| createTime | DateTime | 创建时间 |
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "rows": [
+      {
+        "id": 1,
+        "customerName": "张三",
+        "orderId": "20260317143052051",
+        "scheduleTime": "2026-03-28T10:00:00",
+        "scheduler": "admin",
+        "reimburseType": "安排返还",
+        "reimburseCount": 5,
+        "produceIds": "2603170001,2603170002,2603170003,2603170004,2603170005",
+        "status": "待返还",
+        "reimburseTime": null,
+        "reimburser": null,
+        "belongCompany": "有康科技",
+        "produceCompany": "生产公司A",
+        "remark": "客户要求返还",
+        "createUser": "admin",
+        "createTime": "2026-03-28T10:00:00"
+      }
+    ],
+    "total": 100
+  }
+}
+```
+
+---
+
+### 7.2 获取返还记录详情
+
+**接口描述**: 根据ID获取返还记录详细信息
+
+**请求方式**: `GET`
+
+**接口路径**: `/order/reimburse/{id}`
+
+**权限要求**: `order:reimburse:query`
+
+**路径参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| id | Long | 是 | 记录ID |
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": {
+    "id": 1,
+    "customerName": "张三",
+    "orderId": "20260317143052051",
+    "scheduleTime": "2026-03-28T10:00:00",
+    "scheduler": "admin",
+    "reimburseType": "安排返还",
+    "reimburseCount": 5,
+    "produceIds": "2603170001,2603170002,2603170003,2603170004,2603170005",
+    "status": "待返还",
+    "reimburseTime": null,
+    "reimburser": null,
+    "belongCompany": "有康科技",
+    "produceCompany": "生产公司A",
+    "remark": "客户要求返还",
+    "createUser": "admin",
+    "createTime": "2026-03-28T10:00:00"
+  }
+}
+```
+
+---
+
+### 7.3 确认返还
+
+**接口描述**: 确认返还操作，将待返还状态更新为已返还
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/reimburse/confirm`
+
+**权限要求**: `order:reimburse:confirm`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| reimburseConfirmReqs | Array | 是 | 返还确认信息列表 |
+| reimburseConfirmReqs[].id | Long | 是 | 记录ID |
+| reimburseConfirmReqs[].produceIds | String | 否 | 生产编号集（逗号分隔） |
+| reimburseConfirmReqs[].reimburseType | String | 否 | 返还类型 |
+
+**请求示例**:
+
+```json
+{
+  "reimburseConfirmReqs": [
+    {
+      "id": 1,
+      "produceIds": "2603170001,2603170002",
+      "reimburseType": "安排返还"
+    },
+    {
+      "id": 2,
+      "produceIds": "2603170003,2603170004",
+      "reimburseType": "安排返还"
+    }
+  ]
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
+### 7.4 删除返还记录
+
+**接口描述**: 删除返还记录
+
+**请求方式**: `POST`
+
+**接口路径**: `/order/reimburse/remove`
+
+**权限要求**: `order:reimburse:remove`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| reimburseConfirmReqs | Array | 是 | 要删除的记录列表 |
+| reimburseConfirmReqs[].id | Long | 是 | 记录ID |
+
+**请求示例**:
+
+```json
+{
+  "reimburseConfirmReqs": [
+    {
+      "id": 1
+    },
+    {
+      "id": 2
+    }
+  ]
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+---
+
 ## 附录
 
 ### 通用响应结构
@@ -1865,4 +2360,4 @@ DELETE /order/sample/2603170001,2603170002
 
 ---
 
-*文档生成时间: 2026-03-28*
+*文档生成时间: 2026-03-29*

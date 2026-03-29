@@ -163,11 +163,23 @@ public class SampleResp {
     @Schema(description = "报告状态")
     private String reportStatus;
 
+    @Excel(name = "返还状态")
+    @Schema(description = "返还状态")
+    private String reimburseStatus;
+
     @Excel(name = "客户姓名")
     @Schema(description = "客户姓名")
     private String customerName;
 
+    @Excel(name = "客户id")
+    @Schema(description = "客户id")
+    private Long customerId;
+
     @Excel(name = "客户地址")
     @Schema(description = "客户地址")
     private String customerAddress;
+
+    @Excel(name = "报告异常原因")
+    @Schema(description = "报告异常原因")
+    private String reportErrorReason;
 }

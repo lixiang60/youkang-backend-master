@@ -49,6 +49,8 @@ public enum SampleFlowOperation {
 
     CAPILLARY_ADD("毛细管添加"),
 
+    UPDATE_REPORT_STATUS("修改报告状态"),
+
 
     ;
 

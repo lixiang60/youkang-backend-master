@@ -4,196 +4,220 @@
 
     <select id="queryPage" resultType="com.youkang.system.domain.resp.order.SampleResp">
         SELECT
-            order_id AS orderId,
-            order_history AS orderHistory,
-            sample_id AS sampleId,
-            sample_type AS sampleType,
-            sample_position AS samplePosition,
-            primer,
-            primer_type AS primerType,
-            primer_position AS primerPosition,
-            primer_concentration AS primerConcentration,
-            seq,
-            project,
-            carrier_name AS carrierName,
-            antibiotic_type AS antibioticType,
-            plasmid_length AS plasmidLength,
-            fragment_size AS fragmentSize,
-            test_result AS testResult,
-            origin_concentration AS originConcentration,
-            template_plate_no AS templatePlateNo,
-            template_hole_no AS templateHoleNo,
-            performance,
-            return_state AS returnState,
-            flow_name AS flowName,
-            plate_no AS plateNo,
-            hole_no AS holeNo,
-            belong_company AS belongCompany,
-            produce_company AS produceCompany,
-            produce_id AS produceId,
-            hole_number AS holeNumber,
-            layout,
-            origin_hole_no AS originHoleNo,
-            belong_lab AS belongLab,
-            report_status AS reportStatus,
-            create_user AS createUser,
-            create_time AS createTime,
-            remark
-        FROM yk_sample_info
+            s.order_id AS orderId,
+            s.order_history AS orderHistory,
+            s.sample_id AS sampleId,
+            s.sample_type AS sampleType,
+            s.sample_position AS samplePosition,
+            s.primer,
+            s.primer_type AS primerType,
+            s.primer_position AS primerPosition,
+            s.primer_concentration AS primerConcentration,
+            s.seq,
+            s.project,
+            s.carrier_name AS carrierName,
+            s.antibiotic_type AS antibioticType,
+            s.plasmid_length AS plasmidLength,
+            s.fragment_size AS fragmentSize,
+            s.test_result AS testResult,
+            s.origin_concentration AS originConcentration,
+            s.template_plate_no AS templatePlateNo,
+            s.template_hole_no AS templateHoleNo,
+            s.performance,
+            s.return_state AS returnState,
+            s.flow_name AS flowName,
+            s.plate_no AS plateNo,
+            s.hole_no AS holeNo,
+            s.belong_company AS belongCompany,
+            s.produce_company AS produceCompany,
+            s.produce_id AS produceId,
+            s.hole_number AS holeNumber,
+            s.layout,
+            s.origin_hole_no AS originHoleNo,
+            s.belong_lab AS belongLab,
+            s.report_status AS reportStatus,
+            s.report_error_reason AS reportErrorReason,
+            s.reimburse_status AS reimburseStatus,
+            s.create_user AS createUser,
+            s.create_time AS createTime,
+            s.update_user AS updateUser,
+            s.update_time AS updateTime,
+            s.remark,
+            c.customer_name AS customerName,
+            c.id AS customerId,
+            c.address AS customerAddress
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
         <where>
             <if test="query.orderId != null and query.orderId != ''">
-                AND order_id LIKE CONCAT('%', #{query.orderId}, '%')
+                AND s.order_id LIKE CONCAT('%', #{query.orderId}, '%')
             </if>
             <if test="query.orderHistory != null and query.orderHistory != ''">
-                AND order_history LIKE CONCAT('%', #{query.orderHistory}, '%')
+                AND s.order_history LIKE CONCAT('%', #{query.orderHistory}, '%')
             </if>
             <if test="query.sampleId != null and query.sampleId != ''">
-                AND sample_id LIKE CONCAT('%', #{query.sampleId}, '%')
+                AND s.sample_id LIKE CONCAT('%', #{query.sampleId}, '%')
             </if>
             <if test="query.sampleType != null and query.sampleType != ''">
-                AND sample_type = #{query.sampleType}
+                AND s.sample_type = #{query.sampleType}
             </if>
             <if test="query.primer != null and query.primer != ''">
-                AND primer LIKE CONCAT('%', #{query.primer}, '%')
+                AND s.primer LIKE CONCAT('%', #{query.primer}, '%')
             </if>
             <if test="query.primerType != null and query.primerType != ''">
-                AND primer_type = #{query.primerType}
+                AND s.primer_type = #{query.primerType}
             </if>
             <if test="query.project != null and query.project != ''">
-                AND project = #{query.project}
+                AND s.project = #{query.project}
             </if>
             <if test="query.carrierName != null and query.carrierName != ''">
-                AND carrier_name LIKE CONCAT('%', #{query.carrierName}, '%')
+                AND s.carrier_name LIKE CONCAT('%', #{query.carrierName}, '%')
             </if>
             <if test="query.antibioticType != null and query.antibioticType != ''">
-                AND antibiotic_type = #{query.antibioticType}
+                AND s.antibiotic_type = #{query.antibioticType}
             </if>
             <if test="query.testResult != null and query.testResult != ''">
-                AND test_result = #{query.testResult}
+                AND s.test_result = #{query.testResult}
             </if>
             <if test="query.performance != null and query.performance != ''">
-                AND performance = #{query.performance}
+                AND s.performance = #{query.performance}
             </if>
             <if test="query.returnState != null and query.returnState != ''">
-                AND return_state = #{query.returnState}
+                AND s.return_state = #{query.returnState}
             </if>
             <if test="query.flowName != null and query.flowName != ''">
-                AND flow_name LIKE CONCAT('%', #{query.flowName}, '%')
+                AND s.flow_name LIKE CONCAT('%', #{query.flowName}, '%')
             </if>
             <if test="query.plateNo != null and query.plateNo != ''">
-                AND plate_no LIKE CONCAT('%', #{query.plateNo}, '%')
+                AND s.plate_no LIKE CONCAT('%', #{query.plateNo}, '%')
             </if>
             <if test="query.belongCompany != null and query.belongCompany != ''">
-                AND belong_company LIKE CONCAT('%', #{query.belongCompany}, '%')
+                AND s.belong_company LIKE CONCAT('%', #{query.belongCompany}, '%')
             </if>
             <if test="query.produceCompany != null and query.produceCompany != ''">
-                AND produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
+                AND s.produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
             </if>
             <if test="query.produceId != null">
-                AND produce_id = #{query.produceId}
+                AND s.produce_id = #{query.produceId}
             </if>
             <if test="query.createUser != null and query.createUser != ''">
-                AND create_user LIKE CONCAT('%', #{query.createUser}, '%')
+                AND s.create_user LIKE CONCAT('%', #{query.createUser}, '%')
+            </if>
+            <if test="query.customerName != null and query.customerName != ''">
+                AND c.customer_name LIKE CONCAT('%', #{query.customerName}, '%')
             </if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY s.create_time DESC
     </select>
 
     <select id="queryList" resultType="com.youkang.system.domain.resp.order.SampleResp">
         SELECT
-            order_id AS orderId,
-            order_history AS orderHistory,
-            sample_id AS sampleId,
-            sample_type AS sampleType,
-            sample_position AS samplePosition,
-            primer,
-            primer_type AS primerType,
-            primer_position AS primerPosition,
-            primer_concentration AS primerConcentration,
-            seq,
-            project,
-            carrier_name AS carrierName,
-            antibiotic_type AS antibioticType,
-            plasmid_length AS plasmidLength,
-            fragment_size AS fragmentSize,
-            test_result AS testResult,
-            origin_concentration AS originConcentration,
-            template_plate_no AS templatePlateNo,
-            template_hole_no AS templateHoleNo,
-            performance,
-            return_state AS returnState,
-            flow_name AS flowName,
-            plate_no AS plateNo,
-            hole_no AS holeNo,
-            belong_company AS belongCompany,
-            produce_company AS produceCompany,
-            produce_id AS produceId,
-            hole_number AS holeNumber,
-            layout,
-            origin_hole_no AS originHoleNo,
-            belong_lab AS belongLab,
-            report_status AS reportStatus,
-            create_user AS createUser,
-            create_time AS createTime,
-            remark
-        FROM yk_sample_info
+            s.order_id AS orderId,
+            s.order_history AS orderHistory,
+            s.sample_id AS sampleId,
+            s.sample_type AS sampleType,
+            s.sample_position AS samplePosition,
+            s.primer,
+            s.primer_type AS primerType,
+            s.primer_position AS primerPosition,
+            s.primer_concentration AS primerConcentration,
+            s.seq,
+            s.project,
+            s.carrier_name AS carrierName,
+            s.antibiotic_type AS antibioticType,
+            s.plasmid_length AS plasmidLength,
+            s.fragment_size AS fragmentSize,
+            s.test_result AS testResult,
+            s.origin_concentration AS originConcentration,
+            s.template_plate_no AS templatePlateNo,
+            s.template_hole_no AS templateHoleNo,
+            s.performance,
+            s.return_state AS returnState,
+            s.flow_name AS flowName,
+            s.plate_no AS plateNo,
+            s.hole_no AS holeNo,
+            s.belong_company AS belongCompany,
+            s.produce_company AS produceCompany,
+            s.produce_id AS produceId,
+            s.hole_number AS holeNumber,
+            s.layout,
+            s.origin_hole_no AS originHoleNo,
+            s.belong_lab AS belongLab,
+            s.report_status AS reportStatus,
+            s.report_error_reason AS reportErrorReason,
+            s.reimburse_status AS reimburseStatus,
+            s.create_user AS createUser,
+            s.create_time AS createTime,
+            s.update_user AS updateUser,
+            s.update_time AS updateTime,
+            s.remark,
+            c.customer_name AS customerName,
+            c.id AS customerId,
+            c.address AS customerAddress
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
         <where>
             <if test="query.orderId != null and query.orderId != ''">
-                AND order_id LIKE CONCAT('%', #{query.orderId}, '%')
+                AND s.order_id LIKE CONCAT('%', #{query.orderId}, '%')
             </if>
             <if test="query.orderHistory != null and query.orderHistory != ''">
-                AND order_history LIKE CONCAT('%', #{query.orderHistory}, '%')
+                AND s.order_history LIKE CONCAT('%', #{query.orderHistory}, '%')
             </if>
             <if test="query.sampleId != null and query.sampleId != ''">
-                AND sample_id LIKE CONCAT('%', #{query.sampleId}, '%')
+                AND s.sample_id LIKE CONCAT('%', #{query.sampleId}, '%')
             </if>
             <if test="query.sampleType != null and query.sampleType != ''">
-                AND sample_type = #{query.sampleType}
+                AND s.sample_type = #{query.sampleType}
             </if>
             <if test="query.primer != null and query.primer != ''">
-                AND primer LIKE CONCAT('%', #{query.primer}, '%')
+                AND s.primer LIKE CONCAT('%', #{query.primer}, '%')
             </if>
             <if test="query.primerType != null and query.primerType != ''">
-                AND primer_type = #{query.primerType}
+                AND s.primer_type = #{query.primerType}
             </if>
             <if test="query.project != null and query.project != ''">
-                AND project = #{query.project}
+                AND s.project = #{query.project}
             </if>
             <if test="query.carrierName != null and query.carrierName != ''">
-                AND carrier_name LIKE CONCAT('%', #{query.carrierName}, '%')
+                AND s.carrier_name LIKE CONCAT('%', #{query.carrierName}, '%')
             </if>
             <if test="query.antibioticType != null and query.antibioticType != ''">
-                AND antibiotic_type = #{query.antibioticType}
+                AND s.antibiotic_type = #{query.antibioticType}
             </if>
             <if test="query.testResult != null and query.testResult != ''">
-                AND test_result = #{query.testResult}
+                AND s.test_result = #{query.testResult}
             </if>
             <if test="query.performance != null and query.performance != ''">
-                AND performance = #{query.performance}
+                AND s.performance = #{query.performance}
             </if>
             <if test="query.returnState != null and query.returnState != ''">
-                AND return_state = #{query.returnState}
+                AND s.return_state = #{query.returnState}
             </if>
             <if test="query.flowName != null and query.flowName != ''">
-                AND flow_name LIKE CONCAT('%', #{query.flowName}, '%')
+                AND s.flow_name LIKE CONCAT('%', #{query.flowName}, '%')
             </if>
             <if test="query.plateNo != null and query.plateNo != ''">
-                AND plate_no LIKE CONCAT('%', #{query.plateNo}, '%')
+                AND s.plate_no LIKE CONCAT('%', #{query.plateNo}, '%')
             </if>
             <if test="query.belongCompany != null and query.belongCompany != ''">
-                AND belong_company LIKE CONCAT('%', #{query.belongCompany}, '%')
+                AND s.belong_company LIKE CONCAT('%', #{query.belongCompany}, '%')
             </if>
             <if test="query.produceCompany != null and query.produceCompany != ''">
-                AND produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
+                AND s.produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
             </if>
             <if test="query.produceId != null">
-                AND produce_id = #{query.produceId}
+                AND s.produce_id = #{query.produceId}
             </if>
             <if test="query.createUser != null and query.createUser != ''">
-                AND create_user LIKE CONCAT('%', #{query.createUser}, '%')
+                AND s.create_user LIKE CONCAT('%', #{query.createUser}, '%')
+            </if>
+            <if test="query.customerName != null and query.customerName != ''">
+                AND c.customer_name LIKE CONCAT('%', #{query.customerName}, '%')
             </if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY s.create_time DESC
     </select>
 
     <select id="queryById" resultType="com.youkang.system.domain.resp.order.SampleResp">
@@ -230,15 +254,83 @@
             s.origin_hole_no AS originHoleNo,
             s.belong_lab AS belongLab,
             s.report_status AS reportStatus,
+            s.report_error_reason AS reportErrorReason,
+            s.reimburse_status AS reimburseStatus,
             s.create_user AS createUser,
             s.create_time AS createTime,
+            s.update_user AS updateUser,
+            s.update_time AS updateTime,
             s.remark,
+            c.id AS customerId,
             c.customer_name AS customerName,
             c.address AS customerAddress
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
         LEFT JOIN yk_customer_info c ON o.customer_id = c.id
         WHERE s.produce_id = #{produceId}
+    </select>
+
+    <select id="queryByOrderIdAndProduceId" resultType="com.youkang.system.domain.resp.order.SampleResp">
+        SELECT
+            s.order_id AS orderId,
+            s.order_history AS orderHistory,
+            s.sample_id AS sampleId,
+            s.sample_type AS sampleType,
+            s.sample_position AS samplePosition,
+            s.primer,
+            s.primer_type AS primerType,
+            s.primer_position AS primerPosition,
+            s.primer_concentration AS primerConcentration,
+            s.seq,
+            s.project,
+            s.carrier_name AS carrierName,
+            s.antibiotic_type AS antibioticType,
+            s.plasmid_length AS plasmidLength,
+            s.fragment_size AS fragmentSize,
+            s.test_result AS testResult,
+            s.origin_concentration AS originConcentration,
+            s.template_plate_no AS templatePlateNo,
+            s.template_hole_no AS templateHoleNo,
+            s.performance,
+            s.return_state AS returnState,
+            s.flow_name AS flowName,
+            s.plate_no AS plateNo,
+            s.hole_no AS holeNo,
+            s.belong_company AS belongCompany,
+            s.produce_company AS produceCompany,
+            s.produce_id AS produceId,
+            s.hole_number AS holeNumber,
+            s.layout,
+            s.origin_hole_no AS originHoleNo,
+            s.belong_lab AS belongLab,
+            s.report_status AS reportStatus,
+            s.report_error_reason AS reportErrorReason,
+            s.reimburse_status AS reimburseStatus,
+            s.create_user AS createUser,
+            s.create_time AS createTime,
+            s.update_user AS updateUser,
+            s.update_time AS updateTime,
+            s.remark,
+            c.id AS customerId,
+            c.customer_name AS customerName,
+            c.address AS customerAddress
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        WHERE s.order_id = #{orderId}
+          AND s.prouce_id in
+        <foreach item="produceId" collection="produceIdList" separator="," open="(" close=")">
+            #{produceId}
+        </foreach>
+    </select>
+
+    <select id="getSampleCount" resultType="int">
+        select count(distinct sample_id) from yk_sample_info
+        where order_id = #{orderId}
+          and produce_id in
+        <foreach item="produceId" collection="produceIdList" separator="," open="(" close=")">
+            #{produceId}
+        </foreach>
     </select>
 
     <select id="queryTemplatePage" resultType="com.youkang.system.domain.resp.order.SampleTemplateResp">
@@ -266,6 +358,7 @@
         MAX(s.origin_hole_no) AS originHoleNo,
         MAX(s.belong_lab) AS belongLab,
         MAX(s.report_status) AS reportStatus,
+        MAX(s.report_error_reason) AS reportErrorReason,
         MAX(s.remark) AS remark
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
@@ -321,6 +414,7 @@
         MAX(s.origin_hole_no) AS originHoleNo,
         MAX(s.belong_lab) AS belongLab,
         MAX(s.report_status) AS reportStatus,
+        MAX(s.report_error_reason) AS reportErrorReason,
         MAX(s.remark) AS remark
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
@@ -353,11 +447,12 @@
         s.origin_hole_no AS originHoleNo,
         s.belong_lab AS belongLab,
         s.report_status AS reportStatus,
+        s.report_error_reason AS reportErrorReason,
         s.remark AS remark
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
         LEFT JOIN yk_customer_info c ON o.customer_id = c.id
-        where flow_name = '模板生产'
+        where flow_name = #{query.flowName}
         <if test="query.orderId != null and query.orderId != ''">
             AND s.order_id = #{query.orderId}
         </if>
@@ -486,6 +581,7 @@
             MAX(s.origin_hole_no) AS originHoleNo,
             MAX(s.belong_lab) AS belongLab,
             MAX(s.report_status) AS reportStatus,
+            MAX(s.report_error_reason) AS reportErrorReason,
             MAX(s.remark) AS remark
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
@@ -493,5 +589,18 @@
         WHERE s.plate_no = #{req.plateNo}
         GROUP BY s.order_id, s.sample_id
     </select>
+
+    <!-- 批量追加备注 -->
+    <update id="appendRemark">
+        UPDATE yk_sample_info
+        SET remark = CASE
+            WHEN remark IS NULL OR remark = '' THEN #{remark}
+            ELSE CONCAT(remark, ';', #{remark})
+        END
+        WHERE produce_id IN
+        <foreach collection="produceIds" item="produceId" open="(" separator="," close=")">
+            #{produceId}
+        </foreach>
+    </update>
 
 </mapper>
