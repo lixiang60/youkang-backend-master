@@ -49,3 +49,5 @@ nbdist/
 # Exclude local/runtime files
 .agents/
 youkang-admin/D:/
+.claude
+CLAUDE.md
