@@ -1,30 +1,36 @@
 package com.youkang.web.controller.system;
 
+^M
+^M
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.youkang.common.annotation.Log;
-import com.youkang.common.constant.UserConstants;
-import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.AjaxResult;
-import com.youkang.common.core.domain.entity.SysDept;
-import com.youkang.common.enums.BusinessType;
-import com.youkang.common.utils.StringUtils;
-import com.youkang.system.service.ISysDeptService;
-
+    import org.springframework.security.access.prepost.PreAuthorize;
+   import org.springframework.validation.annotation.Validated;
+   import org.springframework.web.bind.annotation.DeleteMapping;
+   import org.springframework.web.bind.annotation.GetMapping;
+   import org.springframework.web.bind.annotation.PathVariable;
+   import org.springframework.web.bind.annotation.PostMapping;
+   import org.springframework.web.bind.annotation.PutMapping;
+   import org.springframework.web.bind.annotation.RequestBody;
+   import org.springframework.web.bind.annotation.RequestMapping;
+   import org.springframework.web.bind.annotation.RestController;
+   import com.youkang.common.annotation.Log;
+   import com.youkang.common.constant.UserConstants;
+   import com.youkang.common.core.controller.BaseController;
+   import com.youkang.common.core.domain.YKResponse;
+   import com.youkang.common.core.domain.entity.SysDept;
+   import com.youkang.common.enums.BusinessType;
+   import com.youkang.common.utils.StringUtils;
+   import com.youkang.system.service.ISysDeptService;
+^M
+^M
 /**
- * 部门信息
- * 
+ * 鐜索部门
+ *
  * @author youkang
  */
 @RestController
@@ -34,12 +40,13 @@ public class SysDeptController extends BaseController
     @Autowired
     private ISysDeptService deptService;
 
+^M
     /**
      * 获取部门列表
      */
     @PreAuthorize("@ss.hasPermi('system:dept:list')")
     @GetMapping("/list")
-    public AjaxResult list(SysDept dept)
+    public YKResponse<Object> list(SysDept dept)
     {
         List<SysDept> depts = deptService.selectDeptList(dept);
         return success(depts);
@@ -50,7 +57,7 @@ public class SysDeptController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:dept:list')")
     @GetMapping("/list/exclude/{deptId}")
-    public AjaxResult excludeChild(@PathVariable(value = "deptId", required = false) Long deptId)
+    public YKResponse<Object> excludeChild(@PathVariable(value = "deptId", required = false) Long deptId)
     {
         List<SysDept> depts = deptService.selectDeptList(new SysDept());
         depts.removeIf(d -> d.getDeptId().intValue() == deptId || ArrayUtils.contains(StringUtils.split(d.getAncestors(), ","), deptId + ""));
@@ -62,7 +69,7 @@ public class SysDeptController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:dept:query')")
     @GetMapping(value = "/{deptId}")
-    public AjaxResult getInfo(@PathVariable Long deptId)
+    public YKResponse<Object> getInfo(@PathVariable Long deptId)
     {
         deptService.checkDeptDataScope(deptId);
         return success(deptService.selectDeptById(deptId));
@@ -74,7 +81,7 @@ public class SysDeptController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:dept:add')")
     @Log(title = "部门管理", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@Validated @RequestBody SysDept dept)
+    public YKResponse<Object> add(@Validated @RequestBody SysDept dept)
     {
         if (!deptService.checkDeptNameUnique(dept))
         {
@@ -90,7 +97,7 @@ public class SysDeptController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:dept:edit')")
     @Log(title = "部门管理", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@Validated @RequestBody SysDept dept)
+    public YKResponse<Object> edit(@Validated @RequestBody SysDept dept)
     {
         Long deptId = dept.getDeptId();
         deptService.checkDeptDataScope(deptId);
@@ -116,7 +123,7 @@ public class SysDeptController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:dept:remove')")
     @Log(title = "部门管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{deptId}")
-    public AjaxResult remove(@PathVariable Long deptId)
+    public YKResponse<Object> remove(@PathVariable Long deptId)
     {
         if (deptService.hasChildByDeptId(deptId))
         {
@@ -129,4 +136,5 @@ public class SysDeptController extends BaseController
         deptService.checkDeptDataScope(deptId);
         return toAjax(deptService.deleteDeptById(deptId));
     }
+}
 }

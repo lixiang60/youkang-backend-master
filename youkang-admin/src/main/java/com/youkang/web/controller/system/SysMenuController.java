@@ -1,6 +1,8 @@
 package com.youkang.web.controller.system;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.constant.UserConstants;
 import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.domain.entity.SysMenu;
 import com.youkang.common.enums.BusinessType;
 import com.youkang.common.utils.StringUtils;
@@ -38,7 +40,7 @@ public class SysMenuController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:menu:list')")
     @GetMapping("/list")
-    public AjaxResult list(SysMenu menu)
+    public YKResponse<Object> list(SysMenu menu)
     {
         List<SysMenu> menus = menuService.selectMenuList(menu, getUserId());
         return success(menus);
@@ -49,7 +51,7 @@ public class SysMenuController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:menu:query')")
     @GetMapping(value = "/{menuId}")
-    public AjaxResult getInfo(@PathVariable Long menuId)
+    public YKResponse<Object> getInfo(@PathVariable Long menuId)
     {
         return success(menuService.selectMenuById(menuId));
     }
@@ -58,7 +60,7 @@ public class SysMenuController extends BaseController
      * 获取菜单下拉树列表
      */
     @GetMapping("/treeselect")
-    public AjaxResult treeselect(SysMenu menu)
+    public YKResponse<Object> treeselect(SysMenu menu)
     {
         List<SysMenu> menus = menuService.selectMenuList(menu, getUserId());
         return success(menuService.buildMenuTreeSelect(menus));
@@ -68,13 +70,13 @@ public class SysMenuController extends BaseController
      * 加载对应角色菜单列表树
      */
     @GetMapping(value = "/roleMenuTreeselect/{roleId}")
-    public AjaxResult roleMenuTreeselect(@PathVariable("roleId") Long roleId)
+    public YKResponse<Object> roleMenuTreeselect(@PathVariable("roleId") Long roleId)
     {
         List<SysMenu> menus = menuService.selectMenuList(getUserId());
-        AjaxResult ajax = AjaxResult.success();
-        ajax.put("checkedKeys", menuService.selectMenuListByRoleId(roleId));
-        ajax.put("menus", menuService.buildMenuTreeSelect(menus));
-        return ajax;
+        Map<String, Object> data = new HashMap<>();
+        data.put("checkedKeys", menuService.selectMenuListByRoleId(roleId));
+        data.put("menus", menuService.buildMenuTreeSelect(menus));
+        return YKResponse.success(data);
     }
 
     /**
@@ -83,7 +85,7 @@ public class SysMenuController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:menu:add')")
     @Log(title = "菜单管理", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@Validated @RequestBody SysMenu menu)
+    public YKResponse<Object> add(@Validated @RequestBody SysMenu menu)
     {
         if (!menuService.checkMenuNameUnique(menu))
         {
@@ -103,7 +105,7 @@ public class SysMenuController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:menu:edit')")
     @Log(title = "菜单管理", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@Validated @RequestBody SysMenu menu)
+    public YKResponse<Object> edit(@Validated @RequestBody SysMenu menu)
     {
         if (!menuService.checkMenuNameUnique(menu))
         {
@@ -127,7 +129,7 @@ public class SysMenuController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:menu:remove')")
     @Log(title = "菜单管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{menuId}")
-    public AjaxResult remove(@PathVariable("menuId") Long menuId)
+    public YKResponse<Object> remove(@PathVariable("menuId") Long menuId)
     {
         if (menuService.hasChildByMenuId(menuId))
         {

@@ -26,7 +26,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.core.domain.PageResp;
-import com.youkang.common.core.domain.R;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.enums.BusinessType;
 import com.youkang.system.domain.CustomerInfo;
 import com.youkang.system.service.customer.ICustomerInfoService;
@@ -61,9 +61,9 @@ public class CustomerInfoController {
     @Operation(summary = "查询客户信息列表", description = "分页查询客户信息列表")
     @PreAuthorize("@ss.hasPermi('customer:info:list')")
     @GetMapping("/list")
-    public R<PageResp> list(@Parameter(description = "客户查询条件") CustomerQueryReq queryReq) {
+    public YKResponse<PageResp> list(@Parameter(description = "客户查询条件") CustomerQueryReq queryReq) {
         IPage<CustomerResp> page = customerInfoService.queryPage(queryReq);
-        return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
+        return YKResponse.ok(PageResp.of(page.getRecords(), page.getTotal()));
     }
 
     /**
@@ -71,8 +71,8 @@ public class CustomerInfoController {
      */
     @Operation(summary = "客户选择器", description = "获取客户选择器数据")
     @GetMapping("/customerSelector")
-    public R<Page<CustomerSelectorResp>> getCustomerSelector(@Parameter(description = "查询字符串") @RequestParam(required = false) String queryString) {
-        return R.ok(customerInfoService.customerSelector(queryString));
+    public YKResponse<Page<CustomerSelectorResp>> getCustomerSelector(@Parameter(description = "查询字符串") @RequestParam(required = false) String queryString) {
+        return YKResponse.ok(customerInfoService.customerSelector(queryString));
     }
 
     /**
@@ -80,8 +80,8 @@ public class CustomerInfoController {
      */
     @Operation(summary = "课题组选择器", description = "获取课题组选择器数据")
     @GetMapping("/subjectGroupSelector")
-    public R<Page<SubjectGroupSelectorResp>> getSubjectGroupSelector(@Parameter(description = "查询字符串") @RequestParam(required = false) String queryString) {
-        return R.ok(subjectGroupInfoService.getSubjectGroupSelector(queryString));
+    public YKResponse<Page<SubjectGroupSelectorResp>> getSubjectGroupSelector(@Parameter(description = "查询字符串") @RequestParam(required = false) String queryString) {
+        return YKResponse.ok(subjectGroupInfoService.getSubjectGroupSelector(queryString));
     }
 
     /**
@@ -106,9 +106,9 @@ public class CustomerInfoController {
     @Operation(summary = "获取客户详情", description = "根据ID获取客户详细信息")
     @PreAuthorize("@ss.hasPermi('customer:info:query')")
     @GetMapping(value = "/{id}")
-    public R<CustomerResp> getInfo(@Parameter(description = "客户ID") @PathVariable("id") Integer id) {
+    public YKResponse<CustomerResp> getInfo(@Parameter(description = "客户ID") @PathVariable("id") Integer id) {
         CustomerResp resp = customerInfoService.getDetail(id);
-        return R.ok(resp);
+        return YKResponse.ok(resp);
     }
 
     /**
@@ -118,7 +118,7 @@ public class CustomerInfoController {
     @PreAuthorize("@ss.hasPermi('customer:info:add')")
     @Log(title = "客户信息", businessType = BusinessType.INSERT)
     @PostMapping("/add")
-    public R<Void> add(@Parameter(description = "客户信息") @Validated @RequestBody CustomerAddReq addReq) {
+    public YKResponse<Void> add(@Parameter(description = "客户信息") @Validated @RequestBody CustomerAddReq addReq) {
         CustomerInfo entity = new CustomerInfo();
         BeanUtils.copyProperties(addReq, entity);
         String username = SecurityUtils.getUsername();
@@ -136,7 +136,7 @@ public class CustomerInfoController {
                 customerSubjectGroupService.add(customerSubjectGroup);
             }
         }
-        return result ? R.ok() : R.fail("新增客户信息失败");
+        return result ? YKResponse.ok() : YKResponse.fail("新增客户信息失败");
     }
 
     /**
@@ -146,13 +146,13 @@ public class CustomerInfoController {
     @PreAuthorize("@ss.hasPermi('customer:info:edit')")
     @Log(title = "客户信息", businessType = BusinessType.UPDATE)
     @PutMapping("/edit")
-    public R<Void> edit(@Parameter(description = "客户信息") @Validated @RequestBody CustomerEditReq editReq) {
+    public YKResponse<Void> edit(@Parameter(description = "客户信息") @Validated @RequestBody CustomerEditReq editReq) {
         CustomerInfo entity = new CustomerInfo();
         BeanUtils.copyProperties(editReq, entity);
         entity.setUpdateBy(SecurityUtils.getUsername());
         entity.setUpdateTime(LocalDateTime.now());
         boolean result = customerInfoService.updateById(entity);
-        return result ? R.ok() : R.fail("修改客户信息失败");
+        return result ? YKResponse.ok() : YKResponse.fail("修改客户信息失败");
     }
 
     /**
@@ -162,8 +162,8 @@ public class CustomerInfoController {
     @PreAuthorize("@ss.hasPermi('customer:info:remove')")
     @Log(title = "客户信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/remove/{ids}")
-    public R<Void> remove(@Parameter(description = "客户ID数组") @PathVariable Integer[] ids) {
+    public YKResponse<Void> remove(@Parameter(description = "客户ID数组") @PathVariable Integer[] ids) {
         boolean result = customerInfoService.removeByIds(Arrays.asList(ids));
-        return result ? R.ok() : R.fail("删除客户信息失败");
+        return result ? YKResponse.ok() : YKResponse.fail("删除客户信息失败");
     }
 }

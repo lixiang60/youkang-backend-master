@@ -3,7 +3,7 @@ package com.youkang.web.controller.order;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.core.domain.PageResp;
-import com.youkang.common.core.domain.R;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.enums.BusinessType;
 import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.poi.ExcelUtil;
@@ -42,9 +42,9 @@ public class SampleInfoController {
     @Operation(summary = "查询样品信息列表", description = "分页查询样品信息列表")
     @PreAuthorize("@ss.hasPermi('order:sample:list')")
     @PostMapping("/list")
-    public R<PageResp> list(@Parameter(description = "样品查询条件") @RequestBody SampleQueryReq req) {
+    public YKResponse<PageResp> list(@Parameter(description = "样品查询条件") @RequestBody SampleQueryReq req) {
         IPage<SampleResp> page = sampleInfoService.queryPage(req);
-        return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
+        return YKResponse.ok(PageResp.of(page.getRecords(), page.getTotal()));
     }
 
     /**
@@ -67,7 +67,7 @@ public class SampleInfoController {
     @PreAuthorize("@ss.hasPermi('order:sample:import')")
     @Log(title = "样品信息", businessType = BusinessType.IMPORT)
     @PostMapping("/import")
-    public R<String> importData(
+    public YKResponse<String> importData(
             @Parameter(description = "Excel文件") MultipartFile file,
             @Parameter(description = "是否更新已存在的数据") @RequestParam(defaultValue = "false") boolean updateSupport
     ) throws Exception {
@@ -75,7 +75,7 @@ public class SampleInfoController {
         List<SampleInfo> sampleList = util.importExcel(file.getInputStream());
         String operName = SecurityUtils.getUsername();
         String message = sampleInfoService.importSample(sampleList, updateSupport, operName);
-        return R.ok(message);
+        return YKResponse.ok(message);
     }
 
     /**
@@ -94,8 +94,8 @@ public class SampleInfoController {
     @Operation(summary = "获取样品详情", description = "根据生产编号获取样品详细信息")
     @PreAuthorize("@ss.hasPermi('order:sample:query')")
     @GetMapping(value = "/{produceId}")
-    public R<SampleResp> getInfo(@PathVariable Long produceId) {
-        return R.ok(sampleInfoService.queryById(produceId));
+    public YKResponse<SampleResp> getInfo(@PathVariable Long produceId) {
+        return YKResponse.ok(sampleInfoService.queryById(produceId));
     }
 
     /**
@@ -105,9 +105,9 @@ public class SampleInfoController {
     @PreAuthorize("@ss.hasPermi('order:sample:add')")
     @Log(title = "样品信息", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> add(@Parameter(description = "样品信息") @RequestBody SampleItemReq req) {
+    public YKResponse<Void> add(@Parameter(description = "样品信息") @RequestBody SampleItemReq req) {
         boolean result = sampleInfoService.addSample(req);
-        return result ? R.ok() : R.fail("新增样品信息失败");
+        return result ? YKResponse.ok() : YKResponse.fail("新增样品信息失败");
     }
 
     /**
@@ -117,9 +117,9 @@ public class SampleInfoController {
     @PreAuthorize("@ss.hasPermi('order:sample:edit')")
     @Log(title = "样品信息", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> edit(@Parameter(description = "样品更新请求") @RequestBody SampleUpdateReq req) {
+    public YKResponse<Void> edit(@Parameter(description = "样品更新请求") @RequestBody SampleUpdateReq req) {
         boolean result = sampleInfoService.updateSample(req);
-        return result ? R.ok() : R.fail("修改样品信息失败");
+        return result ? YKResponse.ok() : YKResponse.fail("修改样品信息失败");
     }
 
     /**
@@ -129,9 +129,9 @@ public class SampleInfoController {
     @PreAuthorize("@ss.hasPermi('order:sample:remove')")
     @Log(title = "样品信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/{produceIds}")
-    public R<Void> remove(@Parameter(description = "生产编号数组") @PathVariable Long[] produceIds) {
+    public YKResponse<Void> remove(@Parameter(description = "生产编号数组") @PathVariable Long[] produceIds) {
         boolean result = sampleInfoService.removeByIds(Arrays.asList(produceIds));
-        return result ? R.ok() : R.fail("删除样品信息失败");
+        return result ? YKResponse.ok() : YKResponse.fail("删除样品信息失败");
     }
 
 
@@ -139,120 +139,120 @@ public class SampleInfoController {
     @Operation(summary = "安排返还-前端需要做校验，只能传同一orderId下的样品信息", description = "安排返还")
     @PreAuthorize("@ss.hasPermi('order:sample:sequence:arrangeReturn')")
     @PostMapping("/sequence/arrangeReturn")
-    public R<Void> arrangeReturn(@Parameter(description = "安排返还请求") @RequestBody SampleReturnReq req) {
+    public YKResponse<Void> arrangeReturn(@Parameter(description = "安排返还请求") @RequestBody SampleReturnReq req) {
         sampleInfoService.arrangeReturn(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     //============================================模板排版=================================================
     @Operation(summary = "获取模板列表", description = "分页获取模板列表")
     @PreAuthorize("@ss.hasPermi('order:sample:template:list')")
     @PostMapping("/template/list")
-    public R<PageResp> templateList(@Parameter(description = "模板查询条件") @RequestBody SampleTemplateQueryReq req) {
+    public YKResponse<PageResp> templateList(@Parameter(description = "模板查询条件") @RequestBody SampleTemplateQueryReq req) {
         IPage<SampleTemplateResp> page = sampleInfoService.queryTemplatePage(req);
-        return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
+        return YKResponse.ok(PageResp.of(page.getRecords(), page.getTotal()));
     }
     @Operation(summary = "添加模板板号和孔号", description = "添加模板板号")
     @PreAuthorize("@ss.hasPermi('order:sample:template:update')")
     @Log(title = "添加模板板号信息", businessType = BusinessType.UPDATE)
     @PostMapping("/template/updateTemplateNo")
-    public R<Void> updateTemplateNo(@Parameter(description = "板号添加") @RequestBody SampleTemplateUpdateReq req) {
+    public YKResponse<Void> updateTemplateNo(@Parameter(description = "板号添加") @RequestBody SampleTemplateUpdateReq req) {
         sampleInfoService.updateTemplate(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "单个添加模板孔号", description = "添加模板孔号")
     @PreAuthorize("@ss.hasPermi('order:sample:template:update')")
     @Log(title = "添加模板孔号", businessType = BusinessType.UPDATE)
     @PostMapping("/template/updateTemplateHoleNo")
-    public R<Void> updateTemplateHoleNo(@Parameter(description = "添加模板孔号") @RequestBody HoleNoUpdateReq req) {
+    public YKResponse<Void> updateTemplateHoleNo(@Parameter(description = "添加模板孔号") @RequestBody HoleNoUpdateReq req) {
         sampleInfoService.updateTemplateHoleNo(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "排版忽略", description = "排版忽略")
     @PreAuthorize("@ss.hasPermi('order:sample:template:ignoreTemp')")
     @Log(title = "排版忽略", businessType = BusinessType.UPDATE)
     @PostMapping("/template/ignoreTemp")
-    public R<Void> ignoreTemp(@RequestBody SampleTemplateUpdateReq req) {
+    public YKResponse<Void> ignoreTemp(@RequestBody SampleTemplateUpdateReq req) {
         sampleInfoService.ignoreTemp(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "模板bdt", description = "模板bdt")
     @PreAuthorize("@ss.hasPermi('order:sample:template:update')")
     @Log(title = "模板bdt", businessType = BusinessType.UPDATE)
     @PostMapping("/template/templateBDT")
-    public R<List<SampleTemplateResp>> templateBDT(@Parameter(description = "模板bdt") @RequestBody TemplateQueryReq req) {
-        return R.ok(sampleInfoService.templateBDT(req));
+    public YKResponse<List<SampleTemplateResp>> templateBDT(@Parameter(description = "模板bdt") @RequestBody TemplateQueryReq req) {
+        return YKResponse.ok(sampleInfoService.templateBDT(req));
     }
 
     @Operation(summary = "获取特定模板板号剩余孔数量", description = "获取特定板号剩余孔数量")
     @PreAuthorize("@ss.hasPermi('order:sample:template:getHoleNum')")
     @GetMapping("/template/getHoleNum")
-    public R<Integer> getHoleNum(@RequestParam String templateNo) {
-        return R.ok(sampleInfoService.getHoleNum(templateNo));
+    public YKResponse<Integer> getHoleNum(@RequestParam String templateNo) {
+        return YKResponse.ok(sampleInfoService.getHoleNum(templateNo));
     }
 
     //=============================================模板生产============================================
     @Operation(summary = "获取各流程数据列表", description = "分页获取各流程数据列表")
     @PreAuthorize("@ss.hasPermi('order:sample:flow')")
     @PostMapping("/template/produce/list")
-    public R<PageResp> templateProduceList(@RequestBody TemplateProduceQueryReq req) {
+    public YKResponse<PageResp> templateProduceList(@RequestBody TemplateProduceQueryReq req) {
         IPage<TemplateProduceResp> page = sampleInfoService.queryTemplateProudcePage(req);
-        return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
+        return YKResponse.ok(PageResp.of(page.getRecords(), page.getTotal()));
     }
 
     @Operation(summary = "设置模板状态", description = "设置模板状态")
     @PreAuthorize("@ss.hasPermi('order:sample:template')")
     @PostMapping("/template/produce/tempStatus")
-    public R<?> updateTempStatus(@RequestBody TemplateProduceUpdateReq req) {
+    public YKResponse<?> updateTempStatus(@RequestBody TemplateProduceUpdateReq req) {
         sampleInfoService.updateTempStatus(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "设置原浓度以及添加版号孔号", description = "设置原浓度以及添加版号孔号")
     @PreAuthorize("@ss.hasPermi('order:sample:template')")
     @PostMapping("/template/produce/originConcentration")
-    public R<?> updateOriginConcentration(@RequestBody OriginConcentrationUpdateReq req) {
+    public YKResponse<?> updateOriginConcentration(@RequestBody OriginConcentrationUpdateReq req) {
         sampleInfoService.updateOriginConcentration(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "模板生产退回", description = "模板生产退回")
     @PreAuthorize("@ss.hasPermi('order:sample:template')")
     @PostMapping("/template/produce/sendBack")
-    public R<?> sendBack(@RequestBody TemplateProduceUpdateReq req) {
+    public YKResponse<?> sendBack(@RequestBody TemplateProduceUpdateReq req) {
         sampleInfoService.sendBack(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "PCR切胶", description = "PCR切胶")
     @PreAuthorize("@ss.hasPermi('order:sample:template')")
     @PostMapping("/template/produce/pcrGelCut")
-    public R<List<PCRGelCutResp>> pcrGelCut(@RequestBody PCRGelCutReq req) {
-        return R.ok(sampleInfoService.pcrGelCut(req));
+    public YKResponse<List<PCRGelCutResp>> pcrGelCut(@RequestBody PCRGelCutReq req) {
+        return YKResponse.ok(sampleInfoService.pcrGelCut(req));
     }
 
     @Operation(summary = "查询重抽样品列表", description = "通过模板板号查询模板重抽、报告重抽的样品列表")
     @PreAuthorize("@ss.hasPermi('order:sample:template')")
     @PostMapping("/template/produce/resampleList")
-    public R<List<ResampleResp>> resampleList(@RequestBody ResampleQueryReq req) {
-        return R.ok(sampleInfoService.queryResampleList(req));
+    public YKResponse<List<ResampleResp>> resampleList(@RequestBody ResampleQueryReq req) {
+        return YKResponse.ok(sampleInfoService.queryResampleList(req));
     }
 
     @Operation(summary = "根据板号获取已经使用的孔号", description = "根据板号获取已经使用的孔号")
     @PreAuthorize("@ss.hasPermi('order:sample:template')")
     @PostMapping("/template/produce/getUserTemplateHole")
-    public R<List<UsedTemplateHoleResp>> getUserTemplateHole(@RequestBody HoleNoUpdateReq req) {
-        return R.ok(sampleInfoService.getUserTemplateHole(req));
+    public YKResponse<List<UsedTemplateHoleResp>> getUserTemplateHole(@RequestBody HoleNoUpdateReq req) {
+        return YKResponse.ok(sampleInfoService.getUserTemplateHole(req));
     }
 
     @Operation(summary = "查询模板失败样品列表", description = "查询所有流程在模板邮件的样品列表")
     @PreAuthorize("@ss.hasPermi('order:sample:template')")
     @GetMapping("/template/produce/templateFailedList")
-    public R<List<TemplateFailedResp>> templateFailedList() {
-        return R.ok(sampleInfoService.queryTemplateFailedList());
+    public YKResponse<List<TemplateFailedResp>> templateFailedList() {
+        return YKResponse.ok(sampleInfoService.queryTemplateFailedList());
     }
 
     //=============================================反应生产============================================
@@ -261,83 +261,83 @@ public class SampleInfoController {
     @PreAuthorize("@ss.hasPermi('order:sample:reactionProduce')")
     @Log(title = "反应生产-设置原浓度", businessType = BusinessType.UPDATE)
     @PostMapping("/reactionProduce/originConcentration")
-    public R<Void> updateReactionProduceOriginConcentration(@RequestBody ReactionProduceOriginConcentrationReq req) {
+    public YKResponse<Void> updateReactionProduceOriginConcentration(@RequestBody ReactionProduceOriginConcentrationReq req) {
         sampleInfoService.updateReactionProduceOriginConcentration(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "反应生产-添加板号和孔号", description = "根据生产编号批量添加板号和孔号")
     @PreAuthorize("@ss.hasPermi('order:sample:reactionProduce')")
     @Log(title = "反应生产-添加板号和孔号", businessType = BusinessType.UPDATE)
     @PostMapping("/reactionProduce/plate")
-    public R<Void> updateReactionProducePlate(@RequestBody ReactionProducePlateReq req) {
+    public YKResponse<Void> updateReactionProducePlate(@RequestBody ReactionProducePlateReq req) {
         sampleInfoService.updateReactionProducePlate(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "反应生产-单个添加孔号", description = "根据生产编号单个添加孔号")
     @PreAuthorize("@ss.hasPermi('order:sample:reactionProduce')")
     @Log(title = "反应生产-单个添加孔号", businessType = BusinessType.UPDATE)
     @PostMapping("/reactionProduce/holeNo")
-    public R<Void> updateReactionProduceHoleNo(@RequestBody ReactionProduceHoleNoReq req) {
+    public YKResponse<Void> updateReactionProduceHoleNo(@RequestBody ReactionProduceHoleNoReq req) {
         sampleInfoService.updateReactionProduceHoleNo(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "测序BDT", description = "根据板号查询测序BDT")
     @PreAuthorize("@ss.hasPermi('order:sample:reactionProduce')")
     @PostMapping("/reactionProduce/sequencingBDT")
-    public R<List<SequencingBDTResp>> sequencingBDT(@RequestBody SequencingBDTReq req) {
-        return R.ok(sampleInfoService.sequencingBDT(req));
+    public YKResponse<List<SequencingBDTResp>> sequencingBDT(@RequestBody SequencingBDTReq req) {
+        return YKResponse.ok(sampleInfoService.sequencingBDT(req));
     }
 
     @Operation(summary = "反应停止", description = "反应停止")
     @PreAuthorize("@ss.hasPermi('order:sample:reactionStop')")
     @PostMapping("/reactionStop")
-    public R<?> reactionStop(@RequestBody SampleCommonReq req) {
+    public YKResponse<?> reactionStop(@RequestBody SampleCommonReq req) {
         sampleInfoService.reactionStop(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "样品不足", description = "样品不足")
     @PreAuthorize("@ss.hasPermi('order:sample:sampleInsufficient')")
     @PostMapping("/sampleInsufficient")
-    public R<?> insufficient(@RequestBody SampleCommonReq req) {
+    public YKResponse<?> insufficient(@RequestBody SampleCommonReq req) {
         sampleInfoService.sampleInsufficient(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "反应预做", description = "反应预做")
     @PreAuthorize("@ss.hasPermi('order:sample:reactionPre')")
     @PostMapping("/reactionPre")
-    public R<?> reactionPre(@RequestBody SampleCommonReq req) {
+    public YKResponse<?> reactionPre(@RequestBody SampleCommonReq req) {
         sampleInfoService.reactionPre(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "反应预做退回", description = "反应预做退回")
     @PreAuthorize("@ss.hasPermi('order:sample:reactionPreSendBack')")
     @PostMapping("/reactionPreSendBack")
-    public R<?> reactionPreSendBack(@RequestBody SampleCommonReq req) {
+    public YKResponse<?> reactionPreSendBack(@RequestBody SampleCommonReq req) {
         sampleInfoService.reactionPreSendBack(req);
-        return R.ok();
+        return YKResponse.ok();
     }
     //=============================================报告生产============================================
     @Operation(summary = "毛细管添加", description = "毛细管添加")
     @PreAuthorize("@ss.hasPermi('order:sample:capillaryAdd')")
     @PostMapping("/capillaryAdd")
-    public R<?> capillaryAdd(@RequestBody PlateNoCommonReq req) {
+    public YKResponse<?> capillaryAdd(@RequestBody PlateNoCommonReq req) {
         sampleInfoService.capillaryAdd(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     @Operation(summary = "修改报告状态", description = "修改报告状态，支持：报告成功、报告取消、报告重做、报告重抽")
     @PreAuthorize("@ss.hasPermi('order:sample:reportStatus')")
     @Log(title = "修改报告状态", businessType = BusinessType.UPDATE)
     @PostMapping("/reportStatus/update")
-    public R<?> updateReportStatus(@RequestBody ReportStatusUpdateReq req) {
+    public YKResponse<?> updateReportStatus(@RequestBody ReportStatusUpdateReq req) {
         sampleInfoService.updateReportStatus(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
 }

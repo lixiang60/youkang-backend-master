@@ -1,6 +1,8 @@
 package com.youkang.web.controller.system;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
@@ -18,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.domain.entity.SysDept;
 import com.youkang.common.core.domain.entity.SysRole;
 import com.youkang.common.core.domain.entity.SysUser;
@@ -78,7 +80,7 @@ public class SysUserController extends BaseController
     @Log(title = "用户管理", businessType = BusinessType.IMPORT)
     @PreAuthorize("@ss.hasPermi('system:user:import')")
     @PostMapping("/importData")
-    public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception
+    public YKResponse<Object> importData(MultipartFile file, boolean updateSupport) throws Exception
     {
         ExcelUtil<SysUser> util = new ExcelUtil<SysUser>(SysUser.class);
         List<SysUser> userList = util.importExcel(file.getInputStream());
@@ -99,21 +101,21 @@ public class SysUserController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:user:query')")
     @GetMapping(value = { "/", "/{userId}" })
-    public AjaxResult getInfo(@PathVariable(value = "userId", required = false) Long userId)
+    public YKResponse<Object> getInfo(@PathVariable(value = "userId", required = false) Long userId)
     {
-        AjaxResult ajax = AjaxResult.success();
+        Map<String, Object> data = new HashMap<>();
         if (StringUtils.isNotNull(userId))
         {
             userService.checkUserDataScope(userId);
             SysUser sysUser = userService.selectUserById(userId);
-            ajax.put(AjaxResult.DATA_TAG, sysUser);
-            ajax.put("postIds", postService.selectPostListByUserId(userId));
-            ajax.put("roleIds", sysUser.getRoles().stream().map(SysRole::getRoleId).collect(Collectors.toList()));
+            data.put("data", sysUser);
+            data.put("postIds", postService.selectPostListByUserId(userId));
+            data.put("roleIds", sysUser.getRoles().stream().map(SysRole::getRoleId).collect(Collectors.toList()));
         }
         List<SysRole> roles = roleService.selectRoleAll();
-        ajax.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
-        ajax.put("posts", postService.selectPostAll());
-        return ajax;
+        data.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
+        data.put("posts", postService.selectPostAll());
+        return YKResponse.success(data);
     }
 
     /**
@@ -122,7 +124,7 @@ public class SysUserController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:user:add')")
     @Log(title = "用户管理", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@Validated @RequestBody SysUser user)
+    public YKResponse<Object> add(@Validated @RequestBody SysUser user)
     {
         deptService.checkDeptDataScope(user.getDeptId());
         roleService.checkRoleDataScope(user.getRoleIds());
@@ -149,7 +151,7 @@ public class SysUserController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:user:edit')")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@Validated @RequestBody SysUser user)
+    public YKResponse<Object> edit(@Validated @RequestBody SysUser user)
     {
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());
@@ -177,7 +179,7 @@ public class SysUserController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:user:remove')")
     @Log(title = "用户管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{userIds}")
-    public AjaxResult remove(@PathVariable Long[] userIds)
+    public YKResponse<Object> remove(@PathVariable Long[] userIds)
     {
         if (ArrayUtils.contains(userIds, getUserId()))
         {
@@ -192,7 +194,7 @@ public class SysUserController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:user:resetPwd')")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
     @PutMapping("/resetPwd")
-    public AjaxResult resetPwd(@RequestBody SysUser user)
+    public YKResponse<Object> resetPwd(@RequestBody SysUser user)
     {
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());
@@ -207,7 +209,7 @@ public class SysUserController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:user:edit')")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
     @PutMapping("/changeStatus")
-    public AjaxResult changeStatus(@RequestBody SysUser user)
+    public YKResponse<Object> changeStatus(@RequestBody SysUser user)
     {
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());
@@ -220,14 +222,14 @@ public class SysUserController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:user:query')")
     @GetMapping("/authRole/{userId}")
-    public AjaxResult authRole(@PathVariable("userId") Long userId)
+    public YKResponse<Object> authRole(@PathVariable("userId") Long userId)
     {
-        AjaxResult ajax = AjaxResult.success();
         SysUser user = userService.selectUserById(userId);
         List<SysRole> roles = roleService.selectRolesByUserId(userId);
-        ajax.put("user", user);
-        ajax.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
-        return ajax;
+        Map<String, Object> data = new HashMap<>();
+        data.put("user", user);
+        data.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
+        return YKResponse.success(data);
     }
 
     /**
@@ -236,7 +238,7 @@ public class SysUserController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:user:edit')")
     @Log(title = "用户管理", businessType = BusinessType.GRANT)
     @PutMapping("/authRole")
-    public AjaxResult insertAuthRole(Long userId, Long[] roleIds)
+    public YKResponse<Object> insertAuthRole(Long userId, Long[] roleIds)
     {
         userService.checkUserDataScope(userId);
         roleService.checkRoleDataScope(roleIds);
@@ -249,7 +251,7 @@ public class SysUserController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:user:list')")
     @GetMapping("/deptTree")
-    public AjaxResult deptTree(SysDept dept)
+    public YKResponse<Object> deptTree(SysDept dept)
     {
         return success(deptService.selectDeptTreeList(dept));
     }

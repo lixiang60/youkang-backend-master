@@ -8,7 +8,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import com.alibaba.fastjson2.JSON;
 import com.youkang.common.annotation.RepeatSubmit;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.utils.ServletUtils;
 
 /**
@@ -31,8 +31,8 @@ public abstract class RepeatSubmitInterceptor implements HandlerInterceptor
             {
                 if (this.isRepeatSubmit(request, annotation))
                 {
-                    AjaxResult ajaxResult = AjaxResult.error(annotation.message());
-                    ServletUtils.renderString(response, JSON.toJSONString(ajaxResult));
+                    YKResponse<Object> ykResponse = YKResponse.error(annotation.message());
+                    ServletUtils.renderString(response, JSON.toJSONString(ykResponse));
                     return false;
                 }
             }

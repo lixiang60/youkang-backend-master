@@ -1,7 +1,7 @@
 package com.youkang.web.controller.common;
 
 import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.domain.SelectorDTO;
 import com.youkang.common.core.domain.SelectorQueryReq;
 import com.youkang.framework.web.service.selector.ICommonSelector;
@@ -39,7 +39,7 @@ public class CommonSelectorController extends BaseController {
      */
     @Operation(summary = "获取选择器数据列表", description = "根据类型和关键字查询下拉框数据，支持模糊查询")
     @GetMapping("/list")
-    public AjaxResult list(
+    public YKResponse<Object> list(
             @Parameter(description = "选择器类型 (user/dept/role/post/dict)", required = true)
             @RequestParam String type,
             @Parameter(description = "模糊查询关键字")
@@ -69,7 +69,7 @@ public class CommonSelectorController extends BaseController {
      */
     @Operation(summary = "获取选择器数据列表(POST)", description = "根据类型和关键字查询下拉框数据，支持模糊查询")
     @PostMapping("/list")
-    public AjaxResult listByPost(@RequestBody SelectorQueryReq queryReq) {
+    public YKResponse<Object> listByPost(@RequestBody SelectorQueryReq queryReq) {
         ICommonSelector selector = selectorFactory.getSelector(queryReq.getType());
         List<SelectorDTO> result = selector.getSelectorList(queryReq);
 
@@ -83,7 +83,7 @@ public class CommonSelectorController extends BaseController {
      */
     @Operation(summary = "获取支持的选择器类型", description = "返回所有可用的选择器类型列表")
     @GetMapping("/types")
-    public AjaxResult getSupportedTypes() {
+    public YKResponse<Object> getSupportedTypes() {
         List<String> types = selectorFactory.getSupportedTypes();
         return success(types);
     }

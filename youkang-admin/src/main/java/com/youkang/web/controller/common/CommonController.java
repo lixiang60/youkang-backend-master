@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.youkang.common.config.YouKangConfig;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.utils.StringUtils;
 import com.youkang.common.utils.file.FileUploadUtils;
 import com.youkang.common.utils.file.FileUtils;
@@ -43,8 +43,7 @@ public class CommonController
      * @param delete 是否删除
      */
     @GetMapping("/download")
-    public void fileDownload(String fileName, Boolean delete, HttpServletResponse response, HttpServletRequest request)
-    {
+    public void fileDownload(String fileName, Boolean delete, HttpServletResponse response, HttpServletRequest request) {
         try
         {
             if (!FileUtils.checkAllowDownload(fileName))
@@ -72,7 +71,7 @@ public class CommonController
      * 通用上传请求（单个）
      */
     @PostMapping("/upload")
-    public AjaxResult uploadFile(MultipartFile file) throws Exception
+    public YKResponse<Object> uploadFile(MultipartFile file) throws Exception
     {
         try
         {
@@ -81,7 +80,7 @@ public class CommonController
             // 上传并返回新文件名称
             String fileName = FileUploadUtils.upload(filePath, file);
             String url = serverConfig.getUrl() + fileName;
-            AjaxResult ajax = AjaxResult.success();
+            YKResponse<Object> ajax = YKResponse.success();
             ajax.put("url", url);
             ajax.put("fileName", fileName);
             ajax.put("newFileName", FileUtils.getName(fileName));
@@ -90,7 +89,7 @@ public class CommonController
         }
         catch (Exception e)
         {
-            return AjaxResult.error(e.getMessage());
+            return YKResponse.error(e.getMessage());
         }
     }
 
@@ -98,7 +97,7 @@ public class CommonController
      * 通用上传请求（多个）
      */
     @PostMapping("/uploads")
-    public AjaxResult uploadFiles(List<MultipartFile> files) throws Exception
+    public YKResponse<Object> uploadFiles(List<MultipartFile> files) throws Exception
     {
         try
         {
@@ -118,7 +117,7 @@ public class CommonController
                 newFileNames.add(FileUtils.getName(fileName));
                 originalFilenames.add(file.getOriginalFilename());
             }
-            AjaxResult ajax = AjaxResult.success();
+            YKResponse<Object> ajax = YKResponse.success();
             ajax.put("urls", StringUtils.join(urls, FILE_DELIMETER));
             ajax.put("fileNames", StringUtils.join(fileNames, FILE_DELIMETER));
             ajax.put("newFileNames", StringUtils.join(newFileNames, FILE_DELIMETER));
@@ -127,7 +126,7 @@ public class CommonController
         }
         catch (Exception e)
         {
-            return AjaxResult.error(e.getMessage());
+            return YKResponse.error(e.getMessage());
         }
     }
 

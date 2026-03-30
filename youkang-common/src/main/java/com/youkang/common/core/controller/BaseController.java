@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.youkang.common.constant.HttpStatus;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.domain.model.LoginUser;
 import com.youkang.common.core.page.PageDomain;
 import com.youkang.common.core.page.TableDataInfo;
@@ -93,69 +93,69 @@ public class BaseController
     /**
      * 返回成功
      */
-    public AjaxResult success()
+    public YKResponse<Object> success()
     {
-        return AjaxResult.success();
+        return YKResponse.success();
     }
 
     /**
      * 返回失败消息
      */
-    public AjaxResult error()
+    public YKResponse<Object> error()
     {
-        return AjaxResult.error();
+        return YKResponse.error();
     }
 
     /**
      * 返回成功消息
      */
-    public AjaxResult success(String message)
+    public YKResponse<Object> success(String message)
     {
-        return AjaxResult.success(message);
+        return YKResponse.success(message);
     }
-    
+
     /**
      * 返回成功消息
      */
-    public AjaxResult success(Object data)
+    public YKResponse<Object> success(Object data)
     {
-        return AjaxResult.success(data);
+        return YKResponse.success(data);
     }
 
     /**
      * 返回失败消息
      */
-    public AjaxResult error(String message)
+    public YKResponse<Object> error(String message)
     {
-        return AjaxResult.error(message);
+        return YKResponse.error(message);
     }
 
     /**
      * 返回警告消息
      */
-    public AjaxResult warn(String message)
+    public YKResponse<Object> warn(String message)
     {
-        return AjaxResult.warn(message);
+        return YKResponse.warn(message);
     }
 
     /**
      * 响应返回结果
-     * 
+     *
      * @param rows 影响行数
      * @return 操作结果
      */
-    protected AjaxResult toAjax(int rows)
+    protected YKResponse<Object> toAjax(int rows)
     {
-        return rows > 0 ? AjaxResult.success() : AjaxResult.error();
+        return rows > 0 ? YKResponse.success() : YKResponse.error();
     }
 
     /**
      * 响应返回结果
-     * 
+     *
      * @param result 结果
      * @return 操作结果
      */
-    protected AjaxResult toAjax(boolean result)
+    protected YKResponse<Object> toAjax(boolean result)
     {
         return result ? success() : error();
     }

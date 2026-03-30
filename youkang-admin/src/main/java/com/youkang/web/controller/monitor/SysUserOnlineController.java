@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.constant.CacheConstants;
 import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.domain.model.LoginUser;
 import com.youkang.common.core.page.TableDataInfo;
 import com.youkang.common.core.redis.RedisCache;
@@ -75,7 +75,7 @@ public class SysUserOnlineController extends BaseController
     @PreAuthorize("@ss.hasPermi('monitor:online:forceLogout')")
     @Log(title = "在线用户", businessType = BusinessType.FORCE)
     @DeleteMapping("/{tokenId}")
-    public AjaxResult forceLogout(@PathVariable String tokenId)
+    public YKResponse<Object> forceLogout(@PathVariable String tokenId)
     {
         redisCache.deleteObject(CacheConstants.LOGIN_TOKEN_KEY + tokenId);
         return success();

@@ -24,7 +24,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStatement;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.page.TableDataInfo;
 import com.youkang.common.core.text.Convert;
 import com.youkang.common.enums.BusinessType;
@@ -68,7 +68,7 @@ public class GenController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('tool:gen:query')")
     @GetMapping(value = "/{tableId}")
-    public AjaxResult getInfo(@PathVariable Long tableId)
+    public YKResponse<Object> getInfo(@PathVariable Long tableId)
     {
         GenTable table = genTableService.selectGenTableById(tableId);
         List<GenTable> tables = genTableService.selectGenTableAll();
@@ -112,7 +112,7 @@ public class GenController extends BaseController
     @PreAuthorize("@ss.hasPermi('tool:gen:import')")
     @Log(title = "代码生成", businessType = BusinessType.IMPORT)
     @PostMapping("/importTable")
-    public AjaxResult importTableSave(String tables)
+    public YKResponse<Object> importTableSave(String tables)
     {
         String[] tableNames = Convert.toStrArray(tables);
         // 查询表信息
@@ -127,7 +127,7 @@ public class GenController extends BaseController
     @PreAuthorize("@ss.hasRole('admin')")
     @Log(title = "创建表", businessType = BusinessType.OTHER)
     @PostMapping("/createTable")
-    public AjaxResult createTableSave(String sql)
+    public YKResponse<Object> createTableSave(String sql)
     {
         try
         {
@@ -149,12 +149,12 @@ public class GenController extends BaseController
             List<GenTable> tableList = genTableService.selectDbTableListByNames(tableNames.toArray(new String[tableNames.size()]));
             String operName = SecurityUtils.getUsername();
             genTableService.importGenTable(tableList, operName);
-            return AjaxResult.success();
+            return YKResponse.success();
         }
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            return AjaxResult.error("创建表结构异常");
+            return YKResponse.error("创建表结构异常");
         }
     }
 
@@ -164,7 +164,7 @@ public class GenController extends BaseController
     @PreAuthorize("@ss.hasPermi('tool:gen:edit')")
     @Log(title = "代码生成", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult editSave(@Validated @RequestBody GenTable genTable)
+    public YKResponse<Object> editSave(@Validated @RequestBody GenTable genTable)
     {
         genTableService.validateEdit(genTable);
         genTableService.updateGenTable(genTable);
@@ -177,7 +177,7 @@ public class GenController extends BaseController
     @PreAuthorize("@ss.hasPermi('tool:gen:remove')")
     @Log(title = "代码生成", businessType = BusinessType.DELETE)
     @DeleteMapping("/{tableIds}")
-    public AjaxResult remove(@PathVariable Long[] tableIds)
+    public YKResponse<Object> remove(@PathVariable Long[] tableIds)
     {
         genTableService.deleteGenTableByIds(tableIds);
         return success();
@@ -188,7 +188,7 @@ public class GenController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('tool:gen:preview')")
     @GetMapping("/preview/{tableId}")
-    public AjaxResult preview(@PathVariable("tableId") Long tableId) throws IOException
+    public YKResponse<Object> preview(@PathVariable("tableId") Long tableId) throws IOException
     {
         Map<String, String> dataMap = genTableService.previewCode(tableId);
         return success(dataMap);
@@ -212,11 +212,11 @@ public class GenController extends BaseController
     @PreAuthorize("@ss.hasPermi('tool:gen:code')")
     @Log(title = "代码生成", businessType = BusinessType.GENCODE)
     @GetMapping("/genCode/{tableName}")
-    public AjaxResult genCode(@PathVariable("tableName") String tableName)
+    public YKResponse<Object> genCode(@PathVariable("tableName") String tableName)
     {
         if (!GenConfig.isAllowOverwrite())
         {
-            return AjaxResult.error("【系统预设】不允许生成文件覆盖到本地");
+            return YKResponse.error("【系统预设】不允许生成文件覆盖到本地");
         }
         genTableService.generatorCode(tableName);
         return success();
@@ -228,7 +228,7 @@ public class GenController extends BaseController
     @PreAuthorize("@ss.hasPermi('tool:gen:edit')")
     @Log(title = "代码生成", businessType = BusinessType.UPDATE)
     @GetMapping("/synchDb/{tableName}")
-    public AjaxResult synchDb(@PathVariable("tableName") String tableName)
+    public YKResponse<Object> synchDb(@PathVariable("tableName") String tableName)
     {
         genTableService.synchDb(tableName);
         return success();

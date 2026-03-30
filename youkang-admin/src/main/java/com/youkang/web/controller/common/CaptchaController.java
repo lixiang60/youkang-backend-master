@@ -14,7 +14,7 @@ import com.google.code.kaptcha.Producer;
 import com.youkang.common.config.YouKangConfig;
 import com.youkang.common.constant.CacheConstants;
 import com.youkang.common.constant.Constants;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.redis.RedisCache;
 import com.youkang.common.utils.sign.Base64;
 import com.youkang.common.utils.uuid.IdUtils;
@@ -43,9 +43,9 @@ public class CaptchaController
      * 生成验证码
      */
     @GetMapping("/captchaImage")
-    public AjaxResult getCode(HttpServletResponse response) throws IOException
+    public YKResponse<Object> getCode(HttpServletResponse response) throws IOException
     {
-        AjaxResult ajax = AjaxResult.success();
+        YKResponse<Object> ajax = YKResponse.success();
         boolean captchaEnabled = configService.selectCaptchaEnabled();
         ajax.put("captchaEnabled", captchaEnabled);
         if (!captchaEnabled)
@@ -84,7 +84,7 @@ public class CaptchaController
         }
         catch (IOException e)
         {
-            return AjaxResult.error(e.getMessage());
+            return YKResponse.error(e.getMessage());
         }
 
         ajax.put("uuid", uuid);

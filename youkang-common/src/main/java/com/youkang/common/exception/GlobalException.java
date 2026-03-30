@@ -7,7 +7,6 @@ package com.youkang.common.exception;
  */
 public class GlobalException extends RuntimeException
 {
-    private static final long serialVersionUID = 1L;
 
     /**
      * 错误提示
@@ -33,10 +32,6 @@ public class GlobalException extends RuntimeException
         this.message = message;
     }
 
-    public String getDetailMessage()
-    {
-        return detailMessage;
-    }
 
     public GlobalException setDetailMessage(String detailMessage)
     {

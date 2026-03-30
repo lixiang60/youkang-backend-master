@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.config.YouKangConfig;
 import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.domain.entity.SysUser;
 import com.youkang.common.core.domain.model.LoginUser;
 import com.youkang.common.enums.BusinessType;
@@ -45,11 +45,11 @@ public class SysProfileController extends BaseController
      * 个人信息
      */
     @GetMapping
-    public AjaxResult profile()
+    public YKResponse<Object> profile()
     {
         LoginUser loginUser = getLoginUser();
         SysUser user = loginUser.getUser();
-        AjaxResult ajax = AjaxResult.success(user);
+        YKResponse<Object> ajax = YKResponse.success(user);
         ajax.put("roleGroup", userService.selectUserRoleGroup(loginUser.getUsername()));
         ajax.put("postGroup", userService.selectUserPostGroup(loginUser.getUsername()));
         return ajax;
@@ -60,7 +60,7 @@ public class SysProfileController extends BaseController
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult updateProfile(@RequestBody SysUser user)
+    public YKResponse<Object> updateProfile(@RequestBody SysUser user)
     {
         LoginUser loginUser = getLoginUser();
         SysUser currentUser = loginUser.getUser();
@@ -90,7 +90,7 @@ public class SysProfileController extends BaseController
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
     @PutMapping("/updatePwd")
-    public AjaxResult updatePwd(@RequestBody Map<String, String> params)
+    public YKResponse<Object> updatePwd(@RequestBody Map<String, String> params)
     {
         String oldPassword = params.get("oldPassword");
         String newPassword = params.get("newPassword");
@@ -122,7 +122,7 @@ public class SysProfileController extends BaseController
      */
     @Log(title = "用户头像", businessType = BusinessType.UPDATE)
     @PostMapping("/avatar")
-    public AjaxResult avatar(@RequestParam("avatarfile") MultipartFile file) throws Exception
+    public YKResponse<Object> avatar(@RequestParam("avatarfile") MultipartFile file) throws Exception
     {
         if (!file.isEmpty())
         {
@@ -135,7 +135,7 @@ public class SysProfileController extends BaseController
                 {
                     FileUtils.deleteFile(YouKangConfig.getProfile() + FileUtils.stripPrefix(oldAvatar));
                 }
-                AjaxResult ajax = AjaxResult.success();
+                YKResponse<Object> ajax = YKResponse.success();
                 ajax.put("imgUrl", avatar);
                 // 更新缓存用户头像
                 loginUser.getUser().setAvatar(avatar);

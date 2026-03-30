@@ -2,7 +2,7 @@ package com.youkang.web.controller.order;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.youkang.common.core.domain.PageResp;
-import com.youkang.common.core.domain.R;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.system.domain.req.order.SampleFlowLogQueryReq;
 import com.youkang.system.domain.resp.order.SampleFlowLogResp;
 import com.youkang.system.service.order.ISampleFlowLogService;
@@ -34,9 +34,9 @@ public class SampleFlowLogController {
     @Operation(summary = "分页查询流程流转日志", description = "分页查询样品流程流转日志")
     @PreAuthorize("@ss.hasPermi('order:sample:flowLog:list')")
     @PostMapping("/list")
-    public R<PageResp> list(@Parameter(description = "查询条件") @RequestBody SampleFlowLogQueryReq req) {
+    public YKResponse<PageResp> list(@Parameter(description = "查询条件") @RequestBody SampleFlowLogQueryReq req) {
         IPage<SampleFlowLogResp> page = sampleFlowLogService.queryPage(req);
-        return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
+        return YKResponse.ok(PageResp.of(page.getRecords(), page.getTotal()));
     }
 
     /**
@@ -45,7 +45,7 @@ public class SampleFlowLogController {
     @Operation(summary = "查询流转历史", description = "根据生产编号查询流转历史")
     @PreAuthorize("@ss.hasPermi('order:sample:flowLog:query')")
     @GetMapping("/history/{produceId}")
-    public R<List<SampleFlowLogResp>> history(@PathVariable Long produceId) {
-        return R.ok(sampleFlowLogService.queryByProduceId(produceId));
+    public YKResponse<List<SampleFlowLogResp>> history(@PathVariable Long produceId) {
+        return YKResponse.ok(sampleFlowLogService.queryByProduceId(produceId));
     }
 }

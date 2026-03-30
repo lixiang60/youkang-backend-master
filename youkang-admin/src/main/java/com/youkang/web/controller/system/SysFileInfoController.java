@@ -3,7 +3,7 @@ package com.youkang.web.controller.system;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.config.YouKangConfig;
 import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.page.TableDataInfo;
 import com.youkang.common.enums.BusinessType;
 import com.youkang.common.utils.file.FileUtils;
@@ -53,7 +53,7 @@ public class SysFileInfoController extends BaseController {
     @Operation(summary = "获取文件详情", description = "根据文件ID获取文件详细信息")
     @PreAuthorize("@ss.hasPermi('system:file:query')")
     @GetMapping(value = "/{fileId}")
-    public AjaxResult getInfo(@Parameter(description = "文件ID") @PathVariable("fileId") Long fileId) {
+    public YKResponse<Object> getInfo(@Parameter(description = "文件ID") @PathVariable("fileId") Long fileId) {
         return success(sysFileInfoService.selectSysFileInfoByFileId(fileId));
     }
 
@@ -62,7 +62,7 @@ public class SysFileInfoController extends BaseController {
      */
     @Operation(summary = "根据业务查询文件", description = "根据业务类型和业务ID查询关联的文件列表")
     @GetMapping("/business/{businessType}/{businessId}")
-    public AjaxResult getFilesByBusiness(
+    public YKResponse<Object> getFilesByBusiness(
             @Parameter(description = "业务类型") @PathVariable String businessType,
             @Parameter(description = "业务ID") @PathVariable String businessId) {
         List<SysFileInfo> list = sysFileInfoService.selectFilesByBusiness(businessType, businessId);
@@ -75,7 +75,7 @@ public class SysFileInfoController extends BaseController {
     @Operation(summary = "上传文件", description = "上传单个文件，可选择指定业务类型和业务ID")
     @Log(title = "文件上传", businessType = BusinessType.INSERT)
     @PostMapping("/upload")
-    public AjaxResult upload(
+    public YKResponse<Object> upload(
             @Parameter(description = "上传的文件") @RequestParam("file") MultipartFile file,
             @Parameter(description = "业务类型（可选）") @RequestParam(required = false) String businessType,
             @Parameter(description = "业务ID（可选）") @RequestParam(required = false) String businessId) {
@@ -93,7 +93,7 @@ public class SysFileInfoController extends BaseController {
     @Operation(summary = "批量上传文件", description = "一次上传多个文件")
     @Log(title = "批量上传文件", businessType = BusinessType.INSERT)
     @PostMapping("/uploads")
-    public AjaxResult uploads(
+    public YKResponse<Object> uploads(
             @Parameter(description = "上传的文件列表") @RequestParam("files") List<MultipartFile> files,
             @Parameter(description = "业务类型（可选）") @RequestParam(required = false) String businessType,
             @Parameter(description = "业务ID（可选）") @RequestParam(required = false) String businessId) {
@@ -112,7 +112,7 @@ public class SysFileInfoController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:file:edit')")
     @Log(title = "文件信息", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody SysFileInfo sysFileInfo) {
+    public YKResponse<Object> edit(@RequestBody SysFileInfo sysFileInfo) {
         return toAjax(sysFileInfoService.updateSysFileInfo(sysFileInfo));
     }
 
@@ -193,7 +193,7 @@ public class SysFileInfoController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:file:remove')")
     @Log(title = "文件信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/{fileIds}")
-    public AjaxResult remove(@Parameter(description = "文件ID数组") @PathVariable Long[] fileIds) {
+    public YKResponse<Object> remove(@Parameter(description = "文件ID数组") @PathVariable Long[] fileIds) {
         return toAjax(sysFileInfoService.deleteSysFileInfoByFileIds(fileIds));
     }
 }

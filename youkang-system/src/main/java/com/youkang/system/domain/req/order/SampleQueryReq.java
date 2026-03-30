@@ -21,6 +21,9 @@ public class SampleQueryReq extends PageReq {
     @Schema(description = "历史订单号")
     private String orderHistory;
 
+    @Schema(description = "客户名称")
+    private String customerName;
+
     @Schema(description = "样品编号")
     private String sampleId;
 

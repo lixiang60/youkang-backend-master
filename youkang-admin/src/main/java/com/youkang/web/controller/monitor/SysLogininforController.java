@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.page.TableDataInfo;
 import com.youkang.common.enums.BusinessType;
 import com.youkang.common.utils.poi.ExcelUtil;
@@ -57,7 +57,7 @@ public class SysLogininforController extends BaseController
     @PreAuthorize("@ss.hasPermi('monitor:logininfor:remove')")
     @Log(title = "登录日志", businessType = BusinessType.DELETE)
     @DeleteMapping("/{infoIds}")
-    public AjaxResult remove(@PathVariable Long[] infoIds)
+    public YKResponse<Object> remove(@PathVariable Long[] infoIds)
     {
         return toAjax(logininforService.deleteLogininforByIds(infoIds));
     }
@@ -65,7 +65,7 @@ public class SysLogininforController extends BaseController
     @PreAuthorize("@ss.hasPermi('monitor:logininfor:remove')")
     @Log(title = "登录日志", businessType = BusinessType.CLEAN)
     @DeleteMapping("/clean")
-    public AjaxResult clean()
+    public YKResponse<Object> clean()
     {
         logininforService.cleanLogininfor();
         return success();
@@ -74,7 +74,7 @@ public class SysLogininforController extends BaseController
     @PreAuthorize("@ss.hasPermi('monitor:logininfor:unlock')")
     @Log(title = "账户解锁", businessType = BusinessType.OTHER)
     @GetMapping("/unlock/{userName}")
-    public AjaxResult unlock(@PathVariable("userName") String userName)
+    public YKResponse<Object> unlock(@PathVariable("userName") String userName)
     {
         passwordService.clearLoginRecordCache(userName);
         return success();

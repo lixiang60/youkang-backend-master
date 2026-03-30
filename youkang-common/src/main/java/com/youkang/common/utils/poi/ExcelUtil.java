@@ -75,7 +75,7 @@ import com.youkang.common.annotation.Excel.ColumnType;
 import com.youkang.common.annotation.Excel.Type;
 import com.youkang.common.annotation.Excels;
 import com.youkang.common.config.YouKangConfig;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.text.Convert;
 import com.youkang.common.exception.UtilException;
 import com.youkang.common.utils.DateUtils;
@@ -526,7 +526,7 @@ public class ExcelUtil<T>
      * @param sheetName 工作表的名称
      * @return 结果
      */
-    public AjaxResult exportExcel(List<T> list, String sheetName)
+    public YKResponse<Object> exportExcel(List<T> list, String sheetName)
     {
         return exportExcel(list, sheetName, StringUtils.EMPTY);
     }
@@ -539,7 +539,7 @@ public class ExcelUtil<T>
      * @param title 标题
      * @return 结果
      */
-    public AjaxResult exportExcel(List<T> list, String sheetName, String title)
+    public YKResponse<Object> exportExcel(List<T> list, String sheetName, String title)
     {
         this.init(list, sheetName, title, Type.EXPORT);
         return exportExcel();
@@ -581,7 +581,7 @@ public class ExcelUtil<T>
      * @param sheetName 工作表的名称
      * @return 结果
      */
-    public AjaxResult importTemplateExcel(String sheetName)
+    public YKResponse<Object> importTemplateExcel(String sheetName)
     {
         return importTemplateExcel(sheetName, StringUtils.EMPTY);
     }
@@ -593,7 +593,7 @@ public class ExcelUtil<T>
      * @param title 标题
      * @return 结果
      */
-    public AjaxResult importTemplateExcel(String sheetName, String title)
+    public YKResponse<Object> importTemplateExcel(String sheetName, String title)
     {
         this.init(null, sheetName, title, Type.IMPORT);
         return exportExcel();
@@ -650,7 +650,7 @@ public class ExcelUtil<T>
      * 
      * @return 结果
      */
-    public AjaxResult exportExcel()
+    public YKResponse<Object> exportExcel()
     {
         OutputStream out = null;
         try
@@ -659,7 +659,7 @@ public class ExcelUtil<T>
             String filename = encodingFilename(sheetName);
             out = new FileOutputStream(getAbsoluteFile(filename));
             wb.write(out);
-            return AjaxResult.success(filename);
+            return YKResponse.success(filename);
         }
         catch (Exception e)
         {

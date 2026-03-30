@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.page.TableDataInfo;
 import com.youkang.common.enums.BusinessType;
 import com.youkang.common.utils.poi.ExcelUtil;
@@ -61,7 +61,7 @@ public class SysConfigController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:config:query')")
     @GetMapping(value = "/{configId}")
-    public AjaxResult getInfo(@PathVariable Long configId)
+    public YKResponse<Object> getInfo(@PathVariable Long configId)
     {
         return success(configService.selectConfigById(configId));
     }
@@ -70,7 +70,7 @@ public class SysConfigController extends BaseController
      * 根据参数键名查询参数值
      */
     @GetMapping(value = "/configKey/{configKey}")
-    public AjaxResult getConfigKey(@PathVariable String configKey)
+    public YKResponse<Object> getConfigKey(@PathVariable String configKey)
     {
         return success(configService.selectConfigByKey(configKey));
     }
@@ -81,7 +81,7 @@ public class SysConfigController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:config:add')")
     @Log(title = "参数管理", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@Validated @RequestBody SysConfig config)
+    public YKResponse<Object> add(@Validated @RequestBody SysConfig config)
     {
         if (!configService.checkConfigKeyUnique(config))
         {
@@ -97,7 +97,7 @@ public class SysConfigController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:config:edit')")
     @Log(title = "参数管理", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@Validated @RequestBody SysConfig config)
+    public YKResponse<Object> edit(@Validated @RequestBody SysConfig config)
     {
         if (!configService.checkConfigKeyUnique(config))
         {
@@ -113,7 +113,7 @@ public class SysConfigController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:config:remove')")
     @Log(title = "参数管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{configIds}")
-    public AjaxResult remove(@PathVariable Long[] configIds)
+    public YKResponse<Object> remove(@PathVariable Long[] configIds)
     {
         configService.deleteConfigByIds(configIds);
         return success();
@@ -125,7 +125,7 @@ public class SysConfigController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:config:remove')")
     @Log(title = "参数管理", businessType = BusinessType.CLEAN)
     @DeleteMapping("/refreshCache")
-    public AjaxResult refreshCache()
+    public YKResponse<Object> refreshCache()
     {
         configService.resetConfigCache();
         return success();

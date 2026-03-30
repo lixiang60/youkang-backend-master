@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.R;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.utils.StringUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,70 +37,70 @@ public class TestController extends BaseController
     
     @Operation(summary = "获取用户列表")
     @GetMapping("/list")
-    public R<List<UserEntity>> userList()
+    public YKResponse<List<UserEntity>> userList()
     {
         List<UserEntity> userList = new ArrayList<UserEntity>(users.values());
-        return R.ok(userList);
+        return YKResponse.ok(userList);
     }
     
     @Operation(summary = "获取用户详细")
     @GetMapping("/{userId}")
-    public R<UserEntity> getUser(@PathVariable(name = "userId")
+    public YKResponse<UserEntity> getUser(@PathVariable(name = "userId")
     Integer userId)
     {
         if (!users.isEmpty() && users.containsKey(userId))
         {
-            return R.ok(users.get(userId));
+            return YKResponse.ok(users.get(userId));
         }
         else
         {
-            return R.fail("用户不存在");
+            return YKResponse.fail("用户不存在");
         }
     }
     
     @Operation(summary = "新增用户")
     @PostMapping("/save")
-    public R<String> save(UserEntity user)
+    public YKResponse<String> save(UserEntity user)
     {
         if (StringUtils.isNull(user) || StringUtils.isNull(user.getUserId()))
         {
-            return R.fail("用户ID不能为空");
+            return YKResponse.fail("用户ID不能为空");
         }
         users.put(user.getUserId(), user);
-        return R.ok();
+        return YKResponse.ok();
     }
     
     @Operation(summary = "更新用户")
     @PutMapping("/update")
-    public R<String> update(@RequestBody
+    public YKResponse<String> update(@RequestBody
     UserEntity user)
     {
         if (StringUtils.isNull(user) || StringUtils.isNull(user.getUserId()))
         {
-            return R.fail("用户ID不能为空");
+            return YKResponse.fail("用户ID不能为空");
         }
         if (users.isEmpty() || !users.containsKey(user.getUserId()))
         {
-            return R.fail("用户不存在");
+            return YKResponse.fail("用户不存在");
         }
         users.remove(user.getUserId());
         users.put(user.getUserId(), user);
-        return R.ok();
+        return YKResponse.ok();
     }
     
     @Operation(summary = "删除用户信息")
     @DeleteMapping("/{userId}")
-    public R<String> delete(@PathVariable(name = "userId")
+    public YKResponse<String> delete(@PathVariable(name = "userId")
     Integer userId)
     {
         if (!users.isEmpty() && users.containsKey(userId))
         {
             users.remove(userId);
-            return R.ok();
+            return YKResponse.ok();
         }
         else
         {
-            return R.fail("用户不存在");
+            return YKResponse.fail("用户不存在");
         }
     }
 }

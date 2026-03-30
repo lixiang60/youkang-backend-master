@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.youkang.common.constant.Constants;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.domain.entity.SysMenu;
 import com.youkang.common.core.domain.entity.SysUser;
 import com.youkang.common.core.domain.model.LoginBody;
@@ -54,9 +54,9 @@ public class SysLoginController
      * @return 结果
      */
     @PostMapping("/login")
-    public AjaxResult login(@RequestBody LoginBody loginBody)
+    public YKResponse<Object> login(@RequestBody LoginBody loginBody)
     {
-        AjaxResult ajax = AjaxResult.success();
+        YKResponse<Object> ajax = YKResponse.success();
         // 生成令牌
         String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
                 loginBody.getUuid());
@@ -70,7 +70,7 @@ public class SysLoginController
      * @return 用户信息
      */
     @GetMapping("getInfo")
-    public AjaxResult getInfo()
+    public YKResponse<Object> getInfo()
     {
         LoginUser loginUser = SecurityUtils.getLoginUser();
         SysUser user = loginUser.getUser();
@@ -83,7 +83,7 @@ public class SysLoginController
             loginUser.setPermissions(permissions);
             tokenService.refreshToken(loginUser);
         }
-        AjaxResult ajax = AjaxResult.success();
+        YKResponse<Object> ajax = YKResponse.success();
         ajax.put("user", user);
         ajax.put("roles", roles);
         ajax.put("permissions", permissions);
@@ -98,11 +98,11 @@ public class SysLoginController
      * @return 路由信息
      */
     @GetMapping("getRouters")
-    public AjaxResult getRouters()
+    public YKResponse<Object> getRouters()
     {
         Long userId = SecurityUtils.getUserId();
         List<SysMenu> menus = menuService.selectMenuTreeByUserId(userId);
-        return AjaxResult.success(menuService.buildMenus(menus));
+        return YKResponse.success(menuService.buildMenus(menus));
     }
     
     // 检查初始密码是否提醒修改

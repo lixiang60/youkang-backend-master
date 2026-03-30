@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import com.alibaba.fastjson2.JSON;
 import com.youkang.common.constant.Constants;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.domain.model.LoginUser;
 import com.youkang.common.utils.MessageUtils;
 import com.youkang.common.utils.ServletUtils;
@@ -48,6 +48,6 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler
             // 记录用户退出日志
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(userName, Constants.LOGOUT, MessageUtils.message("user.logout.success")));
         }
-        ServletUtils.renderString(response, JSON.toJSONString(AjaxResult.success(MessageUtils.message("user.logout.success"))));
+        ServletUtils.renderString(response, JSON.toJSONString(YKResponse.success(MessageUtils.message("user.logout.success"))));
     }
 }

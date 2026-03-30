@@ -3,7 +3,7 @@ package com.youkang.web.controller.order;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.core.domain.PageResp;
-import com.youkang.common.core.domain.R;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.enums.BusinessType;
 import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.poi.ExcelUtil;
@@ -47,9 +47,9 @@ public class OrderInfoController {
     @Operation(summary = "查询订单信息列表", description = "分页查询订单信息列表")
     @PreAuthorize("@ss.hasPermi('order:info:list')")
     @PostMapping("/list")
-    public R<PageResp> list(@Parameter(description = "订单查询条件") @RequestBody OrderQueryReq req) {
+    public YKResponse<PageResp> list(@Parameter(description = "订单查询条件") @RequestBody OrderQueryReq req) {
         IPage<OrderResp> page = orderInfoService.queryPage(req);
-        return R.ok(PageResp.of(page.getRecords(), page.getTotal()));
+        return YKResponse.ok(PageResp.of(page.getRecords(), page.getTotal()));
     }
 
     /**
@@ -59,9 +59,9 @@ public class OrderInfoController {
     @PreAuthorize("@ss.hasPermi('order:info:add')")
     @Log(title = "订单信息", businessType = BusinessType.INSERT)
     @PostMapping("/addOrder")
-    public R<Void> add(@Parameter(description = "订单信息") @RequestBody OrderAddReq req) {
+    public YKResponse<Void> add(@Parameter(description = "订单信息") @RequestBody OrderAddReq req) {
         orderInfoService.addOrder(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     /**
@@ -69,9 +69,9 @@ public class OrderInfoController {
      */
     @Operation(summary = "通过订单新增样品", description = "通过订单新增样品")
     @PostMapping("/addSample")
-    public R<Void> addSample(@Valid @RequestBody SampleAddReq req){
+    public YKResponse<Void> addSample(@Valid @RequestBody SampleAddReq req){
         orderInfoService.addSample(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
     /**
@@ -79,9 +79,9 @@ public class OrderInfoController {
      */
     @Operation(summary = "通过订单批量新增样品", description = "通过订单批量新增样品")
     @PostMapping("/batchAddSample")
-    public R<Void> batchAddSample( @RequestBody SampleBatchAddReq req){
+    public YKResponse<Void> batchAddSample( @RequestBody SampleBatchAddReq req){
         orderInfoService.batchAddSample(req);
-        return R.ok();
+        return YKResponse.ok();
     }
 
 
@@ -106,14 +106,14 @@ public class OrderInfoController {
     @PreAuthorize("@ss.hasPermi('order:info:import')")
     @Log(title = "订单信息", businessType = BusinessType.IMPORT)
     @PostMapping("/import")
-    public R<String> importData(@Parameter(description = "Excel文件") MultipartFile file, @Parameter(description = "是否更新已存在的数据")
+    public YKResponse<String> importData(@Parameter(description = "Excel文件") MultipartFile file, @Parameter(description = "是否更新已存在的数据")
                                 @RequestParam(defaultValue = "false") boolean updateSupport
     ) throws Exception {
         ExcelUtil<OrderInfo> util = new ExcelUtil<>(OrderInfo.class);
         List<OrderInfo> orderList = util.importExcel(file.getInputStream());
         String operName = SecurityUtils.getUsername();
         String message = orderInfoService.importOrder(orderList, updateSupport, operName);
-        return R.ok(message);
+        return YKResponse.ok(message);
     }
 
     /**
@@ -132,8 +132,8 @@ public class OrderInfoController {
     @Operation(summary = "获取订单详情", description = "根据订单ID获取订单详细信息")
     @PreAuthorize("@ss.hasPermi('order:info:query')")
     @GetMapping(value = "/{orderId}")
-    public R<OrderResp> getInfo(@Parameter(description = "订单ID") @PathVariable("orderId") String orderId) {
-        return R.ok(orderInfoService.queryById(orderId));
+    public YKResponse<OrderResp> getInfo(@Parameter(description = "订单ID") @PathVariable("orderId") String orderId) {
+        return YKResponse.ok(orderInfoService.queryById(orderId));
     }
 
 
@@ -144,9 +144,9 @@ public class OrderInfoController {
     @PreAuthorize("@ss.hasPermi('order:info:edit')")
     @Log(title = "订单信息", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> edit(@Parameter(description = "订单更新请求") @RequestBody OrderUpdateReq req) {
+    public YKResponse<Void> edit(@Parameter(description = "订单更新请求") @RequestBody OrderUpdateReq req) {
         boolean result = orderInfoService.updateOrder(req);
-        return result ? R.ok() : R.fail("修改订单信息失败");
+        return result ? YKResponse.ok() : YKResponse.fail("修改订单信息失败");
     }
 
     /**
@@ -156,8 +156,8 @@ public class OrderInfoController {
     @PreAuthorize("@ss.hasPermi('order:info:remove')")
     @Log(title = "订单信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/{orderIds}")
-    public R<Void> remove(@Parameter(description = "订单ID数组") @PathVariable String[] orderIds) {
+    public YKResponse<Void> remove(@Parameter(description = "订单ID数组") @PathVariable String[] orderIds) {
         boolean result = orderInfoService.removeByIds(Arrays.asList(orderIds));
-        return result ? R.ok() : R.fail("删除订单信息失败");
+        return result ? YKResponse.ok() : YKResponse.fail("删除订单信息失败");
     }
 }

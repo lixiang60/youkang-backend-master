@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.core.controller.BaseController;
-import com.youkang.common.core.domain.AjaxResult;
+import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.core.page.TableDataInfo;
 import com.youkang.common.enums.BusinessType;
 import com.youkang.common.utils.poi.ExcelUtil;
@@ -61,7 +61,7 @@ public class SysJobLogController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('monitor:job:query')")
     @GetMapping(value = "/{jobLogId}")
-    public AjaxResult getInfo(@PathVariable Long jobLogId)
+    public YKResponse<Object> getInfo(@PathVariable Long jobLogId)
     {
         return success(jobLogService.selectJobLogById(jobLogId));
     }
@@ -73,7 +73,7 @@ public class SysJobLogController extends BaseController
     @PreAuthorize("@ss.hasPermi('monitor:job:remove')")
     @Log(title = "定时任务调度日志", businessType = BusinessType.DELETE)
     @DeleteMapping("/{jobLogIds}")
-    public AjaxResult remove(@PathVariable Long[] jobLogIds)
+    public YKResponse<Object> remove(@PathVariable Long[] jobLogIds)
     {
         return toAjax(jobLogService.deleteJobLogByIds(jobLogIds));
     }
@@ -84,7 +84,7 @@ public class SysJobLogController extends BaseController
     @PreAuthorize("@ss.hasPermi('monitor:job:remove')")
     @Log(title = "调度日志", businessType = BusinessType.CLEAN)
     @DeleteMapping("/clean")
-    public AjaxResult clean()
+    public YKResponse<Object> clean()
     {
         jobLogService.cleanJobLog();
         return success();
