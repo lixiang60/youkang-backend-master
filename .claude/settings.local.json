@@ -17,5 +17,47 @@
     ],
     "deny": [],
     "ask": []
+  },
+  "mcpServers": {
+    "context7": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@upstash/context7-mcp@latest"],
+      "env": {}
+    },
+    "mcp-deepwiki": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "mcp-deepwiki@latest"],
+      "env": {}
+    },
+    "Playwright": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@playwright/mcp@latest"],
+      "env": {}
+    },
+    "web-search-prime": {
+      "type": "http",
+      "url": "https://api.z.ai/api/mcp/web_search_prime/mcp",
+      "headers": {
+        "Authorization": "Bearer 114da1c01821450792e17560efe69cab.7H2CIzngahSFK17L"
+      }
+    },
+    "codex": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/GuDaStudio/codexmcp.git", "codexmcp"],
+      "env": {}
+    },
+    "zai-v": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@z_ai/mcp-server"],
+      "env": {
+        "Z_AI_API_KEY": "114da1c01821450792e17560efe69cab.7H2CIzngahSFK17L",
+        "Z_AI_MODE": "ZHIPU"
+      }
+    }
   }
 }

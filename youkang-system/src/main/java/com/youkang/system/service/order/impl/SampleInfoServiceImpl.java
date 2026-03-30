@@ -20,6 +20,7 @@ import com.youkang.system.service.order.ISampleInfoService;
 import com.youkang.system.utils.HoleNoUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +54,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     @Autowired
     private ISampleFlowLogService sampleFlowLogService;
 
+    @Lazy
     @Autowired
     private IReimburseRecordService reimburseRecordService;
 
