@@ -1,33 +1,20 @@
 package com.youkang.web.controller.system;
-
-^M
-^M
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.youkang.common.annotation.Log;
+import com.youkang.common.constant.UserConstants;
+import com.youkang.common.core.controller.BaseController;
+import com.youkang.common.core.domain.YKResponse;
+import com.youkang.common.core.domain.entity.SysDept;
+import com.youkang.common.enums.BusinessType;
+import com.youkang.system.service.ISysDeptService;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-    import org.springframework.security.access.prepost.PreAuthorize;
-   import org.springframework.validation.annotation.Validated;
-   import org.springframework.web.bind.annotation.DeleteMapping;
-   import org.springframework.web.bind.annotation.GetMapping;
-   import org.springframework.web.bind.annotation.PathVariable;
-   import org.springframework.web.bind.annotation.PostMapping;
-   import org.springframework.web.bind.annotation.PutMapping;
-   import org.springframework.web.bind.annotation.RequestBody;
-   import org.springframework.web.bind.annotation.RequestMapping;
-   import org.springframework.web.bind.annotation.RestController;
-   import com.youkang.common.annotation.Log;
-   import com.youkang.common.constant.UserConstants;
-   import com.youkang.common.core.controller.BaseController;
-   import com.youkang.common.core.domain.YKResponse;
-   import com.youkang.common.core.domain.entity.SysDept;
-   import com.youkang.common.enums.BusinessType;
-   import com.youkang.common.utils.StringUtils;
-   import com.youkang.system.service.ISysDeptService;
-^M
-^M
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 /**
  * 鐜索部门
  *
@@ -35,12 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @RestController
 @RequestMapping("/system/dept")
-public class SysDeptController extends BaseController
-{
+public class SysDeptController extends BaseController {
     @Autowired
     private ISysDeptService deptService;
 
-^M
     /**
      * 获取部门列表
      */
@@ -57,7 +42,7 @@ public class SysDeptController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:dept:list')")
     @GetMapping("/list/exclude/{deptId}")
-    public YKResponse<Object> excludeChild(@PathVariable(value = "deptId", required = false) Long deptId)
+    public YKResponse<Object> excludeChild(@PathVariable(required = false) Long deptId)
     {
         List<SysDept> depts = deptService.selectDeptList(new SysDept());
         depts.removeIf(d -> d.getDeptId().intValue() == deptId || ArrayUtils.contains(StringUtils.split(d.getAncestors(), ","), deptId + ""));
@@ -136,5 +121,4 @@ public class SysDeptController extends BaseController
         deptService.checkDeptDataScope(deptId);
         return toAjax(deptService.deleteDeptById(deptId));
     }
-}
 }
