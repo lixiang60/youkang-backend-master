@@ -854,7 +854,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
     public void reactionPreSendBack(SampleCommonReq req) {
         List<Long> produceIdList = req.getProduceIdList();
         this.lambdaUpdate()
-                .set(SampleInfo::getFlowName, "反应预做")
+                .set(SampleInfo::getFlowName, "反应生产")
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
                 .in(SampleInfo::getProduceId, produceIdList)
