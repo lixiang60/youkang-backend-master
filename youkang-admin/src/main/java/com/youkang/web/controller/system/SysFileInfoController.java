@@ -53,34 +53,32 @@ public class SysFileInfoController extends BaseController {
     @Operation(summary = "获取文件详情", description = "根据文件ID获取文件详细信息")
     @PreAuthorize("@ss.hasPermi('system:file:query')")
     @GetMapping(value = "/{fileId}")
-    public YKResponse<Object> getInfo(@Parameter(description = "文件ID") @PathVariable("fileId") Long fileId) {
+    public YKResponse<Object> getInfo(@PathVariable Long fileId) {
         return success(sysFileInfoService.selectSysFileInfoByFileId(fileId));
     }
 
     /**
-     * 根据业务类型和业务ID查询文件列表
+     * 根据业务ID查询文件列表
      */
-    @Operation(summary = "根据业务查询文件", description = "根据业务类型和业务ID查询关联的文件列表")
-    @GetMapping("/business/{businessType}/{businessId}")
+    @Operation(summary = "根据业务查询文件", description = "根据业务ID查询关联的文件列表")
+    @GetMapping("/business/{businessId}")
     public YKResponse<Object> getFilesByBusiness(
-            @Parameter(description = "业务类型") @PathVariable String businessType,
             @Parameter(description = "业务ID") @PathVariable String businessId) {
-        List<SysFileInfo> list = sysFileInfoService.selectFilesByBusiness(businessType, businessId);
+        List<SysFileInfo> list = sysFileInfoService.selectFilesByBusiness(null, businessId);
         return success(list);
     }
 
     /**
      * 上传文件（单个）
      */
-    @Operation(summary = "上传文件", description = "上传单个文件，可选择指定业务类型和业务ID")
+    @Operation(summary = "上传文件", description = "上传单个文件，可选择指定业务ID")
     @Log(title = "文件上传", businessType = BusinessType.INSERT)
     @PostMapping("/upload")
     public YKResponse<Object> upload(
             @Parameter(description = "上传的文件") @RequestParam("file") MultipartFile file,
-            @Parameter(description = "业务类型（可选）") @RequestParam(required = false) String businessType,
             @Parameter(description = "业务ID（可选）") @RequestParam(required = false) String businessId) {
         try {
-            SysFileInfo fileInfo = sysFileInfoService.uploadFile(file, businessType, businessId);
+            SysFileInfo fileInfo = sysFileInfoService.uploadFile(file, null, businessId);
             return success(fileInfo);
         } catch (Exception e) {
             return error("文件上传失败：" + e.getMessage());
@@ -95,10 +93,9 @@ public class SysFileInfoController extends BaseController {
     @PostMapping("/uploads")
     public YKResponse<Object> uploads(
             @Parameter(description = "上传的文件列表") @RequestParam("files") List<MultipartFile> files,
-            @Parameter(description = "业务类型（可选）") @RequestParam(required = false) String businessType,
             @Parameter(description = "业务ID（可选）") @RequestParam(required = false) String businessId) {
         try {
-            List<SysFileInfo> fileInfoList = sysFileInfoService.uploadFiles(files, businessType, businessId);
+            List<SysFileInfo> fileInfoList = sysFileInfoService.uploadFiles(files, null, businessId);
             return success(fileInfoList);
         } catch (Exception e) {
             return error("文件上传失败：" + e.getMessage());
@@ -108,7 +105,7 @@ public class SysFileInfoController extends BaseController {
     /**
      * 修改文件信息
      */
-    @Operation(summary = "修改文件信息", description = "修改文件的业务类型、业务ID等信息")
+    @Operation(summary = "修改文件信息", description = "修改文件的业务ID等信息")
     @PreAuthorize("@ss.hasPermi('system:file:edit')")
     @Log(title = "文件信息", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -131,9 +128,6 @@ public class SysFileInfoController extends BaseController {
                 return;
             }
 
-            // 增加下载次数
-            sysFileInfoService.increaseDownloadCount(fileId);
-
             // 下载文件
             String filePath = YouKangConfig.getProfile() + fileInfo.getFilePath();
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
@@ -151,7 +145,6 @@ public class SysFileInfoController extends BaseController {
     @GetMapping("/preview/{fileId}")
     public void preview(
             @Parameter(description = "文件ID") @PathVariable Long fileId,
-            @Parameter(description = "是否使用缩略图") @RequestParam(defaultValue = "false") Boolean thumbnail,
             HttpServletResponse response) {
         try {
             SysFileInfo fileInfo = sysFileInfoService.selectSysFileInfoByFileId(fileId);
@@ -159,25 +152,14 @@ public class SysFileInfoController extends BaseController {
                 return;
             }
 
-            // 选择原图或缩略图
-            String filePath;
-            if (thumbnail && fileInfo.getThumbnailPath() != null) {
-                filePath = YouKangConfig.getProfile() + fileInfo.getThumbnailPath();
-            } else {
-                filePath = YouKangConfig.getProfile() + fileInfo.getFilePath();
-            }
-
+            String filePath = YouKangConfig.getProfile() + fileInfo.getFilePath();
             File file = new File(filePath);
             if (!file.exists()) {
                 return;
             }
 
             // 设置响应类型
-            if (fileInfo.getMimeType() != null) {
-                response.setContentType(fileInfo.getMimeType());
-            } else {
-                response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-            }
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
 
             // 输出文件内容
             FileUtils.writeBytes(filePath, response.getOutputStream());

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.youkang.common.constant.HttpStatus;
 import com.youkang.common.utils.StringUtils;
+import lombok.Getter;
 
 /**
  * 有康统一响应结果
@@ -18,9 +19,9 @@ import com.youkang.common.utils.StringUtils;
  * @param <T> 数据类型
  * @author youkang
  */
+@Getter
 public class YKResponse<T> extends HashMap<String, Object> implements Serializable {
 
-    private static final long serialVersionUID = 1L;
 
     /** 状态码 Key */
     public static final String CODE_TAG = "code";
@@ -263,10 +264,6 @@ public class YKResponse<T> extends HashMap<String, Object> implements Serializab
 
     public void setMsg(String msg) {
         super.put(MSG_TAG, msg);
-    }
-
-    public T getData() {
-        return data;
     }
 
     @SuppressWarnings("unchecked")

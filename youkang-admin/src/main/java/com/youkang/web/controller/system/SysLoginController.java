@@ -1,7 +1,9 @@
 package com.youkang.web.controller.system;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,12 +58,12 @@ public class SysLoginController
     @PostMapping("/login")
     public YKResponse<Object> login(@RequestBody LoginBody loginBody)
     {
-        YKResponse<Object> ajax = YKResponse.success();
         // 生成令牌
         String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
                 loginBody.getUuid());
-        ajax.put(Constants.TOKEN, token);
-        return ajax;
+        Map<String, Object> data = new HashMap<>();
+        data.put(Constants.TOKEN, token);
+        return YKResponse.success(data);
     }
 
     /**
@@ -83,13 +85,13 @@ public class SysLoginController
             loginUser.setPermissions(permissions);
             tokenService.refreshToken(loginUser);
         }
-        YKResponse<Object> ajax = YKResponse.success();
-        ajax.put("user", user);
-        ajax.put("roles", roles);
-        ajax.put("permissions", permissions);
-        ajax.put("isDefaultModifyPwd", initPasswordIsModify(user.getPwdUpdateDate()));
-        ajax.put("isPasswordExpired", passwordIsExpiration(user.getPwdUpdateDate()));
-        return ajax;
+        Map<String, Object> data = new HashMap<>();
+        data.put("user", user);
+        data.put("roles", roles);
+        data.put("permissions", permissions);
+        data.put("isDefaultModifyPwd", initPasswordIsModify(user.getPwdUpdateDate()));
+        data.put("isPasswordExpired", passwordIsExpiration(user.getPwdUpdateDate()));
+        return YKResponse.success(data);
     }
 
     /**

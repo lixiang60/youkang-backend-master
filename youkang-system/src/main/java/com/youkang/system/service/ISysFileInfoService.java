@@ -29,9 +29,9 @@ public interface ISysFileInfoService {
     List<SysFileInfo> selectSysFileInfoList(SysFileInfo sysFileInfo);
 
     /**
-     * 根据业务类型和业务ID查询文件列表
+     * 根据业务ID查询文件列表
      *
-     * @param businessType 业务类型
+     * @param businessType 业务类型（预留）
      * @param businessId 业务ID
      * @return 文件信息集合
      */
@@ -41,7 +41,7 @@ public interface ISysFileInfoService {
      * 上传文件并保存信息
      *
      * @param file 文件
-     * @param businessType 业务类型（可选）
+     * @param businessType 业务类型（预留）
      * @param businessId 业务ID（可选）
      * @return 文件信息
      */
@@ -51,7 +51,7 @@ public interface ISysFileInfoService {
      * 批量上传文件
      *
      * @param files 文件列表
-     * @param businessType 业务类型（可选）
+     * @param businessType 业务类型（预留）
      * @param businessId 业务ID（可选）
      * @return 文件信息集合
      */
@@ -74,15 +74,16 @@ public interface ISysFileInfoService {
     int updateSysFileInfo(SysFileInfo sysFileInfo);
 
     /**
-     * 增加下载次数
+     * 增加下载次数（已废弃）
      *
      * @param fileId 文件ID
      * @return 结果
      */
+    @Deprecated
     int increaseDownloadCount(Long fileId);
 
     /**
-     * 删除文件信息（同时删除物理文件）
+     * 删除文件信息（同时删除文件）
      *
      * @param fileId 文件ID
      * @return 结果
@@ -90,7 +91,7 @@ public interface ISysFileInfoService {
     int deleteSysFileInfoByFileId(Long fileId);
 
     /**
-     * 批量删除文件信息（同时删除物理文件）
+     * 批量删除文件信息（同时删除文件）
      *
      * @param fileIds 需要删除的数据ID
      * @return 结果

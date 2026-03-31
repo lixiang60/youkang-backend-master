@@ -30,17 +30,9 @@ public interface SysFileInfoMapper {
     List<SysFileInfo> selectSysFileInfoList(SysFileInfo sysFileInfo);
 
     /**
-     * 根据MD5查询文件
+     * 根据业务ID查询文件列表
      *
-     * @param md5 文件MD5值
-     * @return 文件信息
-     */
-    SysFileInfo selectSysFileInfoByMd5(String md5);
-
-    /**
-     * 根据业务类型和业务ID查询文件列表
-     *
-     * @param businessType 业务类型
+     * @param businessType 业务类型（预留）
      * @param businessId 业务ID
      * @return 文件信息集合
      */
@@ -61,14 +53,6 @@ public interface SysFileInfoMapper {
      * @return 结果
      */
     int updateSysFileInfo(SysFileInfo sysFileInfo);
-
-    /**
-     * 增加下载次数
-     *
-     * @param fileId 文件ID
-     * @return 结果
-     */
-    int increaseDownloadCount(Long fileId);
 
     /**
      * 删除文件信息
