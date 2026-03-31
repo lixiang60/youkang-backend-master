@@ -61,9 +61,9 @@ public class SysLoginController
         // 生成令牌
         String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
                 loginBody.getUuid());
-        Map<String, Object> data = new HashMap<>();
-        data.put(Constants.TOKEN, token);
-        return YKResponse.success(data);
+        YKResponse<Object> response = YKResponse.success();
+        response.put(Constants.TOKEN, token);
+        return response;
     }
 
     /**
@@ -85,13 +85,13 @@ public class SysLoginController
             loginUser.setPermissions(permissions);
             tokenService.refreshToken(loginUser);
         }
-        Map<String, Object> data = new HashMap<>();
-        data.put("user", user);
-        data.put("roles", roles);
-        data.put("permissions", permissions);
-        data.put("isDefaultModifyPwd", initPasswordIsModify(user.getPwdUpdateDate()));
-        data.put("isPasswordExpired", passwordIsExpiration(user.getPwdUpdateDate()));
-        return YKResponse.success(data);
+        YKResponse<Object> response = YKResponse.success();
+        response.put("user", user);
+        response.put("roles", roles);
+        response.put("permissions", permissions);
+        response.put("isDefaultModifyPwd", initPasswordIsModify(user.getPwdUpdateDate()));
+        response.put("isPasswordExpired", passwordIsExpiration(user.getPwdUpdateDate()));
+        return response;
     }
 
     /**

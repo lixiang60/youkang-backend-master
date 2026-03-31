@@ -73,10 +73,10 @@ public class SysMenuController extends BaseController
     public YKResponse<Object> roleMenuTreeselect(@PathVariable("roleId") Long roleId)
     {
         List<SysMenu> menus = menuService.selectMenuList(getUserId());
-        Map<String, Object> data = new HashMap<>();
-        data.put("checkedKeys", menuService.selectMenuListByRoleId(roleId));
-        data.put("menus", menuService.buildMenuTreeSelect(menus));
-        return YKResponse.success(data);
+        YKResponse<Object> response = YKResponse.success();
+        response.put("checkedKeys", menuService.selectMenuListByRoleId(roleId));
+        response.put("menus", menuService.buildMenuTreeSelect(menus));
+        return response;
     }
 
     /**

@@ -54,9 +54,9 @@ public class CacheController
         Properties commandStats = (Properties) redisTemplate.execute((RedisCallback<Object>) connection -> connection.info("commandstats"));
         Object dbSize = redisTemplate.execute((RedisCallback<Object>) connection -> connection.dbSize());
 
-        Map<String, Object> result = new HashMap<>(3);
-        result.put("info", info);
-        result.put("dbSize", dbSize);
+        YKResponse<Object> response = YKResponse.success();
+        response.put("info", info);
+        response.put("dbSize", dbSize);
 
         List<Map<String, String>> pieList = new ArrayList<>();
         commandStats.stringPropertyNames().forEach(key -> {
@@ -66,8 +66,8 @@ public class CacheController
             data.put("value", StringUtils.substringBetween(property, "calls=", ",usec"));
             pieList.add(data);
         });
-        result.put("commandStats", pieList);
-        return YKResponse.success(result);
+        response.put("commandStats", pieList);
+        return response;
     }
 
     @PreAuthorize("@ss.hasPermi('monitor:cache:list')")

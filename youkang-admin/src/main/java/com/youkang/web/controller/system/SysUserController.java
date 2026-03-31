@@ -103,19 +103,19 @@ public class SysUserController extends BaseController
     @GetMapping(value = { "/", "/{userId}" })
     public YKResponse<Object> getInfo(@PathVariable(value = "userId", required = false) Long userId)
     {
-        Map<String, Object> data = new HashMap<>();
+        YKResponse<Object> response = YKResponse.success();
         if (StringUtils.isNotNull(userId))
         {
             userService.checkUserDataScope(userId);
             SysUser sysUser = userService.selectUserById(userId);
-            data.put("data", sysUser);
-            data.put("postIds", postService.selectPostListByUserId(userId));
-            data.put("roleIds", sysUser.getRoles().stream().map(SysRole::getRoleId).collect(Collectors.toList()));
+            response.put("data", sysUser);
+            response.put("postIds", postService.selectPostListByUserId(userId));
+            response.put("roleIds", sysUser.getRoles().stream().map(SysRole::getRoleId).collect(Collectors.toList()));
         }
         List<SysRole> roles = roleService.selectRoleAll();
-        data.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
-        data.put("posts", postService.selectPostAll());
-        return YKResponse.success(data);
+        response.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
+        response.put("posts", postService.selectPostAll());
+        return response;
     }
 
     /**
@@ -226,10 +226,10 @@ public class SysUserController extends BaseController
     {
         SysUser user = userService.selectUserById(userId);
         List<SysRole> roles = roleService.selectRolesByUserId(userId);
-        Map<String, Object> data = new HashMap<>();
-        data.put("user", user);
-        data.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
-        return YKResponse.success(data);
+        YKResponse<Object> response = YKResponse.success();
+        response.put("user", user);
+        response.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
+        return response;
     }
 
     /**
