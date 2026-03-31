@@ -419,7 +419,7 @@
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
         LEFT JOIN yk_customer_info c ON o.customer_id = c.id
-        WHERE template_plate_no = #{req.plateNo}
+        WHERE template_plate_no = #{req.templateNo}
         GROUP BY s.order_id, s.sample_id
     </select>
 

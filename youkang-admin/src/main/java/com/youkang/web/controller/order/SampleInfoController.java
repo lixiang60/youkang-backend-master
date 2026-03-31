@@ -181,7 +181,6 @@ public class SampleInfoController {
 
     @Operation(summary = "模板bdt", description = "模板bdt")
     @PreAuthorize("@ss.hasPermi('order:sample:template:update')")
-    @Log(title = "模板bdt", businessType = BusinessType.UPDATE)
     @PostMapping("/template/templateBDT")
     public YKResponse<List<SampleTemplateResp>> templateBDT(@Parameter(description = "模板bdt") @RequestBody TemplateQueryReq req) {
         return YKResponse.ok(sampleInfoService.templateBDT(req));
