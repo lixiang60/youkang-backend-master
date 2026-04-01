@@ -339,4 +339,13 @@ public class SampleInfoController {
         return YKResponse.ok();
     }
 
+    @Operation(summary = "清除模板孔号", description = "清除模板板号和孔号，状态设置为模板成功，流程设置为反应生产")
+    @PreAuthorize("@ss.hasPermi('order:sample:template')")
+    @Log(title = "清除模板孔号", businessType = BusinessType.UPDATE)
+    @PostMapping("/template/clearHole")
+    public YKResponse<?> clearTemplateHole(@RequestBody SampleCommonReq req) {
+        sampleInfoService.clearTemplateHole(req);
+        return YKResponse.ok();
+    }
+
 }

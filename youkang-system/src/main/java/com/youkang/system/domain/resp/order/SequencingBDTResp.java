@@ -41,6 +41,10 @@ public class SequencingBDTResp {
     @Schema(description = "引物")
     private String primer;
 
+    @Excel(name = "引物类型")
+    @Schema(description = "引物类型")
+    private String primerType;
+
     @Excel(name = "引物浓度")
     @Schema(description = "引物浓度")
     private String primerConcentration;

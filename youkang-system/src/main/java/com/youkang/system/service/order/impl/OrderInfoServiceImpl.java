@@ -17,6 +17,7 @@ import com.youkang.system.domain.req.order.OrderQueryReq;
 import com.youkang.system.domain.req.order.OrderUpdateReq;
 import com.youkang.system.domain.req.order.SampleAddReq;
 import com.youkang.system.domain.req.order.SampleBatchAddReq;
+import com.youkang.system.domain.req.order.SampleItemReq;
 import com.youkang.system.domain.resp.order.OrderResp;
 import com.youkang.system.mapper.OrderInfoMapper;
 import com.youkang.system.mapper.SampleInfoMapper;
@@ -30,7 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -121,6 +125,9 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                 if (sampleInfo.getProduceId() == null) {
                     sampleInfo.setProduceId(generateProduceId());
                 }
+                // 同步订单的公司信息到样品
+                sampleInfo.setBelongCompany(req.getBelongCompany());
+                sampleInfo.setProduceCompany(req.getProduceCompany());
                 return sampleInfo;
             }).collect(Collectors.toList());
             sampleInfoMapper.insert(sampleInfoList);
@@ -143,6 +150,14 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         sampleInfo.setCreateTime(LocalDateTime.now());
         // 自动生成生产编号
         sampleInfo.setProduceId(generateProduceId());
+
+        // 从订单中获取公司信息并同步到样品
+        OrderInfo orderInfo = orderInfoMapper.selectById(req.getOrderId());
+        if (orderInfo != null) {
+            sampleInfo.setBelongCompany(orderInfo.getBelongCompany());
+            sampleInfo.setProduceCompany(orderInfo.getProduceCompany());
+        }
+
         sampleInfoMapper.insert(sampleInfo);
     }
 
@@ -150,6 +165,24 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     public void batchAddSample(SampleBatchAddReq req) {
         if (req.getSampleList() != null && !req.getSampleList().isEmpty()) {
             String username = SecurityUtils.getUsername();
+
+            // 收集所有订单ID，批量查询订单信息
+            Set<String> orderIds = req.getSampleList().stream()
+                    .map(SampleItemReq::getOrderId)
+                    .filter(StringUtils::isNotEmpty)
+                    .collect(Collectors.toSet());
+
+            // 批量查询订单信息，构建订单ID到订单的映射
+            Map<String, OrderInfo> orderMap = new HashMap<>();
+            if (!orderIds.isEmpty()) {
+                List<OrderInfo> orders = orderInfoMapper.selectBatchIds(orderIds);
+                orderMap = orders.stream()
+                        .collect(Collectors.toMap(OrderInfo::getOrderId, o -> o));
+            }
+
+            // 最终的订单映射
+            final Map<String, OrderInfo> finalOrderMap = orderMap;
+
             List<SampleInfo> sampleInfoList = req.getSampleList().stream().map(item -> {
                 SampleInfo sampleInfo = new SampleInfo();
                 BeanUtils.copyProperties(item, sampleInfo);
@@ -158,6 +191,14 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                 // 自动生成生产编号
                 if (sampleInfo.getProduceId() == null) {
                     sampleInfo.setProduceId(generateProduceId());
+                }
+                // 从订单中同步公司信息
+                if (StringUtils.isNotEmpty(item.getOrderId())) {
+                    OrderInfo order = finalOrderMap.get(item.getOrderId());
+                    if (order != null) {
+                        sampleInfo.setBelongCompany(order.getBelongCompany());
+                        sampleInfo.setProduceCompany(order.getProduceCompany());
+                    }
                 }
                 return sampleInfo;
             }).collect(Collectors.toList());

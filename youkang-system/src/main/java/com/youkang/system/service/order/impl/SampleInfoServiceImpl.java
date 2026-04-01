@@ -8,10 +8,12 @@ import com.youkang.common.core.redis.RedisCache;
 import com.youkang.common.exception.ServiceException;
 import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.StringUtils;
+import com.youkang.system.domain.OrderInfo;
 import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.enums.SampleFlowOperation;
 import com.youkang.system.domain.req.order.*;
 import com.youkang.system.domain.resp.order.*;
+import com.youkang.system.mapper.OrderInfoMapper;
 import com.youkang.system.mapper.ReimburseRecordMapper;
 import com.youkang.system.mapper.SampleInfoMapper;
 import com.youkang.system.service.order.IReimburseRecordService;
@@ -47,6 +49,9 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
 
     @Autowired
     private SampleInfoMapper sampleInfoMapper;
+
+    @Autowired
+    private OrderInfoMapper orderInfoMapper;
 
     @Autowired
     private RedisCache redisCache;
@@ -125,6 +130,14 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         // 自动生成生产编号
         if (sampleInfo.getProduceId() == null) {
             sampleInfo.setProduceId(generateProduceId());
+        }
+        // 从订单中获取公司信息并同步到样品
+        if (StringUtils.isNotEmpty(req.getOrderId())) {
+            OrderInfo orderInfo = orderInfoMapper.selectById(req.getOrderId());
+            if (orderInfo != null) {
+                sampleInfo.setBelongCompany(orderInfo.getBelongCompany());
+                sampleInfo.setProduceCompany(orderInfo.getProduceCompany());
+            }
         }
         return this.save(sampleInfo);
     }
@@ -449,7 +462,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
             this.lambdaUpdate()
                     .set(SampleInfo::getRemark, appendedRemark)
                     .set(SampleInfo::getPerformance, "模板排版")
-                    .set(SampleInfo::getFlowName, "模板排版")
+                    .set(SampleInfo::getFlowName, "0")
                     .set(SampleInfo::getUpdateUser, username)
                     .eq(SampleInfo::getOrderId, info.getOrderId())
                     .eq(SampleInfo::getSampleId, info.getSampleId())
@@ -519,11 +532,11 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         String returnState = req.getReturnState();
         String flowName;
         if (returnState.equals("模板重抽") || returnState.equals("模板重切")) {
-            flowName = "模板生产";
+            flowName = "反应生产";
         } else if (returnState.equals("模板失败")) {
             flowName = "模板邮件";
         } else {
-            flowName = "模板成功";
+            flowName = "反应生产";
         }
         this.lambdaUpdate().set(SampleInfo::getReturnState, req.getReturnState())
                 .set(SampleInfo::getFlowName, flowName)
@@ -552,7 +565,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         if (StringUtils.isEmpty(req.getPlateNo())) {
             //更新浓度，更新状态为模板成功
             this.lambdaUpdate().set(SampleInfo::getOriginConcentration, req.getOriginConcentration())
-                    .set(SampleInfo::getFlowName, "模板成功")
+                    .set(SampleInfo::getFlowName, "反应生产")
                     .set(SampleInfo::getReturnState, "模板成功")
                     .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
                     .set(SampleInfo::getUpdateTime, LocalDateTime.now())
@@ -965,6 +978,42 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
                 produceIdList,
                 SampleFlowOperation.UPDATE_REPORT_STATUS.getDescription(),
                 "报告生产",
+                req.getRemark()
+        );
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void clearTemplateHole(SampleCommonReq req) {
+        List<Long> produceIdList = req.getProduceIdList();
+        if (produceIdList == null || produceIdList.isEmpty()) {
+            throw new ServiceException("生产编号列表不能为空");
+        }
+
+        String username = SecurityUtils.getUsername();
+        LocalDateTime now = LocalDateTime.now();
+
+        // 清除模板板号和孔号，设置状态为模板成功，流程为反应生产
+        this.lambdaUpdate()
+                .set(SampleInfo::getTemplatePlateNo, null)
+                .set(SampleInfo::getTemplateHoleNo, null)
+                .set(SampleInfo::getReturnState, "模板成功")
+                .set(SampleInfo::getFlowName, "反应生产")
+                .set(SampleInfo::getUpdateUser, username)
+                .set(SampleInfo::getUpdateTime, now)
+                .in(SampleInfo::getProduceId, produceIdList)
+                .update();
+
+        // 追加备注
+        if (StringUtils.isNotEmpty(req.getRemark())) {
+            sampleInfoMapper.appendRemark(produceIdList, req.getRemark());
+        }
+
+        // 批量记录流程流转日志
+        sampleFlowLogService.batchRecordLog(
+                produceIdList,
+                SampleFlowOperation.CLEAR_TEMPLATE_HOLE.getDescription(),
+                "模板生产",
                 req.getRemark()
         );
     }

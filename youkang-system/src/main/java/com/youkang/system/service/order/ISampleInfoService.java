@@ -167,4 +167,12 @@ public interface ISampleInfoService extends IService<SampleInfo> {
      */
     void updateReportStatus(ReportStatusUpdateReq req);
 
+    /**
+     * 清除模板孔号
+     * 清除模板板号和孔号，状态设置为模板成功，流程设置为反应生产
+     *
+     * @param req 请求参数（生产编号列表、备注）
+     */
+    void clearTemplateHole(SampleCommonReq req);
+
 }

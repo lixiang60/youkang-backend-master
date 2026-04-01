@@ -432,6 +432,7 @@
         s.sample_id AS sampleId,
         s.sample_type AS sampleType,
         s.primer AS primer,
+        s.primer_type AS primerType,
         s.primer_concentration AS primerConcentration,
         s.carrier_name AS carrierName,
         s.antibiotic_type AS antibioticType,
