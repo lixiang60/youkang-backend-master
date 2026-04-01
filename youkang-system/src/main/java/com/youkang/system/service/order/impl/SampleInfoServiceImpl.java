@@ -984,7 +984,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void clearTemplateHole(SampleCommonReq req) {
+    public void clearHole(SampleCommonReq req) {
         List<Long> produceIdList = req.getProduceIdList();
         if (produceIdList == null || produceIdList.isEmpty()) {
             throw new ServiceException("生产编号列表不能为空");
@@ -993,10 +993,10 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         String username = SecurityUtils.getUsername();
         LocalDateTime now = LocalDateTime.now();
 
-        // 清除模板板号和孔号，设置状态为模板成功，流程为反应生产
+        // 清除板号和孔号，设置状态为模板成功，流程为反应生产
         this.lambdaUpdate()
-                .set(SampleInfo::getTemplatePlateNo, null)
-                .set(SampleInfo::getTemplateHoleNo, null)
+                .set(SampleInfo::getPlateNo, null)
+                .set(SampleInfo::getHoleNo, null)
                 .set(SampleInfo::getReturnState, "模板成功")
                 .set(SampleInfo::getFlowName, "反应生产")
                 .set(SampleInfo::getUpdateUser, username)
@@ -1012,8 +1012,78 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         // 批量记录流程流转日志
         sampleFlowLogService.batchRecordLog(
                 produceIdList,
-                SampleFlowOperation.CLEAR_TEMPLATE_HOLE.getDescription(),
-                "模板生产",
+                SampleFlowOperation.CLEAR_HOLE.getDescription(),
+                "反应生产",
+                req.getRemark()
+        );
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void clearTemplate(SampleCommonReq req) {
+        List<Long> produceIdList = req.getProduceIdList();
+        if (produceIdList == null || produceIdList.isEmpty()) {
+            throw new ServiceException("生产编号列表不能为空");
+        }
+
+        String username = SecurityUtils.getUsername();
+        LocalDateTime now = LocalDateTime.now();
+
+        // 清除模板板号和孔号，流程设置为模板生产
+        this.lambdaUpdate()
+                .set(SampleInfo::getTemplatePlateNo, null)
+                .set(SampleInfo::getTemplateHoleNo, null)
+                .set(SampleInfo::getFlowName, "模板生产")
+                .set(SampleInfo::getUpdateUser, username)
+                .set(SampleInfo::getUpdateTime, now)
+                .in(SampleInfo::getProduceId, produceIdList)
+                .update();
+
+        // 追加备注
+        if (StringUtils.isNotEmpty(req.getRemark())) {
+            sampleInfoMapper.appendRemark(produceIdList, req.getRemark());
+        }
+
+        // 批量记录流程流转日志
+        sampleFlowLogService.batchRecordLog(
+                produceIdList,
+                SampleFlowOperation.CLEAR_TEMPLATE.getDescription(),
+                "模板排版",
+                req.getRemark()
+        );
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void clearReport(SampleCommonReq req) {
+        List<Long> produceIdList = req.getProduceIdList();
+        if (produceIdList == null || produceIdList.isEmpty()) {
+            throw new ServiceException("生产编号列表不能为空");
+        }
+
+        String username = SecurityUtils.getUsername();
+        LocalDateTime now = LocalDateTime.now();
+
+        // 清除报告状态，流程设置为报告生产
+        this.lambdaUpdate()
+                .set(SampleInfo::getReportStatus, null)
+                .set(SampleInfo::getReportErrorReason, null)
+                .set(SampleInfo::getFlowName, "报告生产")
+                .set(SampleInfo::getUpdateUser, username)
+                .set(SampleInfo::getUpdateTime, now)
+                .in(SampleInfo::getProduceId, produceIdList)
+                .update();
+
+        // 追加备注
+        if (StringUtils.isNotEmpty(req.getRemark())) {
+            sampleInfoMapper.appendRemark(produceIdList, req.getRemark());
+        }
+
+        // 批量记录流程流转日志
+        sampleFlowLogService.batchRecordLog(
+                produceIdList,
+                SampleFlowOperation.CLEAR_REPORT.getDescription(),
+                "报告生产",
                 req.getRemark()
         );
     }

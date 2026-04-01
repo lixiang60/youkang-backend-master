@@ -339,12 +339,30 @@ public class SampleInfoController {
         return YKResponse.ok();
     }
 
-    @Operation(summary = "清除模板孔号", description = "清除模板板号和孔号，状态设置为模板成功，流程设置为反应生产")
+    @Operation(summary = "清除孔号", description = "清除板号和孔号，状态设置为模板成功，流程设置为反应生产")
+    @PreAuthorize("@ss.hasPermi('order:sample:reactionProduce')")
+    @Log(title = "清除孔号", businessType = BusinessType.UPDATE)
+    @PostMapping("/reactionProduce/clearHole")
+    public YKResponse<?> clearHole(@RequestBody SampleCommonReq req) {
+        sampleInfoService.clearHole(req);
+        return YKResponse.ok();
+    }
+
+    @Operation(summary = "清除模板", description = "清除模板板号和孔号，流程设置为模板生产")
     @PreAuthorize("@ss.hasPermi('order:sample:template')")
-    @Log(title = "清除模板孔号", businessType = BusinessType.UPDATE)
-    @PostMapping("/template/clearHole")
-    public YKResponse<?> clearTemplateHole(@RequestBody SampleCommonReq req) {
-        sampleInfoService.clearTemplateHole(req);
+    @Log(title = "清除模板", businessType = BusinessType.UPDATE)
+    @PostMapping("/template/clearTemplate")
+    public YKResponse<?> clearTemplate(@RequestBody SampleCommonReq req) {
+        sampleInfoService.clearTemplate(req);
+        return YKResponse.ok();
+    }
+
+    @Operation(summary = "清除报告", description = "清除报告状态和报告异常原因，流程设置为报告生产")
+    @PreAuthorize("@ss.hasPermi('order:sample:reportStatus')")
+    @Log(title = "清除报告", businessType = BusinessType.UPDATE)
+    @PostMapping("/reportStatus/clearReport")
+    public YKResponse<?> clearReport(@RequestBody SampleCommonReq req) {
+        sampleInfoService.clearReport(req);
         return YKResponse.ok();
     }
 

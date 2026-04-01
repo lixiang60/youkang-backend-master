@@ -51,8 +51,14 @@ public enum SampleFlowOperation {
 
     UPDATE_REPORT_STATUS("修改报告状态"),
 
-    /** 清除模板孔号 */
-    CLEAR_TEMPLATE_HOLE("清除模板孔号"),
+    /** 清除孔号 */
+    CLEAR_HOLE("清除孔号"),
+
+    /** 清除模板 */
+    CLEAR_TEMPLATE("清除模板"),
+
+    /** 清除报告 */
+    CLEAR_REPORT("清除报告"),
 
     ;
 

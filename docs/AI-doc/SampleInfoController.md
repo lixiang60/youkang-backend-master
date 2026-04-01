@@ -19,6 +19,9 @@
 - [设置模板状态](#设置模板状态)
 - [设置原浓度以及添加版号孔号](#设置原浓度以及添加版号孔号)
 - [退回](#退回)
+- [清除孔号](#清除孔号)
+- [清除模板](#清除模板)
+- [清除报告](#清除报告)
 
 ---
 
@@ -403,6 +406,66 @@
 
 ---
 
+### 16. 清除孔号
+- **路径**: `/reactionProduce/clearHole` (完整: `/order/sample/reactionProduce/clearHole`)
+- **方法**: `POSTMAPPING`
+- **说明**: 清除板号和孔号，状态设置为模板成功，流程设置为反应生产
+- **权限**: `order:sample:reactionProduce`
+- **请求参数**: `[SampleCommonReq](#samplecommonreq)`
+- **响应结构**: `R<Void>`
+
+**请求示例 JSON**:
+```json
+{
+  "produceIdList": [
+    2504010001, 2504010002
+  ],
+  "remark": "清除原因"
+}
+```
+
+---
+
+### 17. 清除模板
+- **路径**: `/template/clearTemplate` (完整: `/order/sample/template/clearTemplate`)
+- **方法**: `POSTMAPPING`
+- **说明**: 清除模板板号和孔号，流程设置为模板生产
+- **权限**: `order:sample:template`
+- **请求参数**: `[SampleCommonReq](#samplecommonreq)`
+- **响应结构**: `R<Void>`
+
+**请求示例 JSON**:
+```json
+{
+  "produceIdList": [
+    2504010001, 2504010002
+  ],
+  "remark": "清除原因"
+}
+```
+
+---
+
+### 18. 清除报告
+- **路径**: `/reportStatus/clearReport` (完整: `/order/sample/reportStatus/clearReport`)
+- **方法**: `POSTMAPPING`
+- **说明**: 清除报告状态和报告异常原因，流程设置为报告生产
+- **权限**: `order:sample:reportStatus`
+- **请求参数**: `[SampleCommonReq](#samplecommonreq)`
+- **响应结构**: `R<Void>`
+
+**请求示例 JSON**:
+```json
+{
+  "produceIdList": [
+    2504010001, 2504010002
+  ],
+  "remark": "清除原因"
+}
+```
+
+---
+
 ## 附录：数据结构 (DTO)
 
 #### HoleNoUpdateReq
@@ -598,5 +661,12 @@
 | :--- | :--- | :--- |
 | produceIdList | `List<Long>` | 订单号 |
 | returnState | `String` | 返回状态 |
+| remark | `String` | 备注 |
+
+#### SampleCommonReq
+
+| 字段 | 类型 | 说明 |
+| :--- | :--- | :--- |
+| produceIdList | `List<Long>` | 生产编号列表 |
 | remark | `String` | 备注 |
 

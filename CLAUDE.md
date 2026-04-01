@@ -263,103 +263,17 @@ during the conversation. Try to match the speech style described below.
 
 - 未经说明不可调用
 
-## 6. zai-v
+## 6. zai-mcp-server
 
 - 一个识别图像的 MCP，适用于需要查看图片的场景
+## 7. web-search-prime
+- 一个联网搜索的工具，可以用于联网搜索资料
 
-## 7. Codex
+## 8. web-reader
+- 一个网页读取的工具，可以用于网页读取资料
 
-- 在新建项目或者遇到你无法解决的事情的时候请调用此 MCP
-
-> **1** 在你对用户需求形成初步分析后，将用户需求、初始思路告知 codex，并要求其完善需求分析和实施计划。
-
-> **2** 在实施具体编码任务前，**必须向 codex 索要代码实现原型（要求 codex 仅给出 unified diff patch，严禁对代码做任何真实修改）**。在获取代码原型后，你**只能以此为逻辑参考，再次对代码修改进行重写**，形成企业生产级别、可读性极高、可维护性极高的代码后，才能实施具体编程修改任务。
-
-> **3** 无论何时，只要完成切实编码行为后，**必须立即使用 codex review 代码改动和对应需求完成程度**。
-
-> **4** codex 只能给出参考，你**必须有自己的思考，甚至需要对 codex 的回答提出置疑**。尽信书则不如无书，你与 codex 的最终使命都是达成统一、全面、精准的意见，所以你们必须不断争辩已找到通向真理的唯一途径。
-
-- 工具参数
-
-> **必选**参数：
-
->
-
-> - PROMPT (string): 发送给 codex 的任务指令
-
-> - cd (Path): codex 执行任务的工作目录根路径
-
->
-
-> 可选参数：
-
->
-
-> - sandbox (string): 沙箱策略，可选值：
-
-> - "read-only" (默认): 只读模式，最安全
-
-> - "workspace-write": 允许在工作区写入
-
-> - "danger-full-access": 完全访问权限
-
-> - SESSION_ID (UUID | null): 用于继续之前的会话以与 codex 进行多轮交互，默认为 None（开启新会话）
-
-> - skip_git_repo_check (boolean): 是否允许在非 Git 仓库中运行，默认 False
-
-> - return_all_messages (boolean): 是否返回所有消息（包括推理、工具调用等），默认 False
-
->
-
-> 返回值：
-
-> {
-
-> "success": true,
-
-> "SESSION_ID": "uuid-string",
-
-> "agent_messages": "agent 回复的文本内容",
-
-> "all_messages": [] // 仅当 return_all_messages=True 时包含
-
-> }
-
-> 或失败时：
-
-> {
-
-> "success": false,
-
-> "error": "错误信息"
-
-> }
-
-- 开启新对话：不传 SESSION_ID 参数（或传 None）,工具会返回新的 SESSION_ID 用于后续对话
-
-- 继续之前的对话：将之前返回的 SESSION_ID 作为参数传入,同一会话的上下文会被保留
-
-- 调用规范
-
-> **必须遵守**：
-
->
-
-> - 每次调用 codex 工具时，必须保存返回的 SESSION_ID，以便后续继续对话
-
-> - cd 参数必须指向存在的目录，否则工具会静默失败
-
-> - 严禁 codex 对代码进行实际修改，使用 sandbox="read-only" 以避免意外，并要求 codex 仅给出 unified diff patch 即可
-
->
-
-> 推荐用法：
-
->
-
-> - 如需详细追踪 codex 的推理过程和工具调用，设置 return_all_messages=True
-
-> - 对于精准定位、debug、代码原型快速编写等任务，优先使用 codex 工具
+## 9. zread
+- 通过搜索文档和获取仓库结构，快速了解开源库的核心概念、安装步骤和代码组织方式，加速学习曲线
 
 # 7. 备注
 
@@ -372,6 +286,9 @@ during the conversation. Try to match the speech style described below.
 - 测试胜过跳过，遵循规范胜过随意；谨慎胜过盲目。
 
 - 如实记录不确定性与风险，主动学习并持续改进。
+
+# 9. 接口文档更新
+- 每次新增或者更新接口时，请更新相关的接口文档，有限在D:\github_projects\erp\youkang-backend-master\docs目录下更新
 
 ## 项目概述
 
