@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.youkang.system.domain.OrderInfo;
 import com.youkang.system.domain.req.order.OrderAddReq;
 import com.youkang.system.domain.req.order.OrderQueryReq;
+import com.youkang.system.domain.req.order.OrderRangeQueryReq;
 import com.youkang.system.domain.req.order.OrderUpdateReq;
 import com.youkang.system.domain.req.order.SampleAddReq;
 import com.youkang.system.domain.req.order.SampleBatchAddReq;
 import com.youkang.system.domain.resp.order.OrderResp;
+import com.youkang.system.domain.resp.order.OrderWithSamplesResp;
 
 import java.util.List;
 
@@ -82,4 +84,20 @@ public interface IOrderInfoService extends IService<OrderInfo> {
      * @return 是否成功
      */
     boolean updateOrder(OrderUpdateReq req);
+
+    /**
+     * 根据条件范围查询订单信息
+     *
+     * @param req 范围查询请求
+     * @return 订单信息列表
+     */
+    List<OrderResp> queryByRange(OrderRangeQueryReq req);
+
+    /**
+     * 根据订单号查询订单及样品信息
+     *
+     * @param orderId 订单号
+     * @return 订单及样品信息
+     */
+    OrderWithSamplesResp queryOrderWithSamples(String orderId);
 }

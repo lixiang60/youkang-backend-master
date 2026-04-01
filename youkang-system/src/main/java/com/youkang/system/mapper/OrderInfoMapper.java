@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.youkang.system.domain.OrderInfo;
 import com.youkang.system.domain.req.order.OrderQueryReq;
+import com.youkang.system.domain.req.order.OrderRangeQueryReq;
 import com.youkang.system.domain.resp.order.OrderResp;
 import org.apache.ibatis.annotations.Param;
 
@@ -40,5 +41,13 @@ public interface OrderInfoMapper extends BaseMapper<OrderInfo> {
      * @return 订单响应
      */
     OrderResp queryById(@Param("orderId") String orderId);
+
+    /**
+     * 根据条件范围查询订单信息（关联客户和课题组）
+     *
+     * @param query 范围查询条件
+     * @return 订单响应列表
+     */
+    List<OrderResp> queryByRange(@Param("query") OrderRangeQueryReq query);
 
 }

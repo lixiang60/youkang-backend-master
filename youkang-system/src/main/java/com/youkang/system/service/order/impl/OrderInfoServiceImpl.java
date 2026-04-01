@@ -14,11 +14,14 @@ import com.youkang.system.domain.OrderInfo;
 import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.OrderAddReq;
 import com.youkang.system.domain.req.order.OrderQueryReq;
+import com.youkang.system.domain.req.order.OrderRangeQueryReq;
 import com.youkang.system.domain.req.order.OrderUpdateReq;
 import com.youkang.system.domain.req.order.SampleAddReq;
 import com.youkang.system.domain.req.order.SampleBatchAddReq;
 import com.youkang.system.domain.req.order.SampleItemReq;
 import com.youkang.system.domain.resp.order.OrderResp;
+import com.youkang.system.domain.resp.order.OrderWithSamplesResp;
+import com.youkang.system.domain.resp.order.SampleResp;
 import com.youkang.system.mapper.OrderInfoMapper;
 import com.youkang.system.mapper.SampleInfoMapper;
 import com.youkang.system.service.order.IOrderInfoService;
@@ -341,5 +344,40 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         OrderInfo orderInfo = new OrderInfo();
         BeanUtils.copyProperties(req, orderInfo);
         return this.updateById(orderInfo);
+    }
+
+    /**
+     * 根据条件范围查询订单信息
+     *
+     * @param req 范围查询请求
+     * @return 订单信息列表
+     */
+    @Override
+    public List<OrderResp> queryByRange(OrderRangeQueryReq req) {
+        return orderInfoMapper.queryByRange(req);
+    }
+
+    /**
+     * 根据订单号查询订单及样品信息
+     *
+     * @param orderId 订单号
+     * @return 订单及样品信息
+     */
+    @Override
+    public OrderWithSamplesResp queryOrderWithSamples(String orderId) {
+        // 查询订单信息
+        OrderResp orderInfo = orderInfoMapper.queryById(orderId);
+        if (orderInfo == null) {
+            throw new ServiceException("订单不存在：" + orderId);
+        }
+
+        // 查询样品列表
+        List<SampleResp> sampleList = sampleInfoMapper.queryByOrderId(orderId);
+
+        // 组装返回结果
+        OrderWithSamplesResp resp = new OrderWithSamplesResp();
+        resp.setOrderInfo(orderInfo);
+        resp.setSampleList(sampleList);
+        return resp;
     }
 }

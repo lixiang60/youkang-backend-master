@@ -10,10 +10,12 @@ import com.youkang.common.utils.poi.ExcelUtil;
 import com.youkang.system.domain.OrderInfo;
 import com.youkang.system.domain.req.order.OrderAddReq;
 import com.youkang.system.domain.req.order.OrderQueryReq;
+import com.youkang.system.domain.req.order.OrderRangeQueryReq;
 import com.youkang.system.domain.req.order.OrderUpdateReq;
 import com.youkang.system.domain.req.order.SampleAddReq;
 import com.youkang.system.domain.req.order.SampleBatchAddReq;
 import com.youkang.system.domain.resp.order.OrderResp;
+import com.youkang.system.domain.resp.order.OrderWithSamplesResp;
 import com.youkang.system.service.order.IOrderInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -159,5 +161,25 @@ public class OrderInfoController {
     public YKResponse<Void> remove(@Parameter(description = "订单ID数组") @PathVariable String[] orderIds) {
         boolean result = orderInfoService.removeByIds(Arrays.asList(orderIds));
         return result ? YKResponse.ok() : YKResponse.fail("删除订单信息失败");
+    }
+
+    /**
+     * 根据条件范围查询订单信息
+     */
+    @Operation(summary = "范围查询订单", description = "根据订单号范围、创建时间范围等条件查询订单信息")
+    @PreAuthorize("@ss.hasPermi('order:info:list')")
+    @PostMapping("/queryByRange")
+    public YKResponse<List<OrderResp>> queryByRange(@Parameter(description = "范围查询条件") @RequestBody OrderRangeQueryReq req) {
+        return YKResponse.ok(orderInfoService.queryByRange(req));
+    }
+
+    /**
+     * 根据订单号查询订单及样品信息
+     */
+    @Operation(summary = "查询订单及样品", description = "根据订单号查询订单信息及其关联的所有样品信息")
+    @PreAuthorize("@ss.hasPermi('order:info:query')")
+    @GetMapping("/withSamples/{orderId}")
+    public YKResponse<OrderWithSamplesResp> queryOrderWithSamples(@Parameter(description = "订单号") @PathVariable String orderId) {
+        return YKResponse.ok(orderInfoService.queryOrderWithSamples(orderId));
     }
 }

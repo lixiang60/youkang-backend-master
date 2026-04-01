@@ -128,4 +128,50 @@
         LEFT JOIN yk_subject_group_info g ON c.subject_group_id = g.id
         WHERE o.order_id = #{orderId}
     </select>
+
+    <select id="queryByRange" resultType="com.youkang.system.domain.resp.order.OrderResp">
+        SELECT
+            o.order_id AS orderId,
+            o.customer_id AS customerId,
+            c.customer_name AS customerName,
+            c.address AS customerAddress,
+            c.subject_group_id AS groupId,
+            g.name AS groupName,
+            o.generation,
+            o.order_type AS orderType,
+            o.is_async AS isAsync,
+            o.belong_company AS belongCompany,
+            o.produce_company AS produceCompany,
+            o.gen_no AS genNo,
+            o.remark,
+            o.create_by AS createBy,
+            o.create_time AS createTime
+        FROM yk_order_info o
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        LEFT JOIN yk_subject_group_info g ON c.subject_group_id = g.id
+        <where>
+            <if test="query.startOrderId != null and query.startOrderId != ''">
+                AND o.order_id &gt;= #{query.startOrderId}
+            </if>
+            <if test="query.endOrderId != null and query.endOrderId != ''">
+                AND o.order_id &lt;= #{query.endOrderId}
+            </if>
+            <if test="query.createBy != null and query.createBy != ''">
+                AND o.create_by LIKE CONCAT('%', #{query.createBy}, '%')
+            </if>
+            <if test="query.startTime != null">
+                AND o.create_time &gt;= #{query.startTime}
+            </if>
+            <if test="query.endTime != null">
+                AND o.create_time &lt;= #{query.endTime}
+            </if>
+            <if test="query.belongCompany != null and query.belongCompany != ''">
+                AND o.belong_company LIKE CONCAT('%', #{query.belongCompany}, '%')
+            </if>
+            <if test="query.produceCompany != null and query.produceCompany != ''">
+                AND o.produce_company LIKE CONCAT('%', #{query.produceCompany}, '%')
+            </if>
+        </where>
+        ORDER BY o.create_time DESC
+    </select>
 </mapper>
