@@ -182,4 +182,8 @@ public class SampleResp {
     @Excel(name = "报告异常原因")
     @Schema(description = "报告异常原因")
     private String reportErrorReason;
+
+    @Excel(name = "样品对应号")
+    @Schema(description = "样品对应号")
+    private Long sampleCorrespondId;
 }

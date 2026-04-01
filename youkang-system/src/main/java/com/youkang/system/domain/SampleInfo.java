@@ -213,4 +213,9 @@ public class SampleInfo {
     @TableField("report_error_reason")
     private String reportErrorReason;
 
+    /** 样品对应号 */
+    @Excel(name = "样品对应号")
+    @TableField("sample_correspond_id")
+    private Long sampleCorrespondId;
+
 }
