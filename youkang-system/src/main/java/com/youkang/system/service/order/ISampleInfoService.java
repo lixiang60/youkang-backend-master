@@ -191,4 +191,13 @@ public interface ISampleInfoService extends IService<SampleInfo> {
      */
     void clearReport(SampleCommonReq req);
 
+    /**
+     * 加测
+     * 根据原样品信息创建新的加测样品记录
+     *
+     * @param req 加测请求参数
+     * @return 新生成的生产编号
+     */
+    Long addTest(SampleAddTestReq req);
+
 }

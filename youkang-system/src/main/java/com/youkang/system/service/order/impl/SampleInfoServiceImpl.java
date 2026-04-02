@@ -1088,4 +1088,102 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         );
     }
 
+    //=============================================加测============================================
+
+    /**
+     * 加测
+     * 根据原样品信息创建新的加测样品记录
+     *
+     * @param req 加测请求参数
+     * @return 新生成的生产编号
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long addTest(SampleAddTestReq req) {
+        // 1. 根据生产编号查询原样品信息
+        SampleInfo originalSample = this.getById(req.getProduceId());
+        if (originalSample == null) {
+            throw new ServiceException("原样品信息不存在，生产编号：" + req.getProduceId());
+        }
+
+        // 2. 生成新的订单号
+        String newOrderId = generateOrderId();
+
+        // 3. 生成新的生产编号
+        Long newProduceId = generateProduceId();
+
+        // 4. 创建新的样品记录
+        SampleInfo newSample = new SampleInfo();
+
+        // 复制原样品的所有字段
+        BeanUtils.copyProperties(originalSample, newSample);
+
+        // 设置新值
+        newSample.setProduceId(newProduceId);                      // 新生产编号
+        newSample.setOrderId(newOrderId);                          // 新订单号
+        newSample.setOrderHistory(req.getOrderId());               // 历史订单号为接口上传的订单编号
+
+        // 样品对应号：将订单编号转为Long（如果订单号是纯数字）
+        try {
+            newSample.setSampleCorrespondId(Long.parseLong(req.getOrderId()));
+        } catch (NumberFormatException e) {
+            // 如果订单号不是纯数字，则使用原样品的样品对应号
+            newSample.setSampleCorrespondId(originalSample.getSampleCorrespondId());
+        }
+
+        // 按接口上传的字段填充引物信息
+        newSample.setPrimer(req.getPrimer());                      // 引物名称
+        newSample.setSeq(req.getSeq());                            // 引物序列
+        newSample.setPrimerConcentration(req.getPrimerConcentration()); // 引物浓度
+        newSample.setRemark(req.getRemark());                      // 备注
+
+        // 设置流程状态
+        newSample.setFlowName("反应生产");                          // 流程名称
+        newSample.setReturnState("模板成功");                      // 返回状态
+
+        // 清除模板和反应的板号孔号信息（新样品需要重新排版）
+        newSample.setPlateNo(null);
+        newSample.setHoleNo(null);
+        newSample.setHoleNumber(null);
+        newSample.setLayout(null);
+        // 清除报告相关状态
+        newSample.setReportStatus(null);
+        newSample.setReportErrorReason(null);
+        newSample.setReimburseStatus(null);
+        newSample.setPerformance(null);
+
+        // 设置创建人和创建时间
+        String username = SecurityUtils.getUsername();
+        newSample.setCreateUser(username);
+        newSample.setCreateTime(LocalDateTime.now());
+        newSample.setUpdateUser(null);
+        newSample.setUpdateTime(null);
+
+        // 5. 保存新样品
+        this.save(newSample);
+
+        // 6. 记录流程日志
+        sampleFlowLogService.recordLog(
+                newProduceId,
+                SampleFlowOperation.ADD_TEST.getDescription(),
+                null,
+                "加测，原生产编号：" + req.getProduceId() + "，原订单号：" + req.getOrderId()
+        );
+
+        return newProduceId;
+    }
+
+    /**
+     * 生成订单ID
+     * 格式：yyyyMMddHHmmss + 毫秒后3位（精确到毫秒，保证唯一性）
+     *
+     * @return 订单ID
+     */
+    private String generateOrderId() {
+        LocalDateTime now = LocalDateTime.now();
+        String dateStr = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        int millis = (int) (System.currentTimeMillis() % 1000);
+        return dateStr + String.format("%03d", millis);
+    }
+
 }

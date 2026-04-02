@@ -366,4 +366,14 @@ public class SampleInfoController {
         return YKResponse.ok();
     }
 
+    //=============================================加测============================================
+    @Operation(summary = "加测", description = "根据原样品信息创建新的加测样品记录，流程设置为反应生产，返回状态设置为模板成功")
+    @PreAuthorize("@ss.hasPermi('order:sample:addTest')")
+    @Log(title = "加测", businessType = BusinessType.INSERT)
+    @PostMapping("/addTest")
+    public YKResponse<Long> addTest(@RequestBody SampleAddTestReq req) {
+        Long newProduceId = sampleInfoService.addTest(req);
+        return YKResponse.ok(newProduceId);
+    }
+
 }

@@ -60,6 +60,9 @@ public enum SampleFlowOperation {
     /** 清除报告 */
     CLEAR_REPORT("清除报告"),
 
+    /** 加测 */
+    ADD_TEST("加测"),
+
     ;
 
     private final String description;
