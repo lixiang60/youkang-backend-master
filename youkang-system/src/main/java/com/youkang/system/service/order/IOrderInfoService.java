@@ -100,4 +100,12 @@ public interface IOrderInfoService extends IService<OrderInfo> {
      * @return 订单及样品信息
      */
     OrderWithSamplesResp queryOrderWithSamples(String orderId);
+
+    /**
+     * 根据条件范围查询订单及样品信息
+     *
+     * @param req 范围查询请求
+     * @return 订单及样品信息列表
+     */
+    List<OrderWithSamplesResp> queryOrderWithSamplesByRange(OrderRangeQueryReq req);
 }

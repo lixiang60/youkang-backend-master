@@ -661,4 +661,60 @@
         ORDER BY s.create_time DESC
     </select>
 
+    <!-- 根据订单号列表批量查询样品 -->
+    <select id="queryByOrderIds" resultType="com.youkang.system.domain.resp.order.SampleResp">
+        SELECT
+            s.order_id AS orderId,
+            s.order_history AS orderHistory,
+            s.sample_id AS sampleId,
+            s.sample_type AS sampleType,
+            s.sample_position AS samplePosition,
+            s.primer,
+            s.primer_type AS primerType,
+            s.primer_position AS primerPosition,
+            s.primer_concentration AS primerConcentration,
+            s.seq,
+            s.project,
+            s.carrier_name AS carrierName,
+            s.antibiotic_type AS antibioticType,
+            s.plasmid_length AS plasmidLength,
+            s.fragment_size AS fragmentSize,
+            s.test_result AS testResult,
+            s.origin_concentration AS originConcentration,
+            s.template_plate_no AS templatePlateNo,
+            s.template_hole_no AS templateHoleNo,
+            s.performance,
+            s.return_state AS returnState,
+            s.flow_name AS flowName,
+            s.plate_no AS plateNo,
+            s.hole_no AS holeNo,
+            s.belong_company AS belongCompany,
+            s.produce_company AS produceCompany,
+            s.produce_id AS produceId,
+            s.hole_number AS holeNumber,
+            s.layout,
+            s.origin_hole_no AS originHoleNo,
+            s.belong_lab AS belongLab,
+            s.report_status AS reportStatus,
+            s.report_error_reason AS reportErrorReason,
+            s.reimburse_status AS reimburseStatus,
+            s.sample_correspond_id AS sampleCorrespondId,
+            s.create_user AS createUser,
+            s.create_time AS createTime,
+            s.update_user AS updateUser,
+            s.update_time AS updateTime,
+            s.remark,
+            c.customer_name AS customerName,
+            c.id AS customerId,
+            c.address AS customerAddress
+        FROM yk_sample_info s
+        LEFT JOIN yk_order_info o ON s.order_id = o.order_id
+        LEFT JOIN yk_customer_info c ON o.customer_id = c.id
+        WHERE s.order_id IN
+        <foreach collection="orderIds" item="orderId" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+        ORDER BY s.order_id, s.create_time DESC
+    </select>
+
 </mapper>

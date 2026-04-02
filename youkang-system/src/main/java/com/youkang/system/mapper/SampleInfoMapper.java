@@ -121,4 +121,12 @@ public interface SampleInfoMapper extends BaseMapper<SampleInfo> {
      * @return 样品响应列表
      */
     List<SampleResp> queryByOrderId(@Param("orderId") String orderId);
+
+    /**
+     * 根据订单号列表批量查询样品
+     *
+     * @param orderIds 订单号列表
+     * @return 样品响应列表
+     */
+    List<SampleResp> queryByOrderIds(@Param("orderIds") List<String> orderIds);
 }

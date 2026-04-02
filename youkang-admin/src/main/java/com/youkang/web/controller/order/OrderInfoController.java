@@ -182,4 +182,14 @@ public class OrderInfoController {
     public YKResponse<OrderWithSamplesResp> queryOrderWithSamples(@Parameter(description = "订单号") @PathVariable String orderId) {
         return YKResponse.ok(orderInfoService.queryOrderWithSamples(orderId));
     }
+
+    /**
+     * 根据条件范围查询订单及样品信息
+     */
+    @Operation(summary = "范围查询订单及样品", description = "根据订单号范围、时间范围等条件查询订单及其关联的样品信息")
+    @PreAuthorize("@ss.hasPermi('order:info:list')")
+    @PostMapping("/withSamples/queryByRange")
+    public YKResponse<List<OrderWithSamplesResp>> queryOrderWithSamplesByRange(@Parameter(description = "范围查询条件") @RequestBody OrderRangeQueryReq req) {
+        return YKResponse.ok(orderInfoService.queryOrderWithSamplesByRange(req));
+    }
 }

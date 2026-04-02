@@ -20,6 +20,7 @@ import com.youkang.system.service.order.IReimburseRecordService;
 import com.youkang.system.service.order.ISampleFlowLogService;
 import com.youkang.system.service.order.ISampleInfoService;
 import com.youkang.system.utils.HoleNoUtils;
+import org.apache.ibatis.javassist.tools.rmi.Sample;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -532,7 +533,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         String returnState = req.getReturnState();
         String flowName;
         if (returnState.equals("模板重抽") || returnState.equals("模板重切")) {
-            flowName = "反应生产";
+            flowName = "模板生产";
         } else if (returnState.equals("模板失败")) {
             flowName = "模板邮件";
         } else {
@@ -824,6 +825,7 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         List<Long> produceIdList = req.getProduceIdList();
         this.lambdaUpdate()
                 .set(SampleInfo::getFlowName, "样品不足")
+                .set(SampleInfo::getReturnState,"样品不足")
                 .set(SampleInfo::getUpdateTime, LocalDateTime.now())
                 .set(SampleInfo::getUpdateUser, SecurityUtils.getUsername())
                 .in(SampleInfo::getProduceId, produceIdList)

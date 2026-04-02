@@ -380,4 +380,39 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         resp.setSampleList(sampleList);
         return resp;
     }
+
+    /**
+     * 根据条件范围查询订单及样品信息
+     *
+     * @param req 范围查询请求
+     * @return 订单及样品信息列表
+     */
+    @Override
+    public List<OrderWithSamplesResp> queryOrderWithSamplesByRange(OrderRangeQueryReq req) {
+        // 1. 查询符合条件的订单列表
+        List<OrderResp> orderList = orderInfoMapper.queryByRange(req);
+        if (orderList == null || orderList.isEmpty()) {
+            return List.of();
+        }
+
+        // 2. 提取订单号列表
+        List<String> orderIds = orderList.stream()
+                .map(OrderResp::getOrderId)
+                .collect(Collectors.toList());
+
+        // 3. 批量查询所有订单的样品
+        List<SampleResp> allSamples = sampleInfoMapper.queryByOrderIds(orderIds);
+
+        // 4. 按订单号分组样品
+        Map<String, List<SampleResp>> sampleMap = allSamples.stream()
+                .collect(Collectors.groupingBy(SampleResp::getOrderId));
+
+        // 5. 组装返回结果
+        return orderList.stream().map(order -> {
+            OrderWithSamplesResp resp = new OrderWithSamplesResp();
+            resp.setOrderInfo(order);
+            resp.setSampleList(sampleMap.getOrDefault(order.getOrderId(), List.of()));
+            return resp;
+        }).collect(Collectors.toList());
+    }
 }

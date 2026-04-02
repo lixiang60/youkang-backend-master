@@ -14,6 +14,7 @@
 - [删除订单](#删除订单)
 - [范围查询订单](#范围查询订单)
 - [查询订单及样品](#查询订单及样品)
+- [范围查询订单及样品](#范围查询订单及样品)
 
 ---
 
@@ -396,6 +397,94 @@
     }
   ]
 }
+```
+
+---
+
+### 11. 范围查询订单及样品
+- **路径**: `/withSamples/queryByRange` (完整: `/order/info/withSamples/queryByRange`)
+- **方法**: `POSTMAPPING`
+- **说明**: 根据订单号范围、创建时间范围等条件查询订单及其关联的样品信息
+- **权限**: `order:info:list`
+- **请求参数**: `[OrderRangeQueryReq](#orderrangequeryreq)`
+- **响应结构**: `R<List<OrderWithSamplesResp>>`
+
+**请求示例 JSON**:
+```json
+{
+  "startOrderId": "2025040100001",
+  "endOrderId": "2025040199999",
+  "createBy": "admin",
+  "startTime": "2025-04-01T00:00:00",
+  "endTime": "2025-04-30T23:59:59",
+  "belongCompany": "有康科技",
+  "produceCompany": "有康科技"
+}
+```
+
+**响应数据结构示例 JSON (Data 节点内)**:
+```json
+[
+  {
+    "orderInfo": {
+      "orderId": "20250401123456001",
+      "customerId": 1,
+      "customerName": "张三",
+      "customerAddress": "北京市海淀区",
+      "groupId": 1,
+      "groupName": "基因课题组",
+      "generation": 1,
+      "orderType": "公司录入",
+      "isAsync": 1,
+      "belongCompany": "有康科技",
+      "produceCompany": "有康科技",
+      "genNo": "GEN001",
+      "remark": "备注信息",
+      "createBy": "admin",
+      "createTime": "2025-04-01 12:34:56"
+    },
+    "sampleList": [
+      {
+        "produceId": 2504010001,
+        "orderId": "20250401123456001",
+        "orderHistory": null,
+        "sampleId": "S001",
+        "sampleType": "质粒",
+        "primer": "M13F",
+        "seq": "GTAAAACGACGGCCAGT",
+        "primerConcentration": "10uM",
+        "project": "Sanger测序",
+        "carrierName": "pUC19",
+        "antibioticType": "Amp",
+        "plasmidLength": "3000",
+        "fragmentSize": "1000",
+        "testResult": "是",
+        "originConcentration": "100ng/ul",
+        "templatePlateNo": "TP001",
+        "templateHoleNo": "A01",
+        "performance": "模板排版",
+        "returnState": "模板成功",
+        "flowName": "反应生产",
+        "plateNo": "R001",
+        "holeNo": "B01",
+        "belongCompany": "有康科技",
+        "produceCompany": "有康科技",
+        "holeNumber": 1,
+        "layout": "横排",
+        "createUser": "admin",
+        "createTime": "2025-04-01 12:35:00",
+        "remark": "加测样品",
+        "reportStatus": null,
+        "reimburseStatus": null,
+        "customerName": "张三",
+        "customerId": 1,
+        "customerAddress": "北京市海淀区",
+        "reportErrorReason": null,
+        "sampleCorrespondId": null
+      }
+    ]
+  }
+]
 ```
 
 ## 附录：数据结构 (DTO)
