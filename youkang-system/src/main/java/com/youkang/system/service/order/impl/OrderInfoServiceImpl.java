@@ -116,6 +116,8 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfo.setBelongCompany(req.getBelongCompany());
         orderInfo.setProduceCompany(req.getProduceCompany());
         orderInfo.setGenNo(req.getGenNo());
+        orderInfo.setOrderStatus("订单生成");
+        orderInfo.setStatusTime(LocalDateTime.now());
         orderInfoMapper.insert(orderInfo);
         //如果样品信息不为空，则添加样品信息
         if (req.getSampleInfoList() != null && !req.getSampleInfoList().isEmpty()){
@@ -414,5 +416,35 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             resp.setSampleList(sampleMap.getOrDefault(order.getOrderId(), List.of()));
             return resp;
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * 定时任务：检查订单状态流转（订单生成 -> 订单出库）
+     * 当订单下所有样品的 flow_name 都在 模板取消/报告成功/报告取消 范围内时，自动出库
+     */
+    @Override
+    public void checkOrderOutbound() {
+        List<String> orderIds = orderInfoMapper.selectOutboundOrderIds();
+        if (orderIds == null || orderIds.isEmpty()) {
+            return;
+        }
+        log.info("订单出库检查：发现 {} 个满足出库条件的订单", orderIds.size());
+        orderInfoMapper.batchUpdateOrderOutbound(orderIds);
+        log.info("订单出库检查：已将 {} 个订单状态更新为【订单出库】", orderIds.size());
+    }
+
+    /**
+     * 定时任务：检查订单自动完成（订单出库 -> 订单完成）
+     * 订单出库超过4小时后自动完成
+     */
+    @Override
+    public void checkOrderComplete() {
+        List<String> orderIds = orderInfoMapper.selectCompletedOrderIds(4);
+        if (orderIds == null || orderIds.isEmpty()) {
+            return;
+        }
+        log.info("订单完成检查：发现 {} 个出库超过4小时的订单", orderIds.size());
+        orderInfoMapper.batchUpdateOrderComplete(orderIds);
+        log.info("订单完成检查：已将 {} 个订单状态更新为【订单完成】", orderIds.size());
     }
 }

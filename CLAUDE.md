@@ -22,7 +22,7 @@ during the conversation. Try to match the speech style described below.
 
 # 1. 身份与定位
 
-你是阿宝，一般称呼用户为“宝宝”或其他亲昵的称呼，“主人”除外。精通各种编程语言，尤其是前端和 java，喜欢收集一些有趣且真实的开源项目
+你是阿宝，一般称呼用户为“哥哥”或其他亲昵的称呼。精通各种编程语言，尤其是前端和 java，喜欢收集一些有趣且真实的开源项目
 
 # 2. 性格与气质
 
@@ -301,6 +301,8 @@ during the conversation. Try to match the speech style described below.
 **主入口：** `youkang-admin/src/main/java/com/youkang/YouKangApplication.java`
 **默认端口：** 3564
 
+
+
 ## 构建和运行命令
 
 ```bash
@@ -470,4 +472,77 @@ youkang-system/src/main/java/com/youkang/system/domain/
 ### Redis 使用
 - 缓存用户会话、令牌、权限、字典数据
 - 业务序号生成（使用 `RedisCache.increment()` 原子递增）
+
+## 价格配置设计
+
+### 整体架构
+
+价格配置采用**模板 + 自定义覆盖 + 基础单价兜底**的三层设计：
+
+1. **基础模板**（`yk_price_config`，`group_id = NULL`）：包含所有样品类型 × 测序项目 × 范围组合的价格配置（约100条），作为默认定价基准
+2. **课题组自定义价格**（`yk_price_config`，`group_id = 课题组ID`）：从模板复制出来后可单独修改，只存储课题组实际修改过的记录
+3. **课题组测序单价**（`yk_unit_price`，每个课题组一条）：模板中 `unit_price` 为空的记录（即 `calc_method=800` 的基础测序档位），所有这类记录对同一个课题组共享同一个基础单价
+
+### 查询逻辑
+
+查询课题组价格列表时，SQL 通过三级 COALESCE 兜底：
+
+```sql
+COALESCE(c.unit_price, t.unit_price, up.unit_price) AS unitPrice
+```
+
+优先级：自定义价格(c) > 模板价格(t) > 课题组基础单价(up)
+
+### 更新逻辑
+
+修改价格时，先查找对应模板记录，判断模板的 `unit_price` 是否为空：
+
+- **模板 `unit_price` 有值** → 在 `yk_price_config` 中更新或插入自定义记录（原有逻辑）
+- **模板 `unit_price` 为空** → 更新 `yk_unit_price` 表中该课题组的基础单价（一个课题组只有一条记录）
+
+### 范围联动
+
+模板中的质粒长度和片段大小范围采用间隙式设计（如 0-20000, 20001-50000），相邻记录之间差 1。修改模板范围边界时自动联动更新：
+
+- 修改 `min` → 前一条记录的 `max = oldMin - 1`，更新为 `newMin - 1`
+- 修改 `max` → 后一条记录的 `min = oldMax + 1`，更新为 `newMax + 1`
+
+### 相关文件
+
+| 文件 | 说明 |
+|------|------|
+| `youkang-system/domain/PriceConfig.java` | 价格配置实体 |
+| `youkang-system/domain/UnitPrice.java` | 课题组测序单价实体 |
+| `youkang-system/mapper/PriceConfigMapper.java` | 价格配置 Mapper |
+| `youkang-system/mapper/UnitPriceMapper.java` | 测序单价 Mapper |
+| `youkang-system/service/price/impl/PriceConfigServiceImpl.java` | 价格配置核心逻辑（查询兜底、更新分流、范围联动） |
+| `youkang-system/resources/mapper/system/PriceConfigMapper.xml` | 价格配置 SQL（三级 COALESCE 兜底查询） |
+| `youkang-admin/controller/customer/PriceConfigController.java` | 价格配置 Controller |
+
+### 数据库表
+
+```sql
+-- 价格配置表（模板 + 自定义）
+CREATE TABLE yk_price_config (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    group_id INT COMMENT '课题组ID（NULL = 基础模板）',
+    category VARCHAR(50), charge_name VARCHAR(100),
+    sample_type VARCHAR(50), project VARCHAR(50),
+    plasmid_length_min INT, plasmid_length_max INT,
+    fragment_size_min INT, fragment_size_max INT,
+    unit_price DECIMAL(10,2), calc_method VARCHAR(50),
+    status TINYINT DEFAULT 1, ...
+);
+
+-- 课题组测序单价表（每个课题组一条记录）
+CREATE TABLE yk_unit_price (
+    group_id INT PRIMARY KEY,
+    unit_price DECIMAL(10,2) NOT NULL,
+    create_by VARCHAR(64), create_time DATETIME,
+    update_by VARCHAR(64), update_time DATETIME
+);
+```
+
+## 注意
+- 后续所有的时间字段统一使用LocalDateTime 格式
 

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.youkang.system.mapper.PriceConfigMapper">
+
+    <!-- 查询课题组价格列表（合并模板、自定义价格和课题组基础单价） -->
+    <select id="selectPriceListByGroupId" resultType="com.youkang.system.domain.resp.price.PriceConfigResp">
+        SELECT
+            t.id AS templateId,
+            c.id AS customId,
+            #{groupId} AS groupId,
+            t.category,
+            t.charge_name AS chargeName,
+            t.sample_type AS sampleType,
+            t.project,
+            COALESCE(c.plasmid_length_min, t.plasmid_length_min) AS plasmidLengthMin,
+            COALESCE(c.plasmid_length_max, t.plasmid_length_max) AS plasmidLengthMax,
+            COALESCE(c.fragment_size_min, t.fragment_size_min) AS fragmentSizeMin,
+            COALESCE(c.fragment_size_max, t.fragment_size_max) AS fragmentSizeMax,
+            COALESCE(c.unit_price, t.unit_price, up.unit_price) AS unitPrice,
+            COALESCE(c.calc_method, t.calc_method) AS calcMethod,
+            COALESCE(c.status, t.status) AS status,
+            CASE WHEN c.id IS NOT NULL THEN 1 ELSE 0 END AS isCustom,
+            COALESCE(c.create_by, t.create_by) AS createBy,
+            COALESCE(c.create_time, t.create_time) AS createTime,
+            COALESCE(c.update_by, t.update_by) AS updateBy,
+            COALESCE(c.update_time, t.update_time) AS updateTime,
+            COALESCE(c.remark, t.remark) AS remark
+        FROM yk_price_config t
+        LEFT JOIN yk_price_config c
+            ON c.group_id = #{groupId}
+            AND c.sample_type = t.sample_type
+            AND c.project = t.project
+            AND c.plasmid_length_min = t.plasmid_length_min
+            AND c.plasmid_length_max = t.plasmid_length_max
+            AND c.fragment_size_min = t.fragment_size_min
+            AND c.fragment_size_max = t.fragment_size_max
+            AND c.status = 1
+        LEFT JOIN yk_unit_price up ON up.group_id = #{groupId}
+        WHERE t.group_id IS NULL
+          AND t.status = 1
+        ORDER BY t.category, t.sample_type, t.project,
+                 t.plasmid_length_min, t.fragment_size_min
+    </select>
+
+    <!-- 查找相邻的价格配置（用于联动修改范围） -->
+    <select id="selectAdjacentPrice" resultType="com.youkang.system.domain.PriceConfig">
+        SELECT *
+        FROM yk_price_config
+        WHERE group_id IS NULL
+          AND sample_type = #{sampleType}
+          AND project = #{project}
+          <choose>
+              <when test="plasmidLengthMin != null and plasmidLengthMax == null">
+                  AND plasmid_length_max = #{plasmidLengthMin}
+                  AND fragment_size_min = #{fragmentSizeMin}
+                  AND (fragment_size_max = #{fragmentSizeMax} OR (fragment_size_max IS NULL AND #{fragmentSizeMax} IS NULL))
+              </when>
+              <when test="plasmidLengthMax != null and plasmidLengthMin == null">
+                  AND plasmid_length_min = #{plasmidLengthMax}
+                  AND fragment_size_min = #{fragmentSizeMin}
+                  AND (fragment_size_max = #{fragmentSizeMax} OR (fragment_size_max IS NULL AND #{fragmentSizeMax} IS NULL))
+              </when>
+              <when test="fragmentSizeMin != null and fragmentSizeMax == null">
+                  AND fragment_size_max = #{fragmentSizeMin}
+                  AND plasmid_length_min = #{plasmidLengthMin}
+                  AND (plasmid_length_max = #{plasmidLengthMax} OR (plasmid_length_max IS NULL AND #{plasmidLengthMax} IS NULL))
+              </when>
+              <when test="fragmentSizeMax != null and fragmentSizeMin == null">
+                  AND fragment_size_min = #{fragmentSizeMax}
+                  AND plasmid_length_min = #{plasmidLengthMin}
+                  AND (plasmid_length_max = #{plasmidLengthMax} OR (plasmid_length_max IS NULL AND #{plasmidLengthMax} IS NULL))
+              </when>
+          </choose>
+        LIMIT 1
+    </select>
+
+</mapper>

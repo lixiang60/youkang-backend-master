@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -82,5 +82,16 @@ public class OrderResp {
     @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "创建时间" )
-    private Date createTime;
+    private LocalDateTime createTime;
+
+    /** 订单状态 */
+    @Excel(name = "订单状态")
+    @Schema(description = "订单状态：订单生成、订单出库、订单完成")
+    private String orderStatus;
+
+    /** 状态变更时间 */
+    @Excel(name = "状态变更时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "订单状态变更时间")
+    private LocalDateTime statusTime;
 }

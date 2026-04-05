@@ -44,4 +44,7 @@ public class OrderQueryReq extends PageReq {
 
     @Schema(description = "创建者")
     private String createBy;
+
+    @Schema(description = "订单状态：订单生成、订单出库、订单完成")
+    private String orderStatus;
 }

@@ -50,4 +50,33 @@ public interface OrderInfoMapper extends BaseMapper<OrderInfo> {
      */
     List<OrderResp> queryByRange(@Param("query") OrderRangeQueryReq query);
 
+    /**
+     * 查询所有状态为"订单生成"且所有样品流程已完成的订单ID列表
+     *
+     * @return 满足出库条件的订单ID列表
+     */
+    List<String> selectOutboundOrderIds();
+
+    /**
+     * 批量更新订单状态为出库
+     *
+     * @param orderIds 订单ID列表
+     */
+    void batchUpdateOrderOutbound(@Param("orderIds") List<String> orderIds);
+
+    /**
+     * 查询状态为"订单出库"且超过指定小时数的订单ID列表
+     *
+     * @param hours 超时小时数
+     * @return 超时的订单ID列表
+     */
+    List<String> selectCompletedOrderIds(@Param("hours") int hours);
+
+    /**
+     * 批量更新订单状态为完成
+     *
+     * @param orderIds 订单ID列表
+     */
+    void batchUpdateOrderComplete(@Param("orderIds") List<String> orderIds);
+
 }

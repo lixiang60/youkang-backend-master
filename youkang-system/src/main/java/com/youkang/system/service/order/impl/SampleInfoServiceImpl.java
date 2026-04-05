@@ -534,8 +534,8 @@ public class SampleInfoServiceImpl extends ServiceImpl<SampleInfoMapper, SampleI
         String flowName;
         if (returnState.equals("模板重抽") || returnState.equals("模板重切")) {
             flowName = "模板生产";
-        } else if (returnState.equals("模板失败")) {
-            flowName = "模板邮件";
+        } else if (returnState.equals("模板取消")) {
+            flowName = "模板取消";
         } else {
             flowName = "反应生产";
         }

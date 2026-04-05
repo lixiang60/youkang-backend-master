@@ -140,7 +140,9 @@
         "genNo": "GEN001",
         "remark": "备注信息",
         "createBy": "admin",
-        "createTime": "2026-03-17 14:30:52"
+        "createTime": "2026-03-17 14:30:52",
+        "orderStatus": "订单生成",
+        "statusTime": "2026-03-17 14:30:52"
       }
     ],
     "total": 100
@@ -2401,3 +2403,55 @@ DELETE /order/sample/2603170001,2603170002
 ---
 
 *文档生成时间: 2026-03-29*
+
+---
+
+## 八、订单状态流转（定时任务）
+
+### 状态说明
+
+| 状态值 | 说明 |
+|--------|------|
+| 订单生成 | 订单创建时的初始状态 |
+| 订单出库 | 订单下所有样品流程已完成（模板取消/报告成功/报告取消） |
+| 订单完成 | 订单出库4小时后自动完成 |
+
+### 状态流转规则
+
+```
+订单生成 → 订单出库 → 订单完成
+```
+
+**流转条件：**
+
+1. **订单生成 → 订单出库**：订单下所有样品的 `flow_name`（流程名称）都在 `模板取消`、`报告成功`、`报告取消` 三个值范围内时，自动触发。
+
+2. **订单出库 → 订单完成**：订单出库状态持续4小时后，自动触发。
+
+### 响应字段变更
+
+订单相关接口的响应数据新增以下字段：
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| orderStatus | String | 订单状态（订单生成/订单出库/订单完成） |
+| statusTime | String | 状态变更时间（格式：yyyy-MM-dd HH:mm:ss） |
+
+### 定时任务配置
+
+| 任务名称 | 调用目标 | Cron表达式 | 说明 |
+|----------|----------|-----------|------|
+| 订单状态流转-出库检查 | orderStatusTask.checkOrderOutbound() | 0 0/10 * * * ? | 每10分钟检查 |
+| 订单状态流转-自动完成 | orderStatusTask.checkOrderComplete() | 0 0/10 * * * ? | 每10分钟检查 |
+
+### 相关文件
+
+| 文件 | 说明 |
+|------|------|
+| `sql/yk_order_status.sql` | 数据库变更脚本 |
+| `youkang-system/domain/OrderInfo.java` | 订单实体（新增 orderStatus、statusTime） |
+| `youkang-system/mapper/OrderInfoMapper.java` | Mapper接口（新增状态查询方法） |
+| `youkang-system/resources/mapper/system/OrderInfoMapper.xml` | SQL映射（新增状态流转查询） |
+| `youkang-system/service/order/IOrderInfoService.java` | 服务接口 |
+| `youkang-system/service/order/impl/OrderInfoServiceImpl.java` | 服务实现（状态流转逻辑） |
+| `youkang-quartz/task/OrderStatusTask.java` | 定时任务入口 |

@@ -40,7 +40,8 @@
   "belongCompany": "string",
   "produceCompany": "string",
   "genNo": "string",
-  "createBy": "string"
+  "createBy": "string",
+  "orderStatus": "string"
 }
 ```
 
@@ -64,7 +65,9 @@
       "genNo": "string",
       "remark": "string",
       "createBy": "string",
-      "createTime": "<Date>"
+      "createTime": "<Date>",
+      "orderStatus": "string",
+      "statusTime": "<Date>"
     }
   ]
 }
@@ -520,6 +523,7 @@
 | produceCompany | `String` | 生产公司 |
 | genNo | `String` | 关联基因号 |
 | createBy | `String` | 创建者 |
+| orderStatus | `String` | 订单状态（订单生成、订单出库、订单完成） |
 
 #### OrderResp
 
@@ -540,6 +544,8 @@
 | remark | `String` | 备注 |
 | createBy | `String` | 创建者 |
 | createTime | `Date` | 创建时间 |
+| orderStatus | `String` | 订单状态（订单生成、订单出库、订单完成） |
+| statusTime | `Date` | 状态变更时间 |
 
 #### OrderUpdateReq
 

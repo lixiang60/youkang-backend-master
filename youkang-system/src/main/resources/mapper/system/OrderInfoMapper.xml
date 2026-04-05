@@ -8,7 +8,7 @@
             o.customer_id AS customerId,
             c.customer_name AS customerName,
             c.address AS customerAddress,
-            c.subject_group_id AS groupId,
+            o.group_id AS groupId,
             g.name AS groupName,
             o.generation,
             o.order_type AS orderType,
@@ -18,10 +18,12 @@
             o.gen_no AS genNo,
             o.remark,
             o.create_by AS createBy,
-            o.create_time AS createTime
+            o.create_time AS createTime,
+            o.order_status AS orderStatus,
+            o.status_time AS statusTime
         FROM yk_order_info o
         LEFT JOIN yk_customer_info c ON o.customer_id = c.id
-        LEFT JOIN yk_subject_group_info g ON c.subject_group_id = g.id
+        LEFT JOIN yk_subject_group_info g ON o.group_id = g.id
         <where>
             <if test="query.orderId != null and query.orderId != ''">
                 AND o.order_id LIKE CONCAT('%', #{query.orderId}, '%')
@@ -49,6 +51,9 @@
             </if>
             <if test="query.createBy != null and query.createBy != ''">
                 AND o.create_by LIKE CONCAT('%', #{query.createBy}, '%')
+            </if>
+            <if test="query.orderStatus != null and query.orderStatus != ''">
+                AND o.order_status = #{query.orderStatus}
             </if>
         </where>
         ORDER BY o.create_time DESC
@@ -60,7 +65,7 @@
             o.customer_id AS customerId,
             c.customer_name AS customerName,
             c.address AS customerAddress,
-            c.subject_group_id AS groupId,
+            o.group_id AS groupId,
             g.name AS groupName,
             o.generation,
             o.order_type AS orderType,
@@ -70,10 +75,12 @@
             o.gen_no AS genNo,
             o.remark,
             o.create_by AS createBy,
-            o.create_time AS createTime
+            o.create_time AS createTime,
+            o.order_status AS orderStatus,
+            o.status_time AS statusTime
         FROM yk_order_info o
         LEFT JOIN yk_customer_info c ON o.customer_id = c.id
-        LEFT JOIN yk_subject_group_info g ON c.subject_group_id = g.id
+        LEFT JOIN yk_subject_group_info g ON o.group_id = g.id
         <where>
             <if test="query.orderId != null and query.orderId != ''">
                 AND o.order_id LIKE CONCAT('%', #{query.orderId}, '%')
@@ -102,6 +109,9 @@
             <if test="query.createBy != null and query.createBy != ''">
                 AND o.create_by LIKE CONCAT('%', #{query.createBy}, '%')
             </if>
+            <if test="query.orderStatus != null and query.orderStatus != ''">
+                AND o.order_status = #{query.orderStatus}
+            </if>
         </where>
         ORDER BY o.create_time DESC
     </select>
@@ -112,7 +122,7 @@
             o.customer_id AS customerId,
             c.customer_name AS customerName,
             c.address AS customerAddress,
-            c.subject_group_id AS groupId,
+            o.group_id AS groupId,
             g.name AS groupName,
             o.generation,
             o.order_type AS orderType,
@@ -122,10 +132,12 @@
             o.gen_no AS genNo,
             o.remark,
             o.create_by AS createBy,
-            o.create_time AS createTime
+            o.create_time AS createTime,
+            o.order_status AS orderStatus,
+            o.status_time AS statusTime
         FROM yk_order_info o
         LEFT JOIN yk_customer_info c ON o.customer_id = c.id
-        LEFT JOIN yk_subject_group_info g ON c.subject_group_id = g.id
+        LEFT JOIN yk_subject_group_info g ON o.group_id = g.id
         WHERE o.order_id = #{orderId}
     </select>
 
@@ -135,7 +147,7 @@
             o.customer_id AS customerId,
             c.customer_name AS customerName,
             c.address AS customerAddress,
-            c.subject_group_id AS groupId,
+            o.group_id AS groupId,
             g.name AS groupName,
             o.generation,
             o.order_type AS orderType,
@@ -145,10 +157,12 @@
             o.gen_no AS genNo,
             o.remark,
             o.create_by AS createBy,
-            o.create_time AS createTime
+            o.create_time AS createTime,
+            o.order_status AS orderStatus,
+            o.status_time AS statusTime
         FROM yk_order_info o
         LEFT JOIN yk_customer_info c ON o.customer_id = c.id
-        LEFT JOIN yk_subject_group_info g ON c.subject_group_id = g.id
+        LEFT JOIN yk_subject_group_info g ON o.group_id = g.id
         <where>
             <if test="query.startOrderId != null and query.startOrderId != ''">
                 AND o.order_id &gt;= #{query.startOrderId}
@@ -174,4 +188,49 @@
         </where>
         ORDER BY o.create_time DESC
     </select>
+
+    <!-- 查询满足出库条件的订单：状态为"订单生成"且所有样品流程在终态范围内 -->
+    <select id="selectOutboundOrderIds" resultType="java.lang.String">
+        SELECT o.order_id
+        FROM yk_order_info o
+        WHERE o.order_status = '订单生成'
+        AND EXISTS (
+            SELECT 1 FROM yk_sample_info s WHERE s.order_id = o.order_id
+        )
+        AND NOT EXISTS (
+            SELECT 1 FROM yk_sample_info s
+            WHERE s.order_id = o.order_id
+            AND s.flow_name NOT IN ('模板取消', '报告成功', '报告取消')
+        )
+    </select>
+
+    <!-- 批量更新订单状态为出库 -->
+    <update id="batchUpdateOrderOutbound">
+        UPDATE yk_order_info
+        SET order_status = '订单出库', status_time = NOW()
+        WHERE order_id IN
+        <foreach collection="orderIds" item="orderId" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </update>
+
+    <!-- 查询出库超过指定小时数的订单 -->
+    <select id="selectCompletedOrderIds" resultType="java.lang.String">
+        SELECT order_id
+        FROM yk_order_info
+        WHERE order_status = '订单出库'
+        AND status_time IS NOT NULL
+        AND status_time &lt;= DATE_SUB(NOW(), INTERVAL #{hours} HOUR)
+        AND (remark IS NULL OR remark NOT REGEXP '[\\u4e00-\\u9fa5]')
+    </select>
+
+    <!-- 批量更新订单状态为完成 -->
+    <update id="batchUpdateOrderComplete">
+        UPDATE yk_order_info
+        SET order_status = '订单完成', status_time = NOW()
+        WHERE order_id IN
+        <foreach collection="orderIds" item="orderId" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </update>
 </mapper>

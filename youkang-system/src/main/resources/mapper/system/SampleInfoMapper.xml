@@ -554,7 +554,7 @@
         FROM yk_sample_info s
         LEFT JOIN yk_order_info o ON s.order_id = o.order_id
         LEFT JOIN yk_customer_info c ON o.customer_id = c.id
-        WHERE s.flow_name = '模板邮件'
+        WHERE s.flow_name in ('模板邮件','模板取消')
           AND c.email IS NOT NULL
           AND c.email != ''
         ORDER BY c.id, s.create_time DESC

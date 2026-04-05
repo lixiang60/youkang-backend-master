@@ -7,11 +7,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.youkang.common.enums.PayMentMethodEnum;
 import com.youkang.common.utils.StringUtils;
 import com.youkang.system.domain.CustomerInfo;
+import com.youkang.system.domain.CustomerSubjectGroup;
 import com.youkang.system.domain.SubjectGroupInfo;
 import com.youkang.system.domain.req.customer.CustomerQueryReq;
 import com.youkang.system.domain.resp.customer.CustomerResp;
 import com.youkang.system.domain.resp.customer.CustomerSelectorResp;
 import com.youkang.system.mapper.CustomerInfoMapper;
+import com.youkang.system.mapper.CustomerSubjectGroupMapper;
 import com.youkang.system.mapper.SubjectGroupInfoMapper;
 import com.youkang.system.service.customer.ICustomerInfoService;
 import jakarta.annotation.Resource;
@@ -34,6 +36,9 @@ public class CustomerInfoServiceImpl extends ServiceImpl<CustomerInfoMapper, Cus
 
     @Resource
     private SubjectGroupInfoMapper subjectGroupInfoMapper;
+
+    @Resource
+    private CustomerSubjectGroupMapper customerSubjectGroupMapper;
 
     @Override
     public IPage<CustomerResp> queryPage(CustomerQueryReq queryReq) {
@@ -59,10 +64,22 @@ public class CustomerInfoServiceImpl extends ServiceImpl<CustomerInfoMapper, Cus
                 .eq(StringUtils.isNotEmpty(queryReq.getPaymentMethod()),
                         CustomerInfo::getPaymentMethod, queryReq.getPaymentMethod())
                 .like(StringUtils.isNotEmpty(queryReq.getCompany()),
-                        CustomerInfo::getCompany, queryReq.getCompany())
-                .eq(queryReq.getSubjectGroupId() != null,
-                        CustomerInfo::getSubjectGroupId, queryReq.getSubjectGroupId())
-                .orderByDesc(CustomerInfo::getId);
+                        CustomerInfo::getCompany, queryReq.getCompany());
+
+        // 通过关联关系表筛选课题组
+        if (queryReq.getSubjectGroupId() != null) {
+            List<Integer> customerIds = customerSubjectGroupMapper.selectList(
+                    new LambdaQueryWrapper<CustomerSubjectGroup>()
+                            .eq(CustomerSubjectGroup::getSubjectGroupId, queryReq.getSubjectGroupId())
+            ).stream().map(CustomerSubjectGroup::getCustomerId).toList();
+            wrapper.in(!customerIds.isEmpty(), CustomerInfo::getId, customerIds);
+            if (customerIds.isEmpty()) {
+                // 无匹配的客户，直接返回空结果
+                return new Page<>(queryReq.getPageNum(), queryReq.getPageSize(), 0);
+            }
+        }
+
+        wrapper.orderByDesc(CustomerInfo::getId);
 
         // 分页查询
         IPage<CustomerInfo> entityPage = this.page(page, wrapper);
@@ -104,9 +121,15 @@ public class CustomerInfoServiceImpl extends ServiceImpl<CustomerInfoMapper, Cus
             resp.setPaymentMethodName(methodName);
         }
 
-        // 转换课题组名称
-        if (entity.getSubjectGroupId() != null) {
-            SubjectGroupInfo subjectGroup = subjectGroupInfoMapper.selectById(entity.getSubjectGroupId());
+        // 通过关联关系表获取课题组信息
+        CustomerSubjectGroup relation = customerSubjectGroupMapper.selectOne(
+                new LambdaQueryWrapper<CustomerSubjectGroup>()
+                        .eq(CustomerSubjectGroup::getCustomerId, entity.getId())
+                        .last("LIMIT 1")
+        );
+        if (relation != null && relation.getSubjectGroupId() != null) {
+            resp.setSubjectGroupId(relation.getSubjectGroupId());
+            SubjectGroupInfo subjectGroup = subjectGroupInfoMapper.selectById(relation.getSubjectGroupId());
             if (subjectGroup != null) {
                 resp.setSubjectGroupName(subjectGroup.getName());
             }

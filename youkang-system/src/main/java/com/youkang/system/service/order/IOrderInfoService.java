@@ -108,4 +108,16 @@ public interface IOrderInfoService extends IService<OrderInfo> {
      * @return 订单及样品信息列表
      */
     List<OrderWithSamplesResp> queryOrderWithSamplesByRange(OrderRangeQueryReq req);
+
+    /**
+     * 定时任务：检查订单状态流转（订单生成 -> 订单出库）
+     * 当订单下所有样品的流程名称都在终态范围内时，自动更新为出库
+     */
+    void checkOrderOutbound();
+
+    /**
+     * 定时任务：检查订单自动完成（订单出库 -> 订单完成）
+     * 订单出库超过4小时后自动完成
+     */
+    void checkOrderComplete();
 }

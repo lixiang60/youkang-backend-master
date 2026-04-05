@@ -81,4 +81,15 @@ public class OrderInfo {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("create_time")
     private LocalDateTime createTime;
+
+    /** 订单状态：订单生成、订单出库、订单完成 */
+    @Excel(name = "订单状态")
+    @TableField("order_status")
+    private String orderStatus;
+
+    /** 订单状态变更时间 */
+    @Excel(name = "状态变更时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @TableField("status_time")
+    private LocalDateTime statusTime;
 }
