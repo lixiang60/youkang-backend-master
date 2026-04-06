@@ -9,6 +9,6 @@ public class PageReq {
 
     private Integer pageNum = 1;
 
-    private Integer pageSize = 96;
+    private Integer pageSize = 10;
 
 }

@@ -17,14 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.core.domain.PageResp;
 import com.youkang.common.core.domain.YKResponse;
@@ -56,8 +49,8 @@ public class SubjectGroupInfoController {
      */
     @Operation(summary = "查询课题组信息列表", description = "分页查询课题组信息列表")
     @PreAuthorize("@ss.hasPermi('customer:subjectGroup:list')")
-    @GetMapping("/list")
-    public YKResponse<PageResp> list(@Parameter(description = "课题组查询条件")  SubjectGroupQueryReq queryReq) {
+    @PostMapping("/list")
+    public YKResponse<PageResp> list(@RequestBody SubjectGroupQueryReq queryReq) {
         IPage<SubjectGroupResp> page = subjectGroupInfoService.queryPage(queryReq);
         return YKResponse.ok(PageResp.of(page.getRecords(), page.getTotal()));
     }
