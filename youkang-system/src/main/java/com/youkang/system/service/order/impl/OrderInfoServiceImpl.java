@@ -10,6 +10,7 @@ import com.youkang.common.utils.SecurityUtils;
 import com.youkang.common.utils.StringUtils;
 import com.youkang.common.utils.mail.MailTemplate;
 import com.youkang.common.utils.mail.MailUtils;
+import com.youkang.system.domain.CustomerInfo;
 import com.youkang.system.domain.OrderInfo;
 import com.youkang.system.domain.SampleInfo;
 import com.youkang.system.domain.req.order.OrderAddReq;
@@ -26,6 +27,7 @@ import com.youkang.system.domain.resp.order.SampleResp;
 import com.youkang.system.domain.resp.price.PriceConfigResp;
 import com.youkang.system.mapper.OrderInfoMapper;
 import com.youkang.system.mapper.SampleInfoMapper;
+import com.youkang.system.service.customer.ICustomerInfoService;
 import com.youkang.system.service.order.IOrderInfoService;
 import com.youkang.system.service.price.IPriceConfigService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -73,6 +77,9 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
     @Autowired
     private IPriceConfigService priceConfigService;
+
+    @Autowired
+    private ICustomerInfoService customerInfoService;
 
     /**
      * 新增订单（自动生成订单ID）
@@ -121,12 +128,14 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfo.setRemark(req.getRemark());
         orderInfo.setCreateBy(username);
         orderInfo.setCreateTime(LocalDateTime.now());
-        orderInfo.setBelongCompany(req.getBelongCompany());
-        orderInfo.setProduceCompany(req.getProduceCompany());
-        orderInfo.setGenNo(req.getGenNo());
-        orderInfo.setOrderStatus("订单生成");
-        orderInfo.setStatusTime(LocalDateTime.now());
-        orderInfoMapper.insert(orderInfo);
+        // 根据客户归属公司自动填充所属公司和生产公司
+        CustomerInfo customer = customerInfoService.getById(req.getCustomerInfo().getCustomerId());
+        if (customer == null) {
+            throw new ServiceException("客户不存在，ID：" + req.getCustomerInfo().getCustomerId());
+        }
+        String company = customer.getCompany();
+        orderInfo.setBelongCompany(company);
+        orderInfo.setProduceCompany(company);
         //如果样品信息不为空，则添加样品信息
         if (req.getSampleInfoList() != null && !req.getSampleInfoList().isEmpty()){
             List<SampleInfo> sampleInfoList = req.getSampleInfoList().stream().map(item -> {
@@ -139,8 +148,8 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                     sampleInfo.setProduceId(generateProduceId());
                 }
                 // 同步订单的公司信息到样品
-                sampleInfo.setBelongCompany(req.getBelongCompany());
-                sampleInfo.setProduceCompany(req.getProduceCompany());
+                sampleInfo.setBelongCompany(company);
+                sampleInfo.setProduceCompany(company);
                 return sampleInfo;
             }).collect(Collectors.toList());
             sampleInfoMapper.insert(sampleInfoList);

@@ -5,11 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
+/**
+ * 添加单个样品请求
+ *
+ * @author youkang
+ */
 @Getter
 @Setter
-@Schema(description = "添加单个样品信息")
+@Schema(description = "添加单个样品请求")
 public class SampleAddReq {
 
     @Schema(description = "订单ID")
@@ -35,12 +38,18 @@ public class SampleAddReq {
     @Schema(description = "片段大小")
     private String fragmentSize;
 
+    @Schema(description = "质粒长度")
+    private String plasmidLength;
+
+    @Schema(description = "项目")
+    private String project;
+
     @Schema(description = "是否测通")
     private String testResult;
 
     @Schema(description = "备注")
     private String remark;
 
-    @Schema(description = "生产编号")
+    @Schema(description = "生产编号（为空自动生成）")
     private Long produceId;
 }
