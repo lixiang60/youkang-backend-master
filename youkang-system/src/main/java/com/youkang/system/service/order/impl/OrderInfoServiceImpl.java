@@ -582,4 +582,31 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             return null;
         }
     }
+
+    /**
+     * 订单状态回退（清空上一级状态）
+     * 销售回款 → 订单完成 → 订单出库 → 订单生成
+     */
+    @Override
+    public void resetOrderStatus(String orderId) {
+        OrderInfo order = orderInfoMapper.selectById(orderId);
+        if (order == null) {
+            throw new ServiceException("订单不存在：" + orderId);
+        }
+        String currentStatus = order.getOrderStatus();
+        if (StringUtils.isEmpty(currentStatus)) {
+            throw new ServiceException("订单当前无状态，无法回退");
+        }
+        String targetStatus = switch (currentStatus) {
+            case "销售回款" -> "订单完成";
+            case "订单完成" -> "订单出库";
+            case "订单出库" -> "订单生成";
+            default -> throw new ServiceException("订单当前状态【" + currentStatus + "】不支持回退");
+        };
+        this.lambdaUpdate()
+                .set(OrderInfo::getOrderStatus, targetStatus)
+                .set(OrderInfo::getStatusTime, LocalDateTime.now())
+                .eq(OrderInfo::getOrderId, orderId)
+                .update();
+    }
 }

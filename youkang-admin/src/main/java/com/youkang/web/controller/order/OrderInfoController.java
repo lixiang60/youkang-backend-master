@@ -203,4 +203,16 @@ public class OrderInfoController {
     public YKResponse<List<OrderPriceCalcResp>> calcOrderPrice(@Parameter(description = "订单号") @PathVariable String orderId) {
         return YKResponse.ok(orderInfoService.calcOrderPrice(orderId));
     }
+
+    /**
+     * 订单状态回退
+     */
+    @Operation(summary = "订单状态回退", description = "将订单状态回退到上一级：销售回款→订单完成→订单出库→订单生成")
+    @PreAuthorize("@ss.hasPermi('order:info:edit')")
+    @Log(title = "订单信息", businessType = BusinessType.UPDATE)
+    @PutMapping("/resetStatus/{orderId}")
+    public YKResponse<Void> resetOrderStatus(@Parameter(description = "订单号") @PathVariable String orderId) {
+        orderInfoService.resetOrderStatus(orderId);
+        return YKResponse.ok();
+    }
 }

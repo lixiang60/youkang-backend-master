@@ -130,4 +130,12 @@ public interface IOrderInfoService extends IService<OrderInfo> {
      * @return 价格计算结果列表
      */
     List<OrderPriceCalcResp> calcOrderPrice(String orderId);
+
+    /**
+     * 订单状态回退（清空上一级状态）
+     * 销售回款 → 订单完成 → 订单出库 → 订单生成
+     *
+     * @param orderId 订单号
+     */
+    void resetOrderStatus(String orderId);
 }
