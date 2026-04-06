@@ -67,6 +67,11 @@
   - [7.3 确认返还](#73-确认返还)
   - [7.4 删除返还记录](#74-删除返还记录)
 
+- [八、订单状态流转（定时任务）](#八订单状态流转定时任务)
+
+- [九、订单价格计算](#九订单价格计算)
+  - [9.1 计算订单价格](#91-计算订单价格)
+
 ---
 
 ## 一、订单信息管理
@@ -2455,3 +2460,102 @@ DELETE /order/sample/2603170001,2603170002
 | `youkang-system/service/order/IOrderInfoService.java` | 服务接口 |
 | `youkang-system/service/order/impl/OrderInfoServiceImpl.java` | 服务实现（状态流转逻辑） |
 | `youkang-quartz/task/OrderStatusTask.java` | 定时任务入口 |
+
+---
+
+## 九、订单价格计算
+
+### 9.1 计算订单价格
+
+**接口描述**: 根据订单号计算订单下各样品的单价和总价。按样品编号（sampleId）分组，数量叠加，根据课题组价格配置匹配单价后计算总价。
+
+**请求方式**: `GET`
+
+**接口路径**: `/order/info/calcPrice/{orderId}`
+
+**权限要求**: `order:info:query`
+
+**路径参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| orderId | String | 是 | 订单号 |
+
+**响应参数**:
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| orderId | String | 订单号 |
+| produceIds | Array[Long] | 生产编号集合 |
+| project | String | 测序项目 |
+| sampleId | String | 样品编号 |
+| sampleType | String | 样品类型 |
+| fragmentSize | String | 片段大小 |
+| plasmidLength | String | 质粒长度 |
+| quantity | Integer | 数量（同一样品编号下的记录数） |
+| unitPrice | BigDecimal | 单价（根据价格配置三级兜底匹配） |
+| totalPrice | BigDecimal | 总价（数量 × 单价） |
+
+**计算逻辑**:
+
+1. 查询订单下所有样品，按样品编号（sampleId）分组
+2. 同一样品编号下数量叠加（如3个样品各2条记录 → 3条结果，每条数量为2）
+3. 通过样品类型 + 测序项目 + 质粒长度范围 + 片段大小范围匹配价格配置
+4. 单价使用三级 COALESCE 兜底：课题组自定义价格 > 模板价格 > 课题组基础单价
+5. 总价 = 数量 × 单价
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功",
+  "data": [
+    {
+      "orderId": "20260317143052051",
+      "produceIds": [2603170001, 2603170004],
+      "project": "Sanger测序",
+      "sampleId": "S001",
+      "sampleType": "质粒",
+      "fragmentSize": "1000",
+      "plasmidLength": "2686",
+      "quantity": 2,
+      "unitPrice": 25.00,
+      "totalPrice": 50.00
+    },
+    {
+      "orderId": "20260317143052051",
+      "produceIds": [2603170002, 2603170005],
+      "project": "PCR测序",
+      "sampleId": "S002",
+      "sampleType": "片段",
+      "fragmentSize": "500",
+      "plasmidLength": null,
+      "quantity": 2,
+      "unitPrice": 35.00,
+      "totalPrice": 70.00
+    },
+    {
+      "orderId": "20260317143052051",
+      "produceIds": [2603170003, 2603170006],
+      "project": "Sanger测序",
+      "sampleId": "S003",
+      "sampleType": "质粒",
+      "fragmentSize": "2000",
+      "plasmidLength": "5000",
+      "quantity": 2,
+      "unitPrice": 30.00,
+      "totalPrice": 60.00
+    }
+  ]
+}
+```
+
+**相关文件**:
+
+| 文件 | 说明 |
+|------|------|
+| `youkang-system/domain/resp/order/OrderPriceCalcResp.java` | 价格计算响应对象 |
+| `youkang-system/service/order/IOrderInfoService.java` | 服务接口 |
+| `youkang-system/service/order/impl/OrderInfoServiceImpl.java` | 服务实现（分组、价格匹配、计算逻辑） |
+| `youkang-admin/controller/order/OrderInfoController.java` | Controller |

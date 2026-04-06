@@ -10,6 +10,7 @@ import com.youkang.system.domain.req.order.OrderUpdateReq;
 import com.youkang.system.domain.req.order.SampleAddReq;
 import com.youkang.system.domain.req.order.SampleBatchAddReq;
 import com.youkang.system.domain.resp.order.OrderResp;
+import com.youkang.system.domain.resp.order.OrderPriceCalcResp;
 import com.youkang.system.domain.resp.order.OrderWithSamplesResp;
 
 import java.util.List;
@@ -120,4 +121,13 @@ public interface IOrderInfoService extends IService<OrderInfo> {
      * 订单出库超过4小时后自动完成
      */
     void checkOrderComplete();
+
+    /**
+     * 计算订单价格
+     * 按样品编号分组，数量叠加，根据价格配置计算单价和总价
+     *
+     * @param orderId 订单号
+     * @return 价格计算结果列表
+     */
+    List<OrderPriceCalcResp> calcOrderPrice(String orderId);
 }

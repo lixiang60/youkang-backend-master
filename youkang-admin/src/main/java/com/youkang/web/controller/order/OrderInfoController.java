@@ -16,6 +16,7 @@ import com.youkang.system.domain.req.order.SampleAddReq;
 import com.youkang.system.domain.req.order.SampleBatchAddReq;
 import com.youkang.system.domain.resp.order.OrderResp;
 import com.youkang.system.domain.resp.order.OrderWithSamplesResp;
+import com.youkang.system.domain.resp.order.OrderPriceCalcResp;
 import com.youkang.system.service.order.IOrderInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -191,5 +192,15 @@ public class OrderInfoController {
     @PostMapping("/withSamples/queryByRange")
     public YKResponse<List<OrderWithSamplesResp>> queryOrderWithSamplesByRange(@Parameter(description = "范围查询条件") @RequestBody OrderRangeQueryReq req) {
         return YKResponse.ok(orderInfoService.queryOrderWithSamplesByRange(req));
+    }
+
+    /**
+     * 计算订单价格
+     */
+    @Operation(summary = "计算订单价格", description = "根据订单号计算各样品的单价和总价，按样品编号分组数量叠加")
+    @PreAuthorize("@ss.hasPermi('order:info:query')")
+    @GetMapping("/calcPrice/{orderId}")
+    public YKResponse<List<OrderPriceCalcResp>> calcOrderPrice(@Parameter(description = "订单号") @PathVariable String orderId) {
+        return YKResponse.ok(orderInfoService.calcOrderPrice(orderId));
     }
 }

@@ -19,21 +19,26 @@ import com.youkang.system.domain.req.order.OrderUpdateReq;
 import com.youkang.system.domain.req.order.SampleAddReq;
 import com.youkang.system.domain.req.order.SampleBatchAddReq;
 import com.youkang.system.domain.req.order.SampleItemReq;
+import com.youkang.system.domain.resp.order.OrderPriceCalcResp;
 import com.youkang.system.domain.resp.order.OrderResp;
 import com.youkang.system.domain.resp.order.OrderWithSamplesResp;
 import com.youkang.system.domain.resp.order.SampleResp;
+import com.youkang.system.domain.resp.price.PriceConfigResp;
 import com.youkang.system.mapper.OrderInfoMapper;
 import com.youkang.system.mapper.SampleInfoMapper;
 import com.youkang.system.service.order.IOrderInfoService;
+import com.youkang.system.service.price.IPriceConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +70,9 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
     @Autowired
     private RedisCache redisCache;
+
+    @Autowired
+    private IPriceConfigService priceConfigService;
 
     /**
      * 新增订单（自动生成订单ID）
@@ -446,5 +454,123 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         log.info("订单完成检查：发现 {} 个出库超过4小时的订单", orderIds.size());
         orderInfoMapper.batchUpdateOrderComplete(orderIds);
         log.info("订单完成检查：已将 {} 个订单状态更新为【订单完成】", orderIds.size());
+    }
+
+    /**
+     * 计算订单价格
+     * 按样品编号分组，数量叠加，根据价格配置匹配单价并计算总价
+     */
+    @Override
+    public List<OrderPriceCalcResp> calcOrderPrice(String orderId) {
+        // 1. 查询订单
+        OrderInfo order = orderInfoMapper.selectById(orderId);
+        if (order == null) {
+            throw new ServiceException("订单不存在：" + orderId);
+        }
+
+        // 2. 查询订单下所有样品
+        List<SampleInfo> samples = sampleInfoMapper.selectList(
+                new LambdaQueryWrapper<SampleInfo>().eq(SampleInfo::getOrderId, orderId));
+        if (samples.isEmpty()) {
+            return List.of();
+        }
+
+        // 3. 查询价格配置（三级 COALESCE 兜底：自定义 > 模板 > 基础单价）
+        List<PriceConfigResp> priceConfigs = List.of();
+        if (order.getGroupId() != null) {
+            priceConfigs = priceConfigService.getPriceListByGroupId(order.getGroupId());
+        }
+
+        // 4. 按样品编号分组
+        Map<String, List<SampleInfo>> sampleGroups = samples.stream()
+                .collect(Collectors.groupingBy(SampleInfo::getSampleId));
+
+        // 5. 逐组计算价格
+        List<OrderPriceCalcResp> result = new ArrayList<>();
+        for (Map.Entry<String, List<SampleInfo>> entry : sampleGroups.entrySet()) {
+            List<SampleInfo> group = entry.getValue();
+            SampleInfo first = group.get(0);
+
+            OrderPriceCalcResp resp = new OrderPriceCalcResp();
+            resp.setOrderId(orderId);
+            resp.setProduceIds(group.stream().map(SampleInfo::getProduceId).collect(Collectors.toList()));
+            resp.setProject(first.getProject());
+            resp.setSampleId(first.getSampleId());
+            resp.setSampleType(first.getSampleType());
+            resp.setFragmentSize(first.getFragmentSize());
+            resp.setPlasmidLength(first.getPlasmidLength());
+            resp.setQuantity(group.size());
+
+            // 匹配价格配置
+            BigDecimal unitPrice = matchPrice(priceConfigs, first);
+            resp.setUnitPrice(unitPrice);
+            resp.setTotalPrice(unitPrice != null ? unitPrice.multiply(BigDecimal.valueOf(group.size())) : null);
+
+            result.add(resp);
+        }
+        return result;
+    }
+
+    /**
+     * 根据样品属性匹配价格配置
+     * 匹配条件：sampleType + project + 质粒长度范围 + 片段大小范围
+     */
+    private BigDecimal matchPrice(List<PriceConfigResp> priceConfigs, SampleInfo sample) {
+        Integer plasmidLength = parseInteger(sample.getPlasmidLength());
+        Integer fragmentSize = parseInteger(sample.getFragmentSize());
+
+        for (PriceConfigResp config : priceConfigs) {
+            // 样品类型必须匹配
+            if (!StringUtils.equals(config.getSampleType(), sample.getSampleType())) {
+                continue;
+            }
+            // 测序项目必须匹配
+            if (!StringUtils.equals(config.getProject(), sample.getProject())) {
+                continue;
+            }
+
+            // 质粒长度范围匹配：配置有范围时校验，无范围时直接通过
+            if (config.getPlasmidLengthMin() != null || config.getPlasmidLengthMax() != null) {
+                if (plasmidLength == null) {
+                    continue;
+                }
+                if (config.getPlasmidLengthMin() != null && plasmidLength < config.getPlasmidLengthMin()) {
+                    continue;
+                }
+                if (config.getPlasmidLengthMax() != null && plasmidLength > config.getPlasmidLengthMax()) {
+                    continue;
+                }
+            }
+
+            // 片段大小范围匹配
+            if (config.getFragmentSizeMin() != null || config.getFragmentSizeMax() != null) {
+                if (fragmentSize == null) {
+                    continue;
+                }
+                if (config.getFragmentSizeMin() != null && fragmentSize < config.getFragmentSizeMin()) {
+                    continue;
+                }
+                if (config.getFragmentSizeMax() != null && fragmentSize > config.getFragmentSizeMax()) {
+                    continue;
+                }
+            }
+
+            return config.getUnitPrice();
+        }
+        return null;
+    }
+
+    /**
+     * 安全解析字符串为整数
+     */
+    private Integer parseInteger(String value) {
+        if (StringUtils.isEmpty(value)) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }
