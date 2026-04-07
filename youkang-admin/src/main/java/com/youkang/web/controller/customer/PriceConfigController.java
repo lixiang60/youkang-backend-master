@@ -3,6 +3,8 @@ package com.youkang.web.controller.customer;
 import com.youkang.common.annotation.Log;
 import com.youkang.common.core.domain.YKResponse;
 import com.youkang.common.enums.BusinessType;
+import com.youkang.common.utils.poi.ExcelUtil;
+import com.youkang.system.domain.export.PriceConfigExportVO;
 import com.youkang.system.domain.req.price.PriceConfigBatchUpdateReq;
 import com.youkang.system.domain.req.price.PriceConfigUpdateReq;
 import com.youkang.system.domain.resp.price.PriceConfigResp;
@@ -10,6 +12,8 @@ import com.youkang.system.service.price.IPriceConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -76,5 +80,24 @@ public class PriceConfigController {
     public YKResponse<Void> reset(@Parameter(description = "自定义价格ID") @PathVariable Long id) {
         priceConfigService.resetPriceConfig(id);
         return YKResponse.ok();
+    }
+
+    /**
+     * 导出课题组价格列表
+     */
+    @Operation(summary = "导出课题组价格列表", description = "根据课题组ID导出价格配置为Excel文件")
+    @PreAuthorize("@ss.hasPermi('customer:priceConfig:export')")
+    @Log(title = "价格配置", businessType = BusinessType.EXPORT)
+    @PostMapping("/export/{groupId}")
+    public void export(HttpServletResponse response,
+                       @Parameter(description = "课题组ID") @PathVariable Integer groupId) {
+        List<PriceConfigResp> list = priceConfigService.getPriceListByGroupId(groupId);
+        List<PriceConfigExportVO> exportList = list.stream().map(resp -> {
+            PriceConfigExportVO vo = new PriceConfigExportVO();
+            BeanUtils.copyProperties(resp, vo);
+            return vo;
+        }).toList();
+        ExcelUtil<PriceConfigExportVO> util = new ExcelUtil<>(PriceConfigExportVO.class);
+        util.exportExcel(response, exportList, "课题组价格配置");
     }
 }

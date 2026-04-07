@@ -29,11 +29,9 @@ public class PriceConfigUpdateReq {
     private String chargeName;
 
     @Schema(description = "样品类型")
-    @NotNull(message = "样品类型不能为空")
     private String sampleType;
 
     @Schema(description = "测序项目")
-    @NotNull(message = "测序项目不能为空")
     private String project;
 
     @Schema(description = "质粒长度下限")
@@ -53,7 +51,6 @@ public class PriceConfigUpdateReq {
     private BigDecimal unitPrice;
 
     @Schema(description = "计算方式")
-    @NotNull(message = "计算方式不能为空")
     private String calcMethod;
 
     @Schema(description = "状态（1启用 0禁用）")

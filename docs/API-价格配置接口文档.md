@@ -246,6 +246,59 @@ customer:priceConfig:edit
 
 ---
 
+### 5. 导出课题组价格列表
+
+**请求**
+```
+POST /customer/priceConfig/export/{groupId}
+```
+
+**权限**
+```
+customer:priceConfig:export
+```
+
+**路径参数**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| groupId | Integer | 是 | 课题组ID |
+
+**请求头**
+```
+Authorization: Bearer {token}
+```
+
+**响应**
+
+返回 Excel 文件（`.xlsx`），浏览器自动下载，文件名为 `课题组价格配置.xlsx`。
+
+**导出字段**
+
+| 列名 | 字段 | 说明 |
+|------|------|------|
+| 类别 | category | 类别 |
+| 收费名称 | chargeName | 收费名称 |
+| 样品类型 | sampleType | 样品类型 |
+| 测序项目 | project | 测序项目 |
+| 质粒长度下限 | plasmidLengthMin | 质粒长度下限 |
+| 质粒长度上限 | plasmidLengthMax | 质粒长度上限 |
+| 片段大小下限 | fragmentSizeMin | 片段大小下限 |
+| 片段大小上限 | fragmentSizeMax | 片段大小上限 |
+| 单价 | unitPrice | 单价 |
+| 计算方式 | calcMethod | 计算方式 |
+| 状态 | status | 1→启用，0→禁用 |
+| 是否自定义 | isCustom | 1→是，0→否 |
+| 备注 | remark | 备注 |
+
+**调用示例**
+```http
+POST /customer/priceConfig/export/1
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9...
+```
+
+---
+
 ## 数据库表结构
 
 ```sql
